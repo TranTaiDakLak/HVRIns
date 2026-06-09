@@ -1,0 +1,136 @@
+/* tokens.css — Design tokens cho HVR
+   Dark-first: dark theme là mặc định, light theme adapt từ đó
+   Brand: Instagram (#E1306C) with gradient accent
+   Success/Live status vẫn giữ green (semantic, không phải brand) */
+
+:root {
+  /* === Brand (Instagram palette) === */
+  --brand-primary: #E1306C;
+  --brand-primary-hover: #C41E5A;
+  --brand-primary-active: #a8185c;
+  --brand-primary-bg: rgba(225, 48, 108, 0.14);
+  --brand-primary-border: rgba(225, 48, 108, 0.35);
+  --brand-gradient: linear-gradient(135deg, #833AB4, #E1306C, #FD1D1D);
+
+  /* === Accent === */
+  --accent: #E1306C;
+  --accent-hover: #C41E5A;
+  --accent-bg: rgba(225, 48, 108, 0.12);
+  --accent-border: rgba(225, 48, 108, 0.30);
+
+  /* === Surfaces (dark mặc định) === */
+  --surface-base: #0f1117;
+  --surface-elevated: #161b22;
+  --surface-sunken: #0d1117;
+  --surface-overlay: rgba(0, 0, 0, 0.6);
+  --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-hover-strong: rgba(255, 255, 255, 0.08);
+  --surface-hover-subtle: rgba(255, 255, 255, 0.03);
+
+  /* === Text === */
+  --text-primary: #e8edf3;
+  --text-secondary: #a8b3bd;
+  --text-muted: #8b949e;
+  --text-disabled: #5a6472;
+  --text-link: #60a5fa;
+
+  /* === Borders === */
+  --border-default: #2d333b;
+  --border-strong: #30363d;
+  --border-subtle: #1c2128;
+  --border-focus: #E1306C;
+
+  /* === Feedback === */
+  --success-solid: #22c55e;
+  --success-bg: rgba(34, 197, 94, 0.22);
+  --success-text: #4ade80;
+
+  --danger-solid: #f87171;
+  --danger-bg: rgba(248, 113, 113, 0.15);
+  --danger-text: #f87171;
+
+  --warning-solid: #fbbf24;
+  --warning-bg: rgba(251, 191, 36, 0.15);
+  --warning-text: #fbbf24;
+
+  --info-solid: #60a5fa;
+  --info-bg: rgba(96, 165, 250, 0.15);
+  --info-text: #60a5fa;
+
+  /* === Spacing === */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* === Typography === */
+  --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 24px;
+
+  /* === Radii === */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* === Shadows === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* === Z-index === */
+  --z-dropdown: 100;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+
+  /* === Layout === */
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 64px;
+  --sidebar-bg: #0e0c18;
+  --header-height: 48px;
+  --toolbar-height: 52px;
+  --statusbar-height: 28px;
+  --detail-panel-width: 320px;
+
+  /* === Density (default mode) === */
+  --grid-row-height: 36px;
+  --grid-font-size: 13px;
+  --grid-padding: 6px 12px;
+
+  /* === Transitions === */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  /* === Scrollbar === */
+  --scrollbar-width: 8px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #3a4a5a;
+  --scrollbar-thumb-hover: #4a6080;
+}
+
+/* === Density: Compact === */
+[data-density="compact"] {
+  --grid-row-height: 28px;
+  --grid-font-size: 11px;
+  --grid-padding: 3px 8px;
+}
+
+/* === Density: Comfortable === */
+[data-density="comfortable"] {
+  --grid-row-height: 44px;
+  --grid-font-size: 14px;
+  --grid-padding: 8px 14px;
+}

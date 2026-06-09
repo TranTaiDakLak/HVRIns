@@ -1,0 +1,2 @@
+# Mỗi dòng 1 domain tempmail (ưu tiên dùng trước default provider)
+# Vd: tmpbox.net

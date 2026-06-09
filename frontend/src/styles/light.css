@@ -1,0 +1,218 @@
+/* light.css — Light theme "WinForms" variant
+   Trắng chủ đạo, chỉ chrome/frame mới xám nhẹ — đúng kiểu Windows Forms */
+
+[data-theme="light"] {
+  /* === Surfaces ===
+     WinForms rule: nội dung = trắng, frame/chrome = xám nhạt #f0f0f0 */
+  --sidebar-bg: #eaeaea;
+  --surface-base: #f0f0f0;          /* Window chrome — xám nhạt chuẩn Windows */
+  --surface-elevated: #ffffff;       /* panels/cards = trắng hoàn toàn */
+  --surface-sunken: #f5f5f5;        /* input field bg — gần trắng, hơi lõm */
+  --surface-default: #ffffff;
+  --surface-overlay: rgba(0, 0, 0, 0.25);
+  --surface-hover: rgba(0, 0, 0, 0.04);
+  --surface-hover-strong: rgba(0, 0, 0, 0.08);
+  --surface-hover-subtle: rgba(0, 0, 0, 0.02);
+
+  /* === Text === */
+  --text-primary: #1a1a1a;
+  --text-secondary: #3c3c3c;
+  --text-muted: #6e6e6e;
+  --text-disabled: #aaaaaa;
+  --text-link: #0066cc;
+
+  /* === Borders — nhẹ hơn, gần WinForms 3D border === */
+  --border-default: #d0d0d0;
+  --border-strong: #b8b8b8;
+  --border-subtle: #e8e8e8;
+  --border-focus: var(--accent);
+
+  /* === Brand — Instagram palette === */
+  --brand-primary: #E1306C;
+  --brand-primary-hover: #C41E5A;
+  --brand-primary-active: #a8185c;
+  --brand-primary-bg: rgba(225, 48, 108, 0.09);
+  --brand-primary-border: rgba(225, 48, 108, 0.30);
+  --brand-gradient: linear-gradient(135deg, #833AB4, #E1306C, #FD1D1D);
+
+  /* === Accent — checkbox, tab active, section highlight === */
+  --accent: #E1306C;
+  --accent-hover: #C41E5A;
+  --accent-bg: rgba(225, 48, 108, 0.09);
+  --accent-border: rgba(225, 48, 108, 0.25);
+
+  /* === Feedback === */
+  --success-solid: #16a34a;
+  --success-bg: #dcfce7;
+  --success-text: #15803d;
+
+  --danger-solid: #dc2626;
+  --danger-bg: #fee2e2;
+  --danger-text: #b91c1c;
+
+  --warning-solid: #d97706;
+  --warning-bg: #fef3c7;
+  --warning-text: #92400e;
+
+  --info-solid: #0066cc;
+  --info-bg: #e8f0fb;
+  --info-text: #0055aa;
+
+  /* === Shadows (subtle, WinForms style) === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.14);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.16);
+
+  /* === Scrollbar === */
+  --scrollbar-thumb: #b0b0b0;
+  --scrollbar-thumb-hover: #888888;
+
+  /* === Primary alias (dùng trong proxy-mail-tab) === */
+  --primary-text: var(--brand-primary-active);
+  --primary-subtle: rgba(225,48,108, 0.10);
+  --primary-solid: rgba(225,48,108, 0.40);
+}
+
+/* === Sidebar — xám nhẹ hơn, không quá đậm === */
+[data-theme="light"] .sidebar {
+  background: #ebebeb;
+  border-right: 1px solid #d0d0d0;
+}
+
+[data-theme="light"] .sidebar__item {
+  color: #2a2a2a;
+}
+
+[data-theme="light"] .sidebar__item:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: #000000;
+}
+
+[data-theme="light"] .sidebar__item--active {
+  background: #ffffff;
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent), 0 1px 3px rgba(0,0,0,0.08);
+}
+
+[data-theme="light"] .sidebar__badge {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+[data-theme="light"] .sidebar__toggle {
+  color: #3c3c3c;
+}
+
+[data-theme="light"] .sidebar__brand-name {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .sidebar__brand-suffix {
+  color: #6e6e6e;
+}
+
+[data-theme="light"] .sidebar__divider {
+  background: #c0c0c0;
+}
+
+/* === Table / Data grid === */
+[data-theme="light"] .data-grid__header-row {
+  background: #f0f0f0;
+  border-bottom: 2px solid #d0d0d0;
+}
+
+[data-theme="light"] .data-grid__header-cell {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+[data-theme="light"] .data-grid__row:hover {
+  background: #f5f5f5;
+}
+
+[data-theme="light"] .data-grid__row--selected {
+  background: rgba(225,48,108,0.12);   /* Instagram pink selection */
+}
+
+/* === Status bar — xám nhạt như WinForms StatusStrip === */
+[data-theme="light"] .status-bar {
+  background: #f0f0f0;
+  border-top: 1px solid #d0d0d0;
+  color: #2a2a2a;
+}
+
+/* === Toolbar === */
+[data-theme="light"] .accounts-toolbar {
+  background: #ffffff;
+  border-bottom: 1px solid #d8d8d8;
+}
+
+/* === Grid rows borders === */
+[data-theme="light"] .data-grid__body tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* === Status row colors (muted WinForms tones) === */
+[data-theme="light"] .data-grid__row--status-live      { background: rgba(22, 163, 74, 0.11); }
+[data-theme="light"] .data-grid__row--status-die       { background: rgba(220, 38, 38, 0.16); }
+[data-theme="light"] .data-grid__row--status-checkpoint { background: rgba(217, 119, 6, 0.07); }
+[data-theme="light"] .data-grid__row--status-new       { background: rgba(0, 102, 204, 0.05); }
+[data-theme="light"] .data-grid__row--status-unknown   { background: transparent; }
+[data-theme="light"] .data-grid__row--status-nvr       { background: rgba(202, 138, 4, 0.22); }
+[data-theme="light"] .data-grid__row--status-addmail   { background: rgba(194, 65, 12, 0.28); }
+[data-theme="light"] .data-grid__row--status-verfail   { background: rgba(107, 114, 128, 0.12); }
+
+/* === Input fields — trắng như WinForms TextBox === */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: #ffffff;
+  border-color: #d0d0d0;
+  color: #1a1a1a;
+}
+
+[data-theme="light"] input:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-border);
+}
+
+/* === App header — trắng như menu bar === */
+[data-theme="light"] .app-header {
+  background: #f8f8f8;
+  border-bottom: 1px solid #d8d8d8;
+}
+
+/* === Toolbar buttons — dùng CSS vars để bypass scoped specificity ===
+   Dark mode: vivid colors (default values trong var())
+   Light mode: WinForms neutral — define vars ở đây */
+
+[data-theme="light"] {
+  /* Result — màu thư mục Windows (dark goldenrod) */
+  --toolbar-folder-color: #B8860B;
+  --toolbar-folder-border: #d4b870;
+  --toolbar-folder-bg: #fffcf0;
+  --toolbar-folder-hover: #fff3d0;
+
+  /* Columns + Settings — xám trung tính */
+  --toolbar-columns-color: #3a3a3a;
+  --toolbar-columns-border: #c8c8c8;
+  --toolbar-settings-color: #3a3a3a;
+  --toolbar-settings-border: #c8c8c8;
+  --toolbar-neutral-bg: #f5f5f5;
+  --toolbar-neutral-hover: #e8e8e8;
+
+  /* Import */
+  --toolbar-primary-color: #005A9E;
+  --toolbar-primary-border: #80b8e8;
+  --toolbar-primary-bg: #f0f7ff;
+  --toolbar-primary-hover: #ddeeff;
+
+  /* Xóa */
+  --toolbar-danger-color: #b91c1c;
+  --toolbar-danger-border: #f0a0a0;
+  --toolbar-danger-bg: transparent;
+  --toolbar-danger-hover: #fef2f2;
+}

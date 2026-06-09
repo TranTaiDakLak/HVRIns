@@ -1,0 +1,1 @@
+# Mỗi dòng 1 phone đã có sẵn (dùng khi Phone × Mail = Random File)

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Icon Generator — HVR</title>
+<style>
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    gap: 20px;
+    font-family: system-ui, sans-serif;
+  }
+  #download {
+    color: #60a5fa;
+    font-size: 18px;
+    text-decoration: none;
+    padding: 10px 28px;
+    border: 1px solid #2563eb;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  #download:hover { background: rgba(37,99,235,0.15); }
+</style>
+</head>
+<body>
+<canvas id="c" width="1024" height="1024"></canvas>
+<script>
+const c = document.getElementById('c')
+const ctx = c.getContext('2d')
+const W = 1024
+
+// Rounded rect helper
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+// Background trắng
+roundRect(32, 32, W - 64, W - 64, 200)
+ctx.fillStyle = '#ffffff'
+ctx.fill()
+ctx.strokeStyle = '#e2e8f0'
+ctx.lineWidth = 5
+ctx.stroke()
+
+// Blue accent gradient (giữ nguyên màu chữ)
+const accent = ctx.createLinearGradient(0, W * 0.25, W, W * 0.75)
+accent.addColorStop(0, '#93c5fd')
+accent.addColorStop(0.5, '#3b82f6')
+accent.addColorStop(1, '#1d4ed8')
+
+// NCS — main logo, large and centered
+ctx.save()
+ctx.font = '900 300px system-ui'
+ctx.fillStyle = accent
+ctx.textAlign = 'center'
+ctx.textBaseline = 'middle'
+ctx.fillText('HAVU', W / 2, W / 2 - 30)
+ctx.restore()
+
+// HVR subtitle
+ctx.font = '300 36px system-ui'
+ctx.fillStyle = 'rgba(148,163,184,0.75)'
+ctx.textAlign = 'center'
+ctx.textBaseline = 'alphabetic'
+ctx.fillText('Hạ Vũ VIP PRO', W / 2, W / 2 + 160)
+
+// Download link
+const link = document.createElement('a')
+link.id = 'download'
+link.download = 'appicon.png'
+link.href = c.toDataURL('image/png')
+link.textContent = 'Download appicon.png'
+document.body.appendChild(link)
+</script>
+</body>
+</html>

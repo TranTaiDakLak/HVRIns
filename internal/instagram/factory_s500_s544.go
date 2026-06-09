@@ -1,0 +1,49 @@
+package instagram
+
+const (
+	PlatformS500 = "s500" // Samsung S23 + FB API 500
+	PlatformS501 = "s501" // Samsung S23 + FB API 501
+	PlatformS502 = "s502" // Samsung S23 + FB API 502
+	PlatformS503 = "s503" // Samsung S23 + FB API 503
+	PlatformS504 = "s504" // Samsung S23 + FB API 504
+	PlatformS505 = "s505" // Samsung S23 + FB API 505
+	PlatformS506 = "s506" // Samsung S23 + FB API 506
+	PlatformS507 = "s507" // Samsung S23 + FB API 507
+	PlatformS508 = "s508" // Samsung S23 + FB API 508
+	PlatformS509 = "s509" // Samsung S23 + FB API 509
+	PlatformS510 = "s510" // Samsung S23 + FB API 510
+	PlatformS511 = "s511" // Samsung S23 + FB API 511
+	PlatformS512 = "s512" // Samsung S23 + FB API 512
+	PlatformS513 = "s513" // Samsung S23 + FB API 513
+	PlatformS514 = "s514" // Samsung S23 + FB API 514
+	PlatformS515 = "s515" // Samsung S23 + FB API 515
+	PlatformS516 = "s516" // Samsung S23 + FB API 516
+	PlatformS517 = "s517" // Samsung S23 + FB API 517
+	PlatformS518 = "s518" // Samsung S23 + FB API 518
+	PlatformS519 = "s519" // Samsung S23 + FB API 519
+	PlatformS520 = "s520" // Samsung S23 + FB API 520
+	PlatformS521 = "s521" // Samsung S23 + FB API 521
+	PlatformS522 = "s522" // Samsung S23 + FB API 522
+	PlatformS523 = "s523" // Samsung S23 + FB API 523
+	PlatformS524 = "s524" // Samsung S23 + FB API 524
+	PlatformS525 = "s525" // Samsung S23 + FB API 525
+	PlatformS526 = "s526" // Samsung S23 + FB API 526
+	PlatformS527 = "s527" // Samsung S23 + FB API 527
+	PlatformS528 = "s528" // Samsung S23 + FB API 528
+	PlatformS529 = "s529" // Samsung S23 + FB API 529
+	PlatformS530 = "s530" // Samsung S23 + FB API 530
+	PlatformS531 = "s531" // Samsung S23 + FB API 531
+	PlatformS532 = "s532" // Samsung S23 + FB API 532
+	PlatformS533 = "s533" // Samsung S23 + FB API 533
+	PlatformS534 = "s534" // Samsung S23 + FB API 534
+	PlatformS535 = "s535" // Samsung S23 + FB API 535
+	PlatformS536 = "s536" // Samsung S23 + FB API 536
+	PlatformS537 = "s537" // Samsung S23 + FB API 537
+	PlatformS538 = "s538" // Samsung S23 + FB API 538
+	PlatformS539 = "s539" // Samsung S23 + FB API 539
+	PlatformS540 = "s540" // Samsung S23 + FB API 540
+	PlatformS541 = "s541" // Samsung S23 + FB API 541
+	PlatformS542 = "s542" // Samsung S23 + FB API 542
+	PlatformS543 = "s543" // Samsung S23 + FB API 543
+	PlatformS544 = "s544" // Samsung S23 + FB API 544
+)

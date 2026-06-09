@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Wails App",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "buildFlags": "-tags dev",
+            "env": {
+                "HVR_DATA_DIR": "${workspaceFolder}/build/bin"
+            },
+            "args": []
+        }
+    ]
+}

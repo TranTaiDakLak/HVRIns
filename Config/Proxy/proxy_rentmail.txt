@@ -1,0 +1,1 @@
+# Mỗi dòng 1 proxy (host:port:user:pass hoặc http://user:pass@host:port)
