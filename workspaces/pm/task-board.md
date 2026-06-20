@@ -6,8 +6,8 @@
 ## Sprint 00 — Setup & Safety
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S00-D1-T001 | 1 | Đọc plan (00,02,04,06,07) + check môi trường (Go/Node/wails/Windows) | — | TODO | — |
-| S00-D1-T002 | 1 | Baseline: npm ci+build, `wails build`, `go test ./internal/...`, ghi số platform | — | TODO | — |
+| S00-D1-T001 | 1 | Đọc plan (00,02,04,06,07) + check môi trường (Go/Node/wails/Windows) | — | DONE | Go 1.26.4, Node 24.16, npm 11.13, Wails v2.12.0 ✅ |
+| S00-D1-T002 | 1 | Baseline: npm ci+build, `wails build`, `go test ./internal/...`, ghi số platform | — | BLOCKED | wails build FAIL: `internal/result` package không tồn tại trong repo |
 | S00-D1-T003 | 1 | Commit/revert go.mod, go.sum đang dirty | go.mod, go.sum | TODO | — |
 | S00-D2-T001 | 2 | Đọc plan (01,03,05) + check môi trường | — | DONE | git/node/npm OK |
 | S00-D2-T002 | 2 | Secrets: `git rm --cached` 4 file lộ + thêm `.gitignore` secrets | .gitignore | DONE | check-ignore ✅; embedded ✅ |
@@ -19,11 +19,11 @@
 | S01-D1-T001 | 1 | Tách `app.go` → accounts/settings/profiles/upload/stats/resources/dialogs.go (vẫn package main @ root) | app.go (+files mới) | TODO | — |
 | S01-D1-T002 | 1 | Migration Design Note: danh sách export, cách bọc app.ctx, cách thread AppVersion | dev-1/, decision-log | TODO | — |
 | S01-D1-T003 | 1 | Xác nhận 207 blank-import + 4 go:embed; ghi baseline check | dev-1/progress | TODO | — |
-| S01-D2-T001 | 2 | Xoá `_patch_datr_diag.py`, `decode_request.py`; gỡ `scripts/__pycache__`; +.gitignore | .gitignore | TODO | — |
-| S01-D2-T002 | 2 | Move docs: guide→docs/, README_TEST_EAAG→docs/testing/, old-docs→archive, facebook→flows, .kiro specs→docs/rebuild/specs | docs/** | TODO | — |
-| S01-D2-T003 | 2 | `build.bat`→scripts/ (cd gốc); migrate.ps1/rename_identity.ps1/recolor.py→scripts/legacy | scripts/** | TODO | — |
-| S01-D2-T004 | 2 | cmd/: icongen→tools/, xoá 17 scratch, `go mod tidy`, xác nhận x/image còn | cmd/**, tools/, go.mod | TODO | — |
-| S01-D2-T005 | 2 | config/sample (template Config/*→.example) + sửa launch.json HVR_DATA_DIR | config/**, .vscode/launch.json | TODO | — |
+| S01-D2-T001 | 2 | Xoá `_patch_datr_diag.py`, `decode_request.py`; gỡ `scripts/__pycache__`; +.gitignore | .gitignore | DONE | git rm 2 py + pycache ✅ |
+| S01-D2-T002 | 2 | Move docs: guide→docs/, README_TEST_EAAG→docs/testing/, old-docs→archive, facebook→flows, .kiro specs→docs/rebuild/specs | docs/** | DONE | 32 file rename ✅ |
+| S01-D2-T003 | 2 | `build.bat`→scripts/ (cd gốc); migrate.ps1/rename_identity.ps1/recolor.py→scripts/legacy | scripts/** | DONE | cd /d added ✅ |
+| S01-D2-T004 | 2 | cmd/: icongen→tools/, xoá 17 scratch, `go mod tidy`, xác nhận x/image còn | cmd/**, tools/, go.mod | DONE | x/image ✅; go build ./tools/... ✅ |
+| S01-D2-T005 | 2 | config/sample (template Config/*→.example) + sửa launch.json HVR_DATA_DIR | config/**, .vscode/launch.json | DONE | 8 example files ✅; launch.json ✅ |
 
 ## Sprint 02 — ⭐ Cú chuyển internal/app
 | Task ID | Dev | Mô tả | File chính | Status | Test |
@@ -32,9 +32,9 @@
 | S02-D1-T002 | 1 | Export Startup/AppDataDir/ExpandEphemeralPortRange; bọc app.ctx → OnSecondInstance; thread AppVersion (SetVersion) | internal/app/** | TODO | — |
 | S02-D1-T003 | 1 | main.go mỏng (giữ go:embed+AppVersion+os.Chdir đầu tiên); go vet/test/build | main.go | TODO | — |
 | S02-D1-T004 | 1 | `wails generate module` + sửa ~10 import bridge/wails (go/main→go/app); wails build/dev; verify version & platform | frontend/src/bridge/wails/*.ts, wailsjs/ | TODO | — |
-| S02-D2-T001 | 2 | Viết README.md gốc (overview, build/run, cây thư mục) | README.md | TODO | — |
-| S02-D2-T002 | 2 | Viết lại CLAUDE.md (app thật) + điền author wails.json | CLAUDE.md, wails.json | TODO | — |
-| S02-D2-T003 | 2 | Scaffold tests/go/ + tests/frontend/ (README + .gitkeep) | tests/** | TODO | — |
+| S02-D2-T001 | 2 | Viết README.md gốc (overview, build/run, cây thư mục) | README.md | DONE | README 79 dòng ✅ |
+| S02-D2-T002 | 2 | Viết lại CLAUDE.md (app thật) + điền author wails.json | CLAUDE.md, wails.json | DONE | CLAUDE.md rewrite ✅; wails.json author ✅ |
+| S02-D2-T003 | 2 | Scaffold tests/go/ + tests/frontend/ (README + .gitkeep) | tests/** | DONE | 2 README tạo ✅ |
 
 ## Sprint 03 — FE reorg (D2) + Go test (D1)
 | Task ID | Dev | Mô tả | File chính | Status | Test |
@@ -58,4 +58,4 @@
 ---
 
 ### Tổng kết tiến độ
-- TODO: 30 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 0  (cập nhật mỗi lần chạy)
+- TODO: 27 · IN PROGRESS: 0 · BLOCKED: 1 · DONE: 2  (cập nhật 2026-06-20 D1)

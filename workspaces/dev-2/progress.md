@@ -3,9 +3,9 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 01** (S00 DONE)
-- Task hiện tại: S01-D2-T001
-- Blocker: `wails build` pre-existing fail (dirty go.mod, wails 2.12 binding issue) — Dev 1 scope
+- Sprint đang làm: **Sprint 03** (S00+S01+S02 DONE — chờ Dev 1 S02 DONE trước khi làm FE reorg)
+- Task hiện tại: **CHỜ Dev 1** — kiểm tra task-board S02-D1-* trước khi bắt Sprint 03
+- Blocker: `wails build` BLOCKED (internal/result thiếu, Dev 1 scope); Dev 1 S02 chưa DONE
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)
@@ -24,10 +24,18 @@
   Note: wails build PRE-EXISTING FAIL (dirty go.mod wails 2.12) — không phải do S00-D2-T002.
 
 ### Sprint 01
-- (chưa có)
+- [S01-D2-T001] DONE 2026-06-20 — xoá _patch_datr_diag.py, decode_request.py; rm --cached pycache.
+- [S01-D2-T002] DONE 2026-06-20 — gom docs: NVRINS_BUILD_GUIDE→docs/, README_TEST→docs/testing/,
+  old-docs(16)→archive, facebook→flows, .kiro/specs→docs/rebuild/specs.
+- [S01-D2-T003] DONE 2026-06-20 — build.bat→scripts/ (cd /d head); legacy 3 script→scripts/legacy/.
+- [S01-D2-T004] DONE 2026-06-20 — icongen→tools/; xoá 17 scratch cmd; go mod tidy;
+  x/image còn ✅; go build ./tools/... ✅.
+- [S01-D2-T005] DONE 2026-06-20 — 8 template→config/sample/*.example.txt; launch.json HVR→HVRINS.
 
 ### Sprint 02
-- (chưa có)
+- [S02-D2-T001] DONE 2026-06-20 — README.md gốc (stack/env/build/cây/bảo mật).
+- [S02-D2-T002] DONE 2026-06-20 — CLAUDE.md rewrite (app thật); wails.json author điền.
+- [S02-D2-T003] DONE 2026-06-20 — scaffold tests/go/ + tests/frontend/ với README.
 
 ### Sprint 03
 - (chưa có)

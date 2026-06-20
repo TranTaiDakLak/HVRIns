@@ -4,6 +4,18 @@
 > đọc lại chi tiết task. Thêm dòng mới lên ĐẦU mỗi mục sprint.
 
 ## Sprint 00
+- [S00-D1-T001] DONE — Dev 1 — 2026-06-20
+  - Việc: Đọc plan docs (00,02,04,06,07), check môi trường Go/Node/Wails
+  - Test: Go 1.26.4 ✅, Node v24.16.0 ✅, npm v11.13.0 ✅, Wails v2.12.0 ✅
+  - File: — (read-only)
+  - Ghi chú: Hiểu D-001 (main.go ở gốc vì go:embed) và D-007 (commit nguyên tử). Phát hiện go.mod dirty = wails upgrade 2.11→2.12 (hợp lệ, sẽ commit ở T003).
+
+- [S00-D1-T002] BLOCKED — Dev 1 — 2026-06-20
+  - Lý do: `internal/result` package bị thiếu hoàn toàn (không có trong git history, không có trên disk). Được import bởi app.go:34, app_register.go:163, app_verify.go:14.
+  - Hậu quả: wails build FAIL · wails generate module FAIL · npm run build FAIL (wailsjs/runtime missing vì generate không chạy được)
+  - go test ./internal/... PASS phần lớn; 1 fail ở verifybase (live account kiểm tra thực tế)
+  - Cần: user quyết định tạo `internal/result` hay cung cấp source
+
 - [S00-D2-T001] DONE — Dev 2 — 2026-06-20
   - Việc: Đọc toàn bộ plan docs (05-secrets, 01, 03, 02); check git/node/npm
   - Test: git 2.54, node 24.16, npm 11.13; danh sách 4 file lộ + file CẤM xoá xác nhận
@@ -23,10 +35,47 @@
   - Ghi chú: `wails build` PRE-EXISTING FAIL (go.mod dirty: wails v2.11→v2.12, thiếu wailsjs runtime) — KHÔNG phải do secrets changes. Đây là việc Dev 1 S00-D1-T003. Rotate credential thật: TODO cho chủ dự án.
 
 ## Sprint 01
-*(chưa có task DONE)*
+- [S01-D2-T001] DONE — Dev 2 — 2026-06-20
+  - Việc: git rm 2 py debug + git rm --cached pycache
+  - Test: git ls-files sạch ✅
+  - File: _patch_datr_diag.py, decode_request.py (xoá); scripts/__pycache__/ (untrack)
+
+- [S01-D2-T002] DONE — Dev 2 — 2026-06-20
+  - Việc: gom docs (NVRINS_BUILD_GUIDE→docs/; README_TEST→docs/testing/eaag-verify-flow.md;
+    old-docs(16)→docs/archive/; docs/facebook→docs/flows/; .kiro/specs→docs/rebuild/specs/ copy)
+  - Test: git rename 32 file ✅; outdated note thêm vào eaag-verify-flow.md ✅
+  - File: docs/ (nhiều rename); docs/rebuild/specs/ (3 file mới)
+
+- [S01-D2-T003] DONE — Dev 2 — 2026-06-20
+  - Việc: git mv build.bat→scripts/; thêm cd /d "%~dp0\.."; 3 script→scripts/legacy/
+  - Test: scripts/build.bat có cd gốc ✅ (chưa chạy thật vì wails build pre-existing fail)
+  - File: scripts/build.bat, scripts/legacy/{migrate,rename_identity}.ps1, scripts/legacy/recolor.py
+
+- [S01-D2-T004] DONE — Dev 2 — 2026-06-20
+  - Việc: icongen→tools/icongen; git rm 17 scratch cmd/ (kể cả emailtest chứa secret); go mod tidy
+  - Test: x/image còn ✅; go build ./tools/... PASS ✅
+  - File: cmd/* (xoá 17 dir); tools/icongen/; go.mod/sum; ghi chú: emailtest secret còn trong history
+
+- [S01-D2-T005] DONE — Dev 2 — 2026-06-20
+  - Việc: 8 template Config/*→config/sample/*.example.txt; launch.json HVR_DATA_DIR→HVRINS_DATA_DIR
+  - Test: Config/ rỗng trong index ✅; config/sample/ 8 file ✅
+  - File: config/sample/**, .vscode/launch.json
 
 ## Sprint 02
-*(chưa có task DONE)*
+- [S02-D2-T001] DONE — Dev 2 — 2026-06-20
+  - Việc: Viết README.md gốc (stack, env req, cách chạy, cây thư mục, deviation, security)
+  - Test: markdown preview OK; link tới docs/rebuild/ hợp lệ
+  - File: README.md (79 dòng mới)
+
+- [S02-D2-T002] DONE — Dev 2 — 2026-06-20
+  - Việc: Viết lại CLAUDE.md (app thật, bỏ "greenfield frontend"); điền wails.json author từ git config
+  - Test: CLAUDE.md không còn mâu thuẫn thực tế; wails.json valid JSON ✅
+  - File: CLAUDE.md (rewrite 47 dòng); wails.json (author điền)
+
+- [S02-D2-T003] DONE — Dev 2 — 2026-06-20
+  - Việc: scaffold tests/go/README.md + tests/frontend/README.md
+  - Test: git status thấy 2 file mới ✅
+  - File: tests/go/README.md, tests/frontend/README.md
 
 ## Sprint 03
 *(chưa có task DONE)*

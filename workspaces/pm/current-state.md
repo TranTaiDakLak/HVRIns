@@ -3,36 +3,38 @@
 > Cập nhật sau MỖI lần chạy. Đây là file đọc đầu tiên ở chế độ UPDATE.
 
 **Ngày cập nhật:** 2026-06-20
-**Người cập nhật:** PM (khởi tạo workspaces)
+**Người cập nhật:** Dev 1
 
 ---
 
 ## Trạng thái tổng thể
-- **Giai đoạn:** Vừa khởi tạo `workspaces/`. Kế hoạch tái cấu trúc đã viết xong ở `docs/rebuild/` (9 file).
-- **Code:** CHƯA di chuyển/xoá file source nào. Repo vẫn ở trạng thái trước tái cấu trúc.
-- **Mốc cần đạt trước khi bắt đầu:** chạy baseline (S00-D1-T002) để có "green baseline" + số platform.
+- **Giai đoạn:** Sprint 00 đang chạy. Dev 2 đã xong S00 (T001/T002/T003). Dev 1 đang BLOCKED ở S00-D1-T002.
+- **Code:** CHƯA di chuyển/xoá file source nào. Repo ở trạng thái trước tái cấu trúc.
+- **⚠️ BLOCKER PHÁT HIỆN:** Package `internal/result` không tồn tại trong repo nhưng được import bởi 3 file gốc (app.go, app_register.go, app_verify.go). Toàn bộ build fail vì lý do này.
 
 ## Sprint đang chạy
-**Sprint 00 — Setup & Safety** (chưa bắt đầu)
+**Sprint 00 — Setup & Safety**
 
 ## Task đang làm
-- (chưa có — chờ 2 dev nhận S00)
+- S00-D1-T002: BLOCKED (internal/result missing)
+- S00-D1-T003: TODO (đang chờ)
 
 ## Task đã xong gần nhất
-- PM: khởi tạo toàn bộ `workspaces/` + chia 5 sprint cho 2 dev.
+- S00-D1-T001: DONE (môi trường OK)
+- S00-D2-T001/T002/T003: DONE
 
 ## Task đang bị BLOCK
-- (không)
-
-## Việc tiếp theo nên làm
-1. **Dev 1:** S00-D1-T002 — chạy baseline (`wails build`, `go test`, ghi số platform vào file này).
-2. **Dev 2:** S00-D2-T002 — xử lý secrets (`git rm --cached` + `.gitignore`) — **độc lập, làm ngay được**.
+- **S00-D1-T002 BLOCKED**: Package `HVRIns/internal/result` không tồn tại.
+  - app.go:34, app_register.go:163, app_verify.go:14 đều import `resultpkg "HVRIns/internal/result"`
+  - Hậu quả: `wails build` FAIL · `wails generate module` FAIL · `npm run build` FAIL (wailsjs/runtime không được sinh)
+  - Cần quyết định: (A) Dev 1 tạo package từ API đã suy ra hoàn chỉnh, hoặc (B) user cung cấp source
 
 ## Số liệu baseline (điền sau khi chạy S00-D1-T002)
-- [ ] `wails build`: ___ (PASS/FAIL)
-- [ ] `go test ./internal/...`: ___
-- [ ] Số platform đăng ký (baseline): ___  ← dùng để so sánh sau Pha 3/4
+- [ ] `wails build`: **FAIL** (internal/result missing)
+- [ ] `go test ./internal/...`: mostly PASS; 1 fail verifybase (live account state)
+- [ ] Số platform đăng ký (baseline): ___ (chưa lấy được)
 
 ## Ghi chú nhanh
 - Phụ thuộc chéo quan trọng: **D2 Sprint 03 (FE rename bridge→services) phải đợi D1 Sprint 02 xong**
   (vì binding fix đụng `frontend/src/bridge/wails/*.ts`).
+- go.mod dirty = wails upgrade 2.11→2.12 (hợp lệ, D1 sẽ commit ở S00-D1-T003 sau khi unblock).
