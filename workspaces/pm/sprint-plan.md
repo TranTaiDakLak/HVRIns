@@ -79,3 +79,15 @@ TÁI TẠO bằng suy luận (format/filename/dispatch chưa chắc khớp bản
 1. Có source gốc `internal/result` ở đâu không? (quyết định khôi phục vs validate-suy-luận ở S05-D1-T001)
 2. Rotate credential đã lộ (FB/Hotmail) — thủ công.
 3. Rewrite git history cho secrets — cần đồng thuận team.
+
+### Trạng thái Sprint 05 (cập nhật 2026-06-21)
+- **Dev 2: DONE 3/3** ✅ (FE test thật, docs, QA chạy). **Dev 1: CHƯA chạy 0/3** ❌ (verify repo: không
+  commit S05-D1, dispatch.go còn stub, không có result_test.go). → Dev 1 phải hoàn tất Sprint 05.
+
+## Sprint 06 — Dev 2 hardening (giao 2026-06-21)
+**Bối cảnh:** Dev 2 đã xong Sprint 05; Dev 1 còn nợ. Giao cho Dev 2 việc ĐỘC LẬP (không đụng
+`internal/**`, `main.go`, không phụ thuộc Dev 1) để tiếp tục cứng hoá trong khi chờ Dev 1.
+- Dev 2: `S06-D2-T001` mở rộng FE test (useDataGrid/useColumnVisibility/useContextMenu) · `S06-D2-T002`
+  viết `docs/onboarding.md` · `S06-D2-T003` closeout doc `docs/rebuild/08-ket-qua.md`.
+**DoD:** thêm test FE PASS; có doc onboarding khớp cấu trúc mới; có doc tổng kết ghi rõ việc còn treo.
+**Lưu ý:** đây KHÔNG thay thế việc Dev 1 hoàn tất Sprint 05 — đó vẫn là điều kiện "dự án validated".

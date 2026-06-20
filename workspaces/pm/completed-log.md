@@ -103,6 +103,26 @@
   - File: frontend/src/features/**, frontend/package.json, frontend/vitest.config.ts, frontend/src/app/router/routes.ts
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
+## Sprint 06
+- [S06-D2-T001] DONE — Dev 2 — 2026-06-21
+  - Việc: Thêm 31 vitest tests cho 3 composable: useDataGrid(15), useContextMenu(8), useColumnVisibility(8)
+  - Test: 61/61 PASS ✅; npm build PASS ✅
+  - File: frontend/src/composables/useDataGrid.test.ts, useContextMenu.test.ts, useColumnVisibility.test.ts
+  - Ghi chú: vi.stubGlobal cho window.innerWidth/Height trong contextMenu; setActivePinia+localStorage.clear cho columnVisibility
+  - Commit: f310071
+
+- [S06-D2-T002] DONE — Dev 2 — 2026-06-21
+  - Việc: Viết docs/onboarding.md — môi trường Windows-only, chạy/build/test, cây thư mục sau reorg, quy ước @/ + services layer + test, cảnh báo secrets
+  - Test: khớp git ls-files thực tế; link nội bộ hợp lệ ✅
+  - File: docs/onboarding.md (182 dòng)
+  - Commit: df8e9a4
+
+- [S06-D2-T003] DONE — Dev 2 — 2026-06-21
+  - Việc: Viết docs/rebuild/08-ket-qua.md — tổng kết bảng sprint D1+D2, 10 deviation, 4 việc còn treo (validate output, QA interactive, rotate creds, S05-D1-T003)
+  - Test: — (doc) ✅
+  - File: docs/rebuild/08-ket-qua.md
+  - Commit: 69bd4b7
+
 ## Sprint 05
 - [S05-D1-T001] DONE — Dev 1 — 2026-06-21
   - Việc: Khôi phục BẢN GỐC `internal/result` (thay bản tái tạo a3d8210). Chủ dự án chỉ `D:\Github\HVR\`
