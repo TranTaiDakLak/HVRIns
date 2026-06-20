@@ -3,15 +3,16 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 00**
-- Task hiện tại: S00-D1-T002 **BLOCKED**
-- Blocker: `internal/result` package không tồn tại trong repo nhưng được import bởi 3 file gốc
+- Sprint đang làm: **Sprint 01**
+- Task hiện tại: S01-D1-T001 (đang chuẩn bị)
+- Blocker: —
 
-## Baseline (điền ở S00-D1-T002)
-- wails build: **FAIL** (`app.go:34:2: package HVRIns/internal/result is not in std`)
-- go test ./internal/...: FAIL (1 test verifybase về live account; plus root không compile)
-- Số platform đăng ký: ___ (chưa lấy được vì build fail)
-- 207 blank-import? ___ · 4 go:embed? ___
+## Baseline (S00-D1-T002 DONE)
+- wails build: **PASS** (commit a3d8210, HVRIns.exe 48.8s)
+- go test ./internal/...: mostly PASS · 1 fail verifybase (live account state - pre-existing)
+- Số platform đăng ký (blank-import): **207**
+- go:embed directives: **5** (docs nói 4, thực tế 5 — cookie/store.go có 2 embed)
+- Commit baseline fix: a3d8210
 
 ---
 
@@ -48,7 +49,12 @@ Package cần có:
   FileSuccessNVREmail, FileSuccessNVRPhone
 
 ### Sprint 01
-- (chưa có)
+- [S01-D1-T003] DONE 2026-06-20 — Xác nhận blank-import và go:embed baseline.
+  blank-imports `_ "HVRIns/internal/instagram`: **207** (app.go:206, app_reg_sxxx.go:1).
+  go:embed: **5** (main.go:1, cookie/store.go:2, igcore/template.go:1, instagram/register/ios/iosmess/embed.go:1).
+  Sprint doc nói 4 go:embed — thực tế 5. Quan trọng: 207 blank-import trong app.go + app_reg_sxxx.go
+  sẽ tự đi theo khi Sprint 02 git mv 2 file này vào internal/app — không cần thao tác thêm.
+  Test: Grep PASS. File: progress.md (ghi baseline).
 
 ### Sprint 02
 - (chưa có)

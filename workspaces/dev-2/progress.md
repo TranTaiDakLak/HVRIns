@@ -50,7 +50,10 @@
   npm build PASS; npm test exit 0. Swept vào commit a3d8210 (Dev 1 commit overlap).
 
 ### Sprint 04
-- (chưa có)
+- [S04-D2-T001] DONE 2026-06-20 — rà gốc repo gọn; tick review-checklist S03.
+  Xoá icongen.exe + empty cmd/ + empty Config/. Sự cố: Config=config case-insensitive → restore.
+  .gitignore thêm 4 runtime dirs. Commit 6ec59a7.
+- [S04-D2-T002] DONE (S00) — kế hoạch rewrite git history đã ghi đầy đủ vào risks.md (commit ce1bf66).
 
 ---
 ### Mẫu dòng nhật ký

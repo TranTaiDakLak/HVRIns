@@ -104,7 +104,13 @@
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
 ## Sprint 04
-*(chưa có task DONE)*
+- [S04-D2-T001] DONE — Dev 2 — 2026-06-20
+  - Việc: Rà gốc repo; xoá icongen.exe + empty cmd/ + empty Config/ ở gốc
+  - Sự cố: Windows case-insensitive `Config/`=`config/` → xoá nhầm config/sample/ → khôi phục bằng `git restore`
+  - Thêm .gitignore: Config/Proxy/, Config/TempMail/, Config/Permanent/, Config/DeviceInfo/ (runtime dirs)
+  - Tick review-checklist Sprint 03 (4 hạng mục D2 ✅), cập nhật sprint 04 notes
+  - Test: `git ls-files config/sample/` → 8 file ✅; `git status` sạch
+  - Commit: 6ec59a7
 
 ---
 

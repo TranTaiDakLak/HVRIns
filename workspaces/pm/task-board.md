@@ -52,10 +52,10 @@
 |---------|-----|-------|------------|--------|------|
 | S04-D1-T001 | 1 | Verify cuối (wails build/dev, platform count, GetAppVersion); cập nhật board/log | — | TODO | — |
 | S04-D1-T002 | 1 | Quyết định Pha 7 (defer/làm) → decision-log | pm/decision-log | TODO | — |
-| S04-D2-T001 | 2 | Rà gốc repo gọn + tick review-checklist | pm/review-checklist | TODO | — |
-| S04-D2-T002 | 2 | (tuỳ chọn) Kế hoạch rewrite git history cho secrets | pm/risks.md | TODO | — |
+| S04-D2-T001 | 2 | Rà gốc repo gọn + tick review-checklist | pm/review-checklist | DONE | xoá icongen.exe+empty dirs; review-checklist S03 ticked ✅ (6ec59a7) |
+| S04-D2-T002 | 2 | (tuỳ chọn) Kế hoạch rewrite git history cho secrets | pm/risks.md | DONE | kế hoạch + checklist đã ghi risks.md ✅ (ce1bf66) |
 
 ---
 
 ### Tổng kết tiến độ
-- TODO: 8 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 22  (cập nhật 2026-06-20 D2 sau S03)
+- TODO: 6 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 24  (cập nhật 2026-06-20 D2 sau S04)
