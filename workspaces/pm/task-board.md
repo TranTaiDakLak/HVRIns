@@ -74,10 +74,18 @@
 | S06-D2-T002 | 2 | Viết `docs/onboarding.md` (hoặc CONTRIBUTING) phản ánh cấu trúc mới: chạy/build, cây thư mục, quy ước, bridge→services/features | docs/** | DONE | docs/onboarding.md (182 dòng) ✅ (df8e9a4) |
 | S06-D2-T003 | 2 | Closeout doc `docs/rebuild/08-ket-qua.md`: tổng kết đã làm gì, deviation, việc còn treo (internal/result, secrets) | docs/rebuild/** | DONE | 08-ket-qua.md: bảng sprint D1+D2, 10 deviation, 4 việc treo ✅ (69bd4b7) |
 
+> ✅ **PM REVIEW (2026-06-21, loop #2):** Sprint 05 (D1) + Sprint 06 (D2) đều DONE & **REVIEWED PASS**
+> — `go vet ./...` PASS · `go test ./internal/...` GREEN · `npm test` 61/61 PASS · secrets sạch · root chỉ main.go.
+
+## Sprint 07 — Hardening coverage (giao 2026-06-21, từ Audit #1 — TỰ NGUYỆN, không phải lỗi chặn)
+| Task ID | Dev | Mô tả | File chính | Status | Test |
+|---------|-----|-------|------------|--------|------|
+| S07-D1-T001 | 1 | White-box test cho helper THUẦN trong internal/app (parse/format/filter account, settings normalize — không cần ctx/network) | internal/app/*_test.go | TODO | — |
+| S07-D2-T001 | 2 | Test các global Pinia store (app.store, preferences.store, uploadLog.store) | frontend store tests | DONE | 102 tests PASS (app 11 + prefs 16 + uploadLog 14 = +41) ✅ (ea25286) |
+
 ---
 
 ### Tổng kết tiến độ
-- Sprint 00–04: **DONE 34 (+1 SKIP)** — hoàn tất 2026-06-20.
-- Sprint 05: **Dev 2 DONE 3/3** ✅ · **Dev 1 DONE 3/3** ✅ (T001 restore, T002 verifybase gate, T003 result_test) — 2026-06-21.
-- Sprint 06: **Dev 2 DONE 3/3** ✅ — hoàn tất 2026-06-21.
-- **TẤT CẢ task Dev 1 + Dev 2: DONE** (40 DONE + 1 SKIP). `go test ./internal/...` GREEN, `wails build` PASS.
+- Sprint 00–06: **DONE 40 (+1 SKIP)** — Sprint 05 (D1) + 06 (D2) DONE & PM-REVIEWED PASS 2026-06-21.
+- Sprint 07: Dev 2 DONE 1/1 ✅; Dev 1 TODO 1.
+- Tổng: DONE 41 · SKIP 1 · TODO 1 (D1 S07-D1-T001).

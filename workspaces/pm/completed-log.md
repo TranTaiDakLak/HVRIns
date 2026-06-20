@@ -103,6 +103,14 @@
   - File: frontend/src/features/**, frontend/package.json, frontend/vitest.config.ts, frontend/src/app/router/routes.ts
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
+## Sprint 07
+- [S07-D2-T001] DONE — Dev 2 — 2026-06-21
+  - Việc: Test 3 global Pinia store: app.store(11 tests), preferences.store(16 tests), uploadLog.store(14 tests)
+  - Test: 102/102 PASS ✅ (từ 61→102, thêm 41 tests)
+  - File: frontend/src/stores/app.store.test.ts, preferences.store.test.ts, uploadLog.store.test.ts
+  - Ghi chú: watcher Vue async → await nextTick() cho localStorage persist test; vi.useFakeTimers() cho auto-remove notification
+  - Commit: ea25286
+
 ## Sprint 06
 - [S06-D2-T001] DONE — Dev 2 — 2026-06-21
   - Việc: Thêm 31 vitest tests cho 3 composable: useDataGrid(15), useContextMenu(8), useColumnVisibility(8)

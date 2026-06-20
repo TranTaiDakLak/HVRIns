@@ -35,15 +35,17 @@
   có chủ đích) → phụ thuộc S05-D1-T001 + quyết định của chủ dự án.
 
 ## Sprint đang chạy
-**Sprint 05 + 06: TẤT CẢ task Dev 1 + Dev 2 DONE.** Còn treo (ngoài scope dev): QA interactive GUI cần
-chủ dự án click tay; re-check output register/verify sau restore; rotate creds + rewrite git history (thủ công).
+**Sprint 00–06: TẤT CẢ DONE & PM-REVIEWED PASS** (loop #2, 2026-06-21). Audit #1 chạy xong (xem
+pm/audit-log.md): build/test/secrets/structure đều sạch. Đã giao **Sprint 07 — hardening coverage**
+(tự nguyện, không phải lỗi chặn).
 
 ## Task đang làm / kế tiếp
-1. **Dev 1 — ƯU TIÊN:** hoàn tất Sprint 05 (S05-D1-T001 → T002 → T003). Đây là bottleneck của cả dự án.
-2. **Dev 2:** Sprint 06 (độc lập, không phụ thuộc Dev 1): mở rộng FE test + onboarding doc + closeout.
+1. **Dev 1:** S07-D1-T001 — white-box test helper THUẦN trong internal/app.
+2. **Dev 2:** S07-D2-T001 — test global Pinia store (app/preferences/uploadLog).
+(PM tiếp tục loop 10' — hết Sprint 07 sẽ audit lại; chỉ dừng khi user bảo dừng.)
 
 ## Task đang bị BLOCK
-- (không cứng) — nhưng "validate output register/verify" treo chờ S05-D1-T001 + quyết định chủ dự án.
+- (không)
 
 ## ✅ Quyết định chủ dự án (2026-06-21)
 1. **`internal/result` → KHÔI PHỤC BẢN GỐC** (cập nhật): chủ dự án chỉ `D:\Github\HVR\` → bản gốc CÓ THẬT ở
@@ -55,7 +57,7 @@ chủ dự án click tay; re-check output register/verify sau restore; rotate cr
 - **Rewrite git history** cho secrets — cần đồng thuận team (kế hoạch ở risks.md).
 
 ## Số liệu baseline (giữ để so hồi quy)
-- `wails build`: PASS (a3d8210) · Số platform: **207** · `go test ./internal/...`: 1 fail verifybase (chưa xử lý — S05-D1-T002)
+- `wails build`: PASS · Số platform: **207** · `go test ./internal/...`: **GREEN** (verifybase gated, fakeinfo guarded) · `npm test`: 61/61 PASS
 
 ## Ghi chú
 - Git: chỉ branch `main`, 1 worktree. Mọi thay đổi đều trên main.
