@@ -50,12 +50,12 @@
 ## Sprint 04 — Finalize
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S04-D1-T001 | 1 | Verify cuối (wails build/dev, platform count, GetAppVersion); cập nhật board/log | — | TODO | — |
-| S04-D1-T002 | 1 | Quyết định Pha 7 (defer/làm) → decision-log | pm/decision-log | TODO | — |
+| S04-D1-T001 | 1 | Verify cuối (wails build/dev, platform count, GetAppVersion); cập nhật board/log | — | DONE | go vet PASS · go test same baseline · npm build ✓ · wails build PASS · 207 platform ✅ |
+| S04-D1-T002 | 1 | Quyết định Pha 7 (defer/làm) → decision-log | pm/decision-log | DONE | DEFER — D-011 (rủi ro cao/lợi ích thấp); backlog trong current-state.md ✅ |
 | S04-D2-T001 | 2 | Rà gốc repo gọn + tick review-checklist | pm/review-checklist | DONE | xoá icongen.exe+empty dirs; review-checklist S03 ticked ✅ (6ec59a7) |
 | S04-D2-T002 | 2 | (tuỳ chọn) Kế hoạch rewrite git history cho secrets | pm/risks.md | DONE | kế hoạch + checklist đã ghi risks.md ✅ (ce1bf66) |
 
 ---
 
 ### Tổng kết tiến độ
-- TODO: 0 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 32 (+ 1 SKIP)  (cập nhật 2026-06-20 D1 S03 DONE)
+- TODO: 0 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 34 (+ 1 SKIP)  (cập nhật 2026-06-20 D1 S04 ALL DONE)

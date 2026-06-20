@@ -3,8 +3,8 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 03** (S03-D1-T001)
-- Task hiện tại: Unit tests internal/proxy
+- Sprint đang làm: **Sprint 04 — TẤT CẢ TASK D1 DONE**
+- Task hiện tại: Hoàn tất
 - Blocker: —
 
 ## Baseline (S00-D1-T002 DONE)
@@ -96,7 +96,13 @@ Package cần có:
   Phát hiện: app_test.go sót lại ở root sau git mv → di chuyển sang internal/app/app_test.go.
 
 ### Sprint 04
-- (chưa có)
+- [S04-D1-T001] DONE 2026-06-20 — Verify cuối toàn bộ (S04).
+  go vet ./...: PASS · go test ./internal/...: same baseline (fakeinfo+verifybase pre-existing) ·
+  npm build: PASS · wails build: PASS (HVRIns.exe) · 207 platform ✅.
+
+- [S04-D1-T002] DONE 2026-06-20 — Quyết định Pha 7: DEFER.
+  D-011: rủi ro cao (2900 file + 207 blank-import), lợi ích thấp ở giai đoạn hiện tại.
+  Backlog item tạo trong decision-log.
 
 ---
 ### Mẫu dòng nhật ký
