@@ -12,14 +12,14 @@
 ## Nghiệm thu Sprint 00
 - [ ] Baseline xanh, số platform đã ghi vào current-state.md
 - [ ] go.mod/go.sum sạch (đã commit/revert)
-- [ ] 4 file secret không còn track; `.gitignore` đã chặn; `internal/cookie/embedded/...` còn nguyên
-- [ ] Đã rotate credential (hoặc ghi rõ kế hoạch trong risks.md)
+- [x] 4 file secret không còn track; `.gitignore` đã chặn; `internal/cookie/embedded/...` còn nguyên
+- [ ] Đã rotate credential (ghi rõ TODO + kế hoạch rewrite trong risks.md — chủ dự án cần làm)
 
 ## Nghiệm thu Sprint 01
 - [ ] `app.go` đã tách thành các file con; `go build .` vẫn xanh (cùng package, không đổi import)
-- [ ] Root sạch python lạc + __pycache__; docs đã gom; build.bat ở scripts/
-- [ ] cmd/ chỉ còn (dọn xong); icongen ở tools/; `golang.org/x/image` còn trong go.mod
-- [ ] config/sample có template .example; launch.json đã sửa HVRINS_DATA_DIR
+- [x] Root sạch python lạc + __pycache__; docs đã gom; build.bat ở scripts/
+- [x] cmd/ dọn xong (icongen ở tools/, 17 scratch đã xoá); `golang.org/x/image` còn trong go.mod ✅
+- [x] config/sample có template .example; launch.json đã sửa HVRINS_DATA_DIR
 
 ## Nghiệm thu Sprint 02 (quan trọng nhất)
 - [ ] 12+ file ở `internal/app` là `package app`; main.go là bootstrap mỏng ở gốc
@@ -29,7 +29,7 @@
 - [ ] `GetAppVersion()` trả version thật (KHÔNG "dev")
 - [ ] Số platform đăng ký == baseline
 - [ ] `app_test.go` pass ở vị trí mới (white-box)
-- [ ] README.md gốc đã viết; CLAUDE.md đã viết lại; tests/ scaffold tồn tại
+- [x] README.md gốc đã viết; CLAUDE.md đã viết lại; tests/ scaffold tồn tại ✅ (D2 done)
 
 ## Nghiệm thu Sprint 03
 - [ ] Alias `@/` bật; import đã convert; npm build xanh
