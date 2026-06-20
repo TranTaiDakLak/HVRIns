@@ -16,9 +16,9 @@
 ## Sprint 01 — Prep & Cleanup
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S01-D1-T001 | 1 | Tách `app.go` → accounts/settings/profiles/upload/stats/resources/dialogs.go (vẫn package main @ root) | app.go (+files mới) | TODO | — |
-| S01-D1-T002 | 1 | Migration Design Note: danh sách export, cách bọc app.ctx, cách thread AppVersion | dev-1/, decision-log | TODO | — |
-| S01-D1-T003 | 1 | Xác nhận 207 blank-import + 4 go:embed; ghi baseline check | dev-1/progress | TODO | — |
+| S01-D1-T001 | 1 | Tách `app.go` → accounts/settings/profiles/upload/stats/resources/dialogs.go (vẫn package main @ root) | app.go (+files mới) | DONE | go build PASS (92598da) · gofmt clean · 7 new files · app.go 7315→~2600 lines |
+| S01-D1-T002 | 1 | Migration Design Note: danh sách export, cách bọc app.ctx, cách thread AppVersion | dev-1/, decision-log | DONE | migration-note.md: export list, OnSecondInstance, SetVersion+buildVersion ✅ |
+| S01-D1-T003 | 1 | Xác nhận 207 blank-import + 4 go:embed; ghi baseline check | dev-1/progress | DONE | 207 blank-import ✅ · 5 go:embed ✅ (sprint doc nói 4 nhưng thực tế 5) |
 | S01-D2-T001 | 2 | Xoá `_patch_datr_diag.py`, `decode_request.py`; gỡ `scripts/__pycache__`; +.gitignore | .gitignore | DONE | git rm 2 py + pycache ✅ |
 | S01-D2-T002 | 2 | Move docs: guide→docs/, README_TEST_EAAG→docs/testing/, old-docs→archive, facebook→flows, .kiro specs→docs/rebuild/specs | docs/** | DONE | 32 file rename ✅ |
 | S01-D2-T003 | 2 | `build.bat`→scripts/ (cd gốc); migrate.ps1/rename_identity.ps1/recolor.py→scripts/legacy | scripts/** | DONE | cd /d added ✅ |
@@ -58,4 +58,4 @@
 ---
 
 ### Tổng kết tiến độ
-- TODO: 6 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 24  (cập nhật 2026-06-20 D2 sau S04)
+- TODO: 4 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 26  (cập nhật 2026-06-20 D1 S01-T002)

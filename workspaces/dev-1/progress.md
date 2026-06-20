@@ -4,7 +4,7 @@
 
 ## Trạng thái hiện tại
 - Sprint đang làm: **Sprint 01**
-- Task hiện tại: S01-D1-T001 (đang chuẩn bị)
+- Task hiện tại: S01-D1-T002 (Migration Design Note)
 - Blocker: —
 
 ## Baseline (S00-D1-T002 DONE)
@@ -49,6 +49,19 @@ Package cần có:
   FileSuccessNVREmail, FileSuccessNVRPhone
 
 ### Sprint 01
+- [S01-D1-T002] DONE 2026-06-20 — Migration Design Note viết xong.
+  Export list: startup→Startup, appDataDir→AppDataDir, expandEphemeralPortRange→ExpandEphemeralPortRange.
+  OnSecondInstance() bọc app.ctx; SetVersion(v)+buildVersion thread AppVersion từ main.
+  File: workspaces/dev-1/migration-note.md.
+
+- [S01-D1-T001] DONE 2026-06-20 — Tách app.go (7315 dòng) → 7 file mới @ root (package main):
+  app_accounts.go (~800 ln), app_dialogs.go (~155 ln), app_resources.go (~325 ln),
+  app_stats.go (~350 ln), app_upload.go (~862 ln), app_profiles.go (~209 ln),
+  app_settings.go (~1927 ln). app.go còn ~2600 dòng (core: App struct, NewApp, startup, run).
+  Mỗi file có import block riêng (chính xác theo go build -gcflags="-e").
+  Test: go build PASS · gofmt clean · go test ./internal/... same baseline.
+  File: app.go (-4700 ln), +7 new files. Commit: 92598da.
+
 - [S01-D1-T003] DONE 2026-06-20 — Xác nhận blank-import và go:embed baseline.
   blank-imports `_ "HVRIns/internal/instagram`: **207** (app.go:206, app_reg_sxxx.go:1).
   go:embed: **5** (main.go:1, cookie/store.go:2, igcore/template.go:1, instagram/register/ios/iosmess/embed.go:1).
