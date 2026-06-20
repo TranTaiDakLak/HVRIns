@@ -78,7 +78,30 @@
   - File: tests/go/README.md, tests/frontend/README.md
 
 ## Sprint 03
-*(chưa có task DONE)*
+- [S03-D2-T001] DONE — Dev 2 — 2026-06-20
+  - Việc: bật alias @/ (tsconfig + vite.config); viết script convert-imports.cjs; convert 195 relative import
+  - Test: npm run build PASS; 17 wailsjs imports giữ relative ✅
+  - File: frontend/tsconfig.json, frontend/vite.config.ts, 69 file src/**
+  - Commit: ba1e177
+
+- [S03-D2-T002] DONE — Dev 2 — 2026-06-20
+  - Việc: xoá stub src/main.ts (export {}), src/App.vue (empty); giữ src/app/ (D-009)
+  - Test: npm run build PASS ✅; index.html vẫn → src/app/main.ts
+  - File: frontend/src/main.ts (xoá), frontend/src/App.vue (xoá)
+  - Ghi chú: không flatten src/app/ — rủi ro không cần thiết, ghi decision-log D-009
+  - Commit: c314943
+
+- [S03-D2-T003] DONE — Dev 2 — 2026-06-20
+  - Việc: git mv bridge → services; update 39 file @/bridge → @/services; fix 2 dynamic import() sót
+  - Test: npm run build PASS ✅; wailsjs relative path (../../../) vẫn đúng ✅
+  - File: frontend/src/services/** (rename từ bridge/), AccountsImportDialog.vue, AccountsPage.vue
+  - Commit: 681770e
+
+- [S03-D2-T004] DONE — Dev 2 — 2026-06-20
+  - Việc: modules→features; AccountsPage/AuthSource/RegStats → features/*/pages/; settings+schema+reg-stats gom feature; routes.ts dynamic import → @/; "test":"vitest run"; passWithNoTests=true
+  - Test: npm run build PASS ✅; npm test exit 0 ✅
+  - File: frontend/src/features/**, frontend/package.json, frontend/vitest.config.ts, frontend/src/app/router/routes.ts
+  - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
 ## Sprint 04
 *(chưa có task DONE)*

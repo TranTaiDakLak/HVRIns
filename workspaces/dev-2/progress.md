@@ -3,9 +3,9 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 03** (S00+S01+S02 DONE — chờ Dev 1 S02 DONE trước khi làm FE reorg)
-- Task hiện tại: **CHỜ Dev 1** — kiểm tra task-board S02-D1-* trước khi bắt Sprint 03
-- Blocker: `wails build` BLOCKED (internal/result thiếu, Dev 1 scope); Dev 1 S02 chưa DONE
+- Sprint đang làm: **Sprint 04** (S00→S03 D2 DONE)
+- Task hiện tại: **S04-D2-T001** — rà gốc repo + tick review-checklist
+- Blocker: `wails build` — Dev 1 đã fix internal/result (a3d8210); confirm wails build PASS
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)
@@ -38,7 +38,16 @@
 - [S02-D2-T003] DONE 2026-06-20 — scaffold tests/go/ + tests/frontend/ với README.
 
 ### Sprint 03
-- (chưa có)
+- [S03-D2-T001] DONE 2026-06-20 — bật alias @/ (tsconfig+vite); convert 195 relative import → @/.
+  Test: npm run build PASS. 17 wailsjs imports giữ relative (độ sâu đúng). Commit ba1e177.
+- [S03-D2-T002] DONE 2026-06-20 — xoá stub src/main.ts + src/App.vue (dead code).
+  Quyết định D-009: giữ src/app/ (không làm phẳng). npm run build PASS. Commit c314943.
+- [S03-D2-T003] DONE 2026-06-20 — bridge/ → services/ (giữ nguyên độ sâu thư mục).
+  Update 39 file @/bridge → @/services; fix 2 dynamic import() còn sót. Commit 681770e.
+- [S03-D2-T004] DONE 2026-06-20 — modules/ → features/; gom pages vào feature; vitest pass.
+  AccountsPage, AuthSource, RegStats → features/pages/. settings/, schema/, reg-stats gom vào feature.
+  routes.ts dynamic import → @/. package.json "test": "vitest run". passWithNoTests=true.
+  npm build PASS; npm test exit 0. Swept vào commit a3d8210 (Dev 1 commit overlap).
 
 ### Sprint 04
 - (chưa có)

@@ -7,8 +7,8 @@
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
 | S00-D1-T001 | 1 | Đọc plan (00,02,04,06,07) + check môi trường (Go/Node/wails/Windows) | — | DONE | Go 1.26.4, Node 24.16, npm 11.13, Wails v2.12.0 ✅ |
-| S00-D1-T002 | 1 | Baseline: npm ci+build, `wails build`, `go test ./internal/...`, ghi số platform | — | BLOCKED | wails build FAIL: `internal/result` package không tồn tại trong repo |
-| S00-D1-T003 | 1 | Commit/revert go.mod, go.sum đang dirty | go.mod, go.sum | TODO | — |
+| S00-D1-T002 | 1 | Baseline: npm ci+build, `wails build`, `go test ./internal/...`, ghi số platform | internal/result/ | DONE | wails build PASS (a3d8210) · 207 blank-import · 5 go:embed · 1 test fail verifybase pre-existing |
+| S00-D1-T003 | 1 | Commit/revert go.mod, go.sum đang dirty | go.mod, go.sum | DONE | Dev 2 đã commit go mod tidy ở S01-D2-T004; go.mod clean ✅ |
 | S00-D2-T001 | 2 | Đọc plan (01,03,05) + check môi trường | — | DONE | git/node/npm OK |
 | S00-D2-T002 | 2 | Secrets: `git rm --cached` 4 file lộ + thêm `.gitignore` secrets | .gitignore | DONE | check-ignore ✅; embedded ✅ |
 | S00-D2-T003 | 2 | Ghi checklist rotate creds vào risks.md; xác nhận wails build xanh | pm/risks.md | DONE | rotate TODO; embedded ✅; build FAIL pre-existing |
@@ -39,10 +39,10 @@
 ## Sprint 03 — FE reorg (D2) + Go test (D1)
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S03-D2-T001 | 2 | Bật alias `@/` (tsconfig+vite) + convert import `../`→`@/` | frontend/tsconfig*, src/** | TODO | — |
-| S03-D2-T002 | 2 | Xoá stub src/main.ts+App.vue; làm phẳng src/app→src/ (cập nhật index.html) | frontend/src/** | TODO | — |
-| S03-D2-T003 | 2 | bridge/→services/ (GIỮ độ sâu thư mục) | frontend/src/services/** | TODO | — |
-| S03-D2-T004 | 2 | modules/→features/ + gom pages/components feature + script vitest | frontend/src/features/**, package.json | TODO | — |
+| S03-D2-T001 | 2 | Bật alias `@/` (tsconfig+vite) + convert import `../`→`@/` | frontend/tsconfig*, src/** | DONE | 195 import converted; npm build ✅ (ba1e177) |
+| S03-D2-T002 | 2 | Xoá stub src/main.ts+App.vue; giữ src/app/ (D-009) | frontend/src/** | DONE | stubs xoá; npm build ✅ (c314943) |
+| S03-D2-T003 | 2 | bridge/→services/ (GIỮ độ sâu thư mục) | frontend/src/services/** | DONE | 39 file updated; wailsjs depth OK; npm build ✅ (681770e) |
+| S03-D2-T004 | 2 | modules/→features/ + gom pages/components feature + script vitest | frontend/src/features/**, package.json | DONE | features/ gom xong; npm build ✅; npm test exit 0 (a3d8210) |
 | S03-D1-T001 | 1 | Unit test thay cmd scratch: internal/proxy/*_test.go + regex test | internal/proxy/** | TODO | — |
 | S03-D1-T002 | 1 | (tuỳ chọn) stub cpu_other.go/portrange_other.go cross-platform | internal/app/** | TODO | — |
 | S03-D1-T003 | 1 | Rà import cycle settings/adapter/legacy.go sau khi App→internal/app | internal/settings/** | TODO | — |
@@ -58,4 +58,4 @@
 ---
 
 ### Tổng kết tiến độ
-- TODO: 27 · IN PROGRESS: 0 · BLOCKED: 1 · DONE: 2  (cập nhật 2026-06-20 D1)
+- TODO: 8 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 22  (cập nhật 2026-06-20 D2 sau S03)
