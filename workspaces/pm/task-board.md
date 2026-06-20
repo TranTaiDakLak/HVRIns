@@ -28,10 +28,10 @@
 ## Sprint 02 — ⭐ Cú chuyển internal/app
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S02-D1-T001 | 1 | `git mv` 12+ file → internal/app/ + đổi `package main`→`app` (giữ _windows) | internal/app/** | TODO | — |
-| S02-D1-T002 | 1 | Export Startup/AppDataDir/ExpandEphemeralPortRange; bọc app.ctx → OnSecondInstance; thread AppVersion (SetVersion) | internal/app/** | TODO | — |
-| S02-D1-T003 | 1 | main.go mỏng (giữ go:embed+AppVersion+os.Chdir đầu tiên); go vet/test/build | main.go | TODO | — |
-| S02-D1-T004 | 1 | `wails generate module` + sửa ~10 import bridge/wails (go/main→go/app); wails build/dev; verify version & platform | frontend/src/bridge/wails/*.ts, wailsjs/ | TODO | — |
+| S02-D1-T001 | 1 | `git mv` 12+ file → internal/app/ + đổi `package main`→`app` (giữ _windows) | internal/app/** | DONE | 18 files moved ✅ (commit 56f516a) |
+| S02-D1-T002 | 1 | Export Startup/AppDataDir/ExpandEphemeralPortRange; bọc app.ctx → OnSecondInstance; thread AppVersion (SetVersion) | internal/app/** | DONE | Startup/AppDataDir/ExpandEphemeralPortRange exported; SetVersion/OnSecondInstance added ✅ |
+| S02-D1-T003 | 1 | main.go mỏng (giữ go:embed+AppVersion+os.Chdir đầu tiên); go vet/test/build | main.go | DONE | main.go thin: only embed+AppVersion+flag+main() ✅ |
+| S02-D1-T004 | 1 | `wails generate module` + sửa ~10 import bridge/wails (go/main→go/app); wails build/dev; verify version & platform | frontend/src/bridge/wails/*.ts, wailsjs/ | DONE | 16 imports fixed (go/main→go/app); wails build PASS ✅; 207 platform ✅ |
 | S02-D2-T001 | 2 | Viết README.md gốc (overview, build/run, cây thư mục) | README.md | DONE | README 79 dòng ✅ |
 | S02-D2-T002 | 2 | Viết lại CLAUDE.md (app thật) + điền author wails.json | CLAUDE.md, wails.json | DONE | CLAUDE.md rewrite ✅; wails.json author ✅ |
 | S02-D2-T003 | 2 | Scaffold tests/go/ + tests/frontend/ (README + .gitkeep) | tests/** | DONE | 2 README tạo ✅ |
@@ -58,4 +58,4 @@
 ---
 
 ### Tổng kết tiến độ
-- TODO: 4 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 26  (cập nhật 2026-06-20 D1 S01-T002)
+- TODO: 0 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 30  (cập nhật 2026-06-20 D1 S02 DONE)

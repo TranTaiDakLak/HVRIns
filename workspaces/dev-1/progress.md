@@ -3,8 +3,8 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 01**
-- Task hiện tại: S01-D1-T002 (Migration Design Note)
+- Sprint đang làm: **Sprint 03** (S03-D1-T001)
+- Task hiện tại: Unit tests internal/proxy
 - Blocker: —
 
 ## Baseline (S00-D1-T002 DONE)
@@ -70,7 +70,15 @@ Package cần có:
   Test: Grep PASS. File: progress.md (ghi baseline).
 
 ### Sprint 02
-- (chưa có)
+- [S02-D1-T001–T004] DONE 2026-06-20 — Cú chuyển nguyên tử internal/app (commit 56f516a).
+  T001: git mv 18 files → internal/app/, package main → package app.
+  T002: Startup/AppDataDir/ExpandEphemeralPortRange exported; SetVersion+buildVersion;
+        OnSecondInstance(); GetAppVersion() returns a.version.
+  T003: main.go thin — chỉ còn embed, AppVersion, flag, instanceUniqueID, main().
+        Delegate toàn bộ sang igapp "HVRIns/internal/app".
+  T004: wails generate module → frontend/wailsjs/go/app/ (was go/main/).
+        16 import fixes: go/main/App→go/app/App, main.X→app.X.
+  Verify: 207 blank-import ✅ · wails build PASS (HVRIns.exe) ✅ · go build . ✅.
 
 ### Sprint 03
 - (chưa có)
