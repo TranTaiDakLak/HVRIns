@@ -104,6 +104,21 @@
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
 ## Sprint 05
+- [S05-D2-T001] DONE — Dev 2 — 2026-06-21
+  - Việc: QA acceptance Q1–Q12 + RG-1..5 + section 3 (cấu trúc repo)
+  - Kết quả UI (xác nhận thủ công qua wails dev — người dùng xác nhận PASS):
+    Q1(app shell) Q2(accounts grid) Q3(import dialog) Q4(settings persist) Q5(proxy parse)
+    Q6(interaction save) Q7(reg stats render) Q8(profiles) Q9(upload site) Q10(folder dialog)
+    Q11(quit confirm) Q12(second instance) — tất cả PASS ✅
+  - RG-1(AppVersion≠"dev") RG-2(data dir) RG-3(platform count) RG-4(go:embed) RG-5(settings persist) — PASS ✅
+  - Section 3 (automated):
+    - Root: main.go, wails.json, go.mod, go.sum, README.md, CLAUDE.md ✅
+    - Không còn app*.go ở gốc (đã vào internal/app/) ✅
+    - git ls-files: không còn secret ✅
+    - internal/cookie/embedded/cookie_initial.txt còn ✅
+    - golang.org/x/image v0.38.0 trong go.mod ✅
+  - Ghi chú test Go: fakeinfo+verifybase fail là pre-existing (commit gốc 6c463a3), không phải regression sprint
+
 - [S05-D2-T002] DONE — Dev 2 — 2026-06-21
   - Việc: vitest.config.ts thêm alias @/ + bỏ passWithNoTests; viết useSelection.test.ts (17 tests) + useAccountsStore.test.ts (13 tests)
   - Test: 30/30 PASS ✅; npm run build PASS ✅

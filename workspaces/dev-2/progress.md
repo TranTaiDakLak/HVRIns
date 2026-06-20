@@ -3,9 +3,9 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 05** (S00→S04 D2 DONE)
-- Task hiện tại: **S05-D2-T001 CHỜ Dev 1** (S05-D1-T001 phải DONE trước)
-- Blocker: QA chức năng (Q3/Q7/RG-1..5) chờ Dev 1 validate internal/result
+- Sprint đang làm: **Hoàn tất** (Sprint 00–05 Dev 2 scope ALL DONE)
+- Task hiện tại: —
+- Blocker: Không còn (Dev 1 hoàn thành S05-D1; Dev 2 DONE 3/3 Sprint 05)
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)
@@ -62,6 +62,9 @@
 - [S05-D2-T003] DONE 2026-06-21 — audit + đồng bộ docs.
   docs/06: 4→5 go:embed. project-scan.md: cập nhật. 01-hien-trang: note internal/result (D-012).
   decision-log: D-012 + D-013. Secret check: sạch. Commit 2f9057d.
+- [S05-D2-T001] DONE 2026-06-21 — QA acceptance Q1–Q12 + RG-1..5 PASS (người dùng xác nhận).
+  Section 3 automated: root sạch (chỉ main.go + CLAUDE.md + wails.json + go.*+ README.md);
+  app*.go sạch ở gốc; no secret; embedded cookie OK; x/image OK. ✅
 - [S05-D2-T001] CHỜ Dev 1 S05-D1-T001 DONE.
 
 ---
