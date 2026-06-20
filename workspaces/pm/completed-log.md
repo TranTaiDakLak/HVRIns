@@ -103,6 +103,20 @@
   - File: frontend/src/features/**, frontend/package.json, frontend/vitest.config.ts, frontend/src/app/router/routes.ts
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
+## Sprint 05
+- [S05-D2-T002] DONE — Dev 2 — 2026-06-21
+  - Việc: vitest.config.ts thêm alias @/ + bỏ passWithNoTests; viết useSelection.test.ts (17 tests) + useAccountsStore.test.ts (13 tests)
+  - Test: 30/30 PASS ✅; npm run build PASS ✅
+  - File: frontend/vitest.config.ts, frontend/src/composables/useSelection.test.ts, frontend/src/features/accounts/store/useAccountsStore.test.ts
+  - Ghi chú: vi.mock('@/services/client') để bypass waitForWails() 2s; setActivePinia(createPinia()) mỗi test
+  - Commit: 1d0f0c8
+
+- [S05-D2-T003] DONE — Dev 2 — 2026-06-21
+  - Việc: audit cấu trúc vs 02-cau-truc-dich.md; sửa "4→5 go:embed" trong docs + project-scan; note internal/result (D-012); D-013 (cmd/ deleted); secret check; embedded còn
+  - Test: git ls-files sạch ✅; embedded cookie còn ✅; x/image còn ✅
+  - File: docs/rebuild/06-go-wails-cho-newbie.md, docs/rebuild/01-hien-trang.md, workspaces/pm/project-scan.md, workspaces/pm/decision-log.md
+  - Commit: 2f9057d
+
 ## Sprint 04
 - [S04-D2-T001] DONE — Dev 2 — 2026-06-20
   - Việc: Rà gốc repo; xoá icongen.exe + empty cmd/ + empty Config/ ở gốc

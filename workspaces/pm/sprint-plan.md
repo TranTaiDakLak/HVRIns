@@ -64,3 +64,18 @@ S04 D1 verify cuối + quyết định Pha 7  ║  S04 D2 rà gốc gọn + kế
 - Dev 1: `S04-D1-T001` verify cuối (wails build/dev, platform, version) + cập nhật board/log · `S04-D1-T002` quyết định Pha 7 (defer/làm) → decision-log.
 - Dev 2: `S04-D2-T001` rà gốc gọn + review-checklist · `S04-D2-T002` (tuỳ chọn) kế hoạch rewrite history cho secrets.
 **DoD:** review-checklist tick hết mục bắt buộc; gốc repo chỉ còn file/thư mục chuẩn.
+**Trạng thái:** ✅ HOÀN TẤT 2026-06-20 (34 task DONE + 1 SKIP). Cấu trúc đã verify.
+
+## Sprint 05 — Validation, QA & Hardening (giao 2026-06-21)
+**Bối cảnh:** cấu trúc xong nhưng còn 2 việc "build-xanh-không-thấy": (1) `internal/result` là package
+TÁI TẠO bằng suy luận (format/filename/dispatch chưa chắc khớp bản gốc); (2) chưa QA chức năng thật.
+**Mục tiêu:** đảm bảo HÀNH VI đúng + thêm test thật + đồng bộ docs.
+- Dev 1: `S05-D1-T001` ⭐ validate/khôi phục internal/result · `S05-D1-T002` xử lý test fail verifybase · `S05-D1-T003` unit test khóa hành vi result.
+- Dev 2: `S05-D2-T002` viết FE test thật (làm trước, độc lập) · `S05-D2-T001` chạy QA acceptance Q1–Q12 (CHỜ S05-D1-T001) · `S05-D2-T003` audit cấu trúc + đồng bộ docs.
+**Phụ thuộc:** S05-D2-T001 (QA register/verify) đợi S05-D1-T001 (result đúng). Còn lại song song.
+**DoD:** internal/result đúng/được ghi gap rõ; QA Q1–Q12 + RG-1..5 đạt; có FE test thật PASS; docs khớp thực tế.
+
+### Cần CHỦ DỰ ÁN quyết (không phải dev)
+1. Có source gốc `internal/result` ở đâu không? (quyết định khôi phục vs validate-suy-luận ở S05-D1-T001)
+2. Rotate credential đã lộ (FB/Hotmail) — thủ công.
+3. Rewrite git history cho secrets — cần đồng thuận team.

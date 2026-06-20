@@ -3,9 +3,9 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 04** (S00→S03 D2 DONE)
-- Task hiện tại: **S04-D2-T001** — rà gốc repo + tick review-checklist
-- Blocker: `wails build` — Dev 1 đã fix internal/result (a3d8210); confirm wails build PASS
+- Sprint đang làm: **Sprint 05** (S00→S04 D2 DONE)
+- Task hiện tại: **S05-D2-T001 CHỜ Dev 1** (S05-D1-T001 phải DONE trước)
+- Blocker: QA chức năng (Q3/Q7/RG-1..5) chờ Dev 1 validate internal/result
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)
@@ -54,6 +54,15 @@
   Xoá icongen.exe + empty cmd/ + empty Config/. Sự cố: Config=config case-insensitive → restore.
   .gitignore thêm 4 runtime dirs. Commit 6ec59a7.
 - [S04-D2-T002] DONE (S00) — kế hoạch rewrite git history đã ghi đầy đủ vào risks.md (commit ce1bf66).
+
+### Sprint 05
+- [S05-D2-T002] DONE 2026-06-21 — viết frontend test thật (30 tests PASS).
+  vitest.config.ts: thêm alias @/ + bỏ passWithNoTests. useSelection.test.ts (17 tests).
+  useAccountsStore.test.ts (13 tests) — vi.mock service/client. Commit 1d0f0c8.
+- [S05-D2-T003] DONE 2026-06-21 — audit + đồng bộ docs.
+  docs/06: 4→5 go:embed. project-scan.md: cập nhật. 01-hien-trang: note internal/result (D-012).
+  decision-log: D-012 + D-013. Secret check: sạch. Commit 2f9057d.
+- [S05-D2-T001] CHỜ Dev 1 S05-D1-T001 DONE.
 
 ---
 ### Mẫu dòng nhật ký

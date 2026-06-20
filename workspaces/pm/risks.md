@@ -20,6 +20,7 @@
 | R-13 | 🟡 | Import cycle khi App ↔ settings/adapter | Rà legacy.go sau move (S03-D1-T003) | D1 |
 | R-14 | 🟢 | Nhầm 2 file cookie_initial.txt | Chỉ gỡ `Config/Cookie/...`, GIỮ `internal/cookie/embedded/...` | D2 |
 | R-15 | 🟠 | Conflict 2 dev sửa trùng file | Tuân thủ bảng "Ranh giới file" trong sprint-plan; D2-S03 đợi D1-S02 | PM |
+| R-16 | 🔴 | `internal/result` TÁI TẠO bằng suy luận (build xanh nhưng hành vi có thể sai): format/filename suy luận, `dispatch.go` STUB trả nil → file output có thể sai định dạng / mất detail-file theo sub-status | S05-D1-T001: hỏi source gốc; nếu không có → đối chiếu phía ĐỌC, khôi phục dispatch hoặc ghi gap; viết test khóa (S05-D1-T003) | D1 |
 
 ## Checklist rotate credentials (S00-D2-T003)
 > Cập nhật 2026-06-20 — Dev 2. File đã gỡ khỏi tracking (git rm --cached). Rotate thật là việc THỦ CÔNG của chủ dự án.
