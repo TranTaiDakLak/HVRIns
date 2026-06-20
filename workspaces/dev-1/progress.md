@@ -81,7 +81,19 @@ Package cần có:
   Verify: 207 blank-import ✅ · wails build PASS (HVRIns.exe) ✅ · go build . ✅.
 
 ### Sprint 03
-- (chưa có)
+- [S03-D1-T001] DONE 2026-06-20 — Unit tests proxy thay cmd scratch đã xoá.
+  Viết internal/proxy/client_test.go: FormatProxyURL (8 case), ShortDisplay (6 case),
+  RenderSessionIfIsProxyServer (static/ssid/zone/proxyshare), isPort (10 case).
+  Test: go test ./internal/proxy/... PASS. File: internal/proxy/client_test.go.
+
+- [S03-D1-T002] SKIP 2026-06-20 — Cross-platform stubs không làm (app Windows-only).
+  Lý do: internal/proxy/transport_pool.go dùng syscall.Handle (Windows-only), không có CI Linux.
+  Quyết định: D-010 (decision-log). go build ./... Windows PASS.
+
+- [S03-D1-T003] DONE 2026-06-20 — Rà import cycle settings/adapter sau Sprint 02.
+  go build ./...: PASS (no cycle). go vet ./...: PASS (sau move app_test.go → internal/app/).
+  legacy.go mirror structs vẫn cần thiết (cycle nếu import internal/app ↔ internal/settings).
+  Phát hiện: app_test.go sót lại ở root sau git mv → di chuyển sang internal/app/app_test.go.
 
 ### Sprint 04
 - (chưa có)

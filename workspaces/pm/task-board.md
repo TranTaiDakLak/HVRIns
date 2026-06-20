@@ -43,9 +43,9 @@
 | S03-D2-T002 | 2 | Xoá stub src/main.ts+App.vue; giữ src/app/ (D-009) | frontend/src/** | DONE | stubs xoá; npm build ✅ (c314943) |
 | S03-D2-T003 | 2 | bridge/→services/ (GIỮ độ sâu thư mục) | frontend/src/services/** | DONE | 39 file updated; wailsjs depth OK; npm build ✅ (681770e) |
 | S03-D2-T004 | 2 | modules/→features/ + gom pages/components feature + script vitest | frontend/src/features/**, package.json | DONE | features/ gom xong; npm build ✅; npm test exit 0 (a3d8210) |
-| S03-D1-T001 | 1 | Unit test thay cmd scratch: internal/proxy/*_test.go + regex test | internal/proxy/** | TODO | — |
-| S03-D1-T002 | 1 | (tuỳ chọn) stub cpu_other.go/portrange_other.go cross-platform | internal/app/** | TODO | — |
-| S03-D1-T003 | 1 | Rà import cycle settings/adapter/legacy.go sau khi App→internal/app | internal/settings/** | TODO | — |
+| S03-D1-T001 | 1 | Unit test thay cmd scratch: internal/proxy/*_test.go + regex test | internal/proxy/** | DONE | client_test.go: FormatProxyURL/ShortDisplay/RenderSession/isPort PASS ✅ |
+| S03-D1-T002 | 1 | (tuỳ chọn) stub cpu_other.go/portrange_other.go cross-platform | internal/app/** | SKIP | Windows-only; syscall.Handle dependency; D-010 ✅ |
+| S03-D1-T003 | 1 | Rà import cycle settings/adapter/legacy.go sau khi App→internal/app | internal/settings/** | DONE | go build./... PASS; go vet PASS; no cycle; mirror structs còn cần ✅ |
 
 ## Sprint 04 — Finalize
 | Task ID | Dev | Mô tả | File chính | Status | Test |
@@ -58,4 +58,4 @@
 ---
 
 ### Tổng kết tiến độ
-- TODO: 0 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 30  (cập nhật 2026-06-20 D1 S02 DONE)
+- TODO: 0 · IN PROGRESS: 0 · BLOCKED: 0 · DONE: 32 (+ 1 SKIP)  (cập nhật 2026-06-20 D1 S03 DONE)

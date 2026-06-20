@@ -14,5 +14,6 @@
 | D-008 | 2026-06-20 | **Phân vai: D1=Go/Build, D2=Cleanup/Infra/FE**; D2-Sprint03 (FE) đợi D1-Sprint02 | Tránh 2 dev sửa trùng `frontend/src/bridge/wails` và root `*.go`. | Chốt |
 
 | D-009 | 2026-06-20 | **Giữ `src/app/`** (KHÔNG làm phẳng `src/app/main.ts`→`src/main.ts`) | Flattening yêu cầu cập nhật `index.html` + mọi `@/app/router/...` import → rủi ro không cần thiết ở giai đoạn này. Stub cũ đã xoá; entry `src/app/main.ts` rõ ràng. | Chốt (S03-D2-T002) |
+| D-010 | 2026-06-20 | **SKIP cross-platform stubs** (S03-D1-T002) — app dứt khoát Windows-only | `internal/proxy/transport_pool.go` dùng `syscall.Handle` (Windows-only); `wails.json` target Windows; không có CI Linux cần `go build ./...` xanh. Không cần `cpu_other.go`/`portrange_other.go`. | Chốt |
 
-> Quyết định để dev điền thêm khi thực thi — thêm dòng D-010, D-011...
+> Quyết định để dev điền thêm khi thực thi — thêm dòng D-011, D-012...
