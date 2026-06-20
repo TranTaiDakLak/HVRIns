@@ -1,4 +1,4 @@
-package main
+package app
 
 // app_tempmail_reg.go — TempMail reuse helpers cho RegMode=TempMail.
 //

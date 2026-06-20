@@ -1,7 +1,7 @@
 ﻿// legacy-import.wails.ts — Wails binding cho ParseLegacyConfig / ImportLegacyConfig
 
 import type { ILegacyImportService, LegacyParseResult } from '@/services/contracts'
-import { ParseLegacyConfig, ImportLegacyConfig } from '../../../wailsjs/go/main/App'
+import { ParseLegacyConfig, ImportLegacyConfig } from '../../../wailsjs/go/app/App'
 
 export const legacyImportWails: ILegacyImportService = {
   async parse(generalJSON: string, interactionJSON: string): Promise<LegacyParseResult> {

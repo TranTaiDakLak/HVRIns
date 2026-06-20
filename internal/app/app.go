@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -351,7 +351,8 @@ const (
 
 // Account — cấu trúc đầy đủ mapping từ WeBM DataGridView + PlatformItems
 type App struct {
-	ctx           context.Context
+	ctx     context.Context
+	version string
 	accounts      []Account
 	accountsMu    sync.RWMutex // bảo vệ a.accounts — RWMutex cho read-heavy (ListAccounts poll)
 	activityCache sync.Map     // map[int]string — lock-free activity cache cho onStatus hot path
@@ -550,7 +551,7 @@ var boughtMailMu sync.Mutex
 
 // rentMailDir trả về thư mục lưu mail rent: Config/RentMail (cạnh exe). "" nếu lỗi.
 func rentMailDir() string {
-	dir := filepath.Join(appDataDir(), "Config", "RentMail")
+	dir := filepath.Join(AppDataDir(), "Config", "RentMail")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return ""
 	}
@@ -1100,7 +1101,7 @@ func verifyPlatformKeyList(c InteractionConfig) []string {
 // startup được Wails gọi ngay sau khi cửa sổ app khởi động.
 // ctx: Wails context — dùng để emit events lên frontend.
 // Thực hiện: setup logging, load AppSettings, scan thư mục nguồn (nếu folder mode), khởi động folder watcher.
-func (a *App) startup(ctx context.Context) {
+func (a *App) Startup(ctx context.Context) {
 	a.ctx = ctx
 
 	// ═══ GC tuning cho chạy dài hạn (tuần/tháng) — aggressive để RAM không drift ═══
@@ -1153,7 +1154,7 @@ func (a *App) startup(ctx context.Context) {
 	// Đăng ký file cache domain cho mail-temp.com (TTL 48h).
 	// Khi user chọn Mode=MailTemp, CreateEmail sẽ load domain list từ file này
 	// thay vì fetch lại web mỗi lần (tránh chậm + block).
-	emailtemp.SetMailTempComDomainCachePath(filepath.Join(appDataDir(), "Config", "mailtempcom_domains.txt"))
+	emailtemp.SetMailTempComDomainCachePath(filepath.Join(AppDataDir(), "Config", "mailtempcom_domains.txt"))
 
 	// Ensure Config/DeviceInfo/ + 2 file split (_reg.txt + _ver.txt) auto-create.
 	if err := fbdata.EnsureDir(); err != nil {
@@ -1181,7 +1182,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 
 	// Load phone database từ Config/phone_database/.
-	fakeinfo.LoadPhoneDatabase(filepath.Join(appDataDir(), "Config", "phone_database"))
+	fakeinfo.LoadPhoneDatabase(filepath.Join(AppDataDir(), "Config", "phone_database"))
 	slog.Info("phone database loaded", "count", len(fakeinfo.PhoneCountries()))
 
 	// Load user overrides từ Config/ (Namereg, Locales, SimNetwork).
@@ -1256,7 +1257,27 @@ func (a *App) startup(ctx context.Context) {
 
 // removeAccountLine xóa 1 dòng khỏi file (dùng chung cho cả CloneHV và file mode)
 func (a *App) GetAppVersion() string {
-	return AppVersion
+	return a.version
+}
+
+// SetVersion injects the ldflags-set AppVersion from package main.
+// Call immediately after NewApp(), before wails.Run().
+func (a *App) SetVersion(v string) {
+	a.version = v
+	buildVersion = v
+}
+
+// OnSecondInstance restores the window when a second instance is launched.
+// Wire into options.SingleInstanceLock.OnSecondInstanceLaunch.
+func (a *App) OnSecondInstance() {
+	if a.ctx == nil {
+		return
+	}
+	runtime.WindowUnminimise(a.ctx)
+	runtime.Show(a.ctx)
+	runtime.WindowSetAlwaysOnTop(a.ctx, true)
+	time.Sleep(80 * time.Millisecond)
+	runtime.WindowSetAlwaysOnTop(a.ctx, false)
 }
 
 type VerifyRunConfig struct {
@@ -1893,7 +1914,7 @@ func extractDatrFromCookieLine(line string) string {
 //
 // Luôn auto-MkdirAll — caller không cần tạo trước.
 func defaultResultFolder() string {
-	candidate := filepath.Join(appDataDir(), "result")
+	candidate := filepath.Join(AppDataDir(), "result")
 	if mkErr := os.MkdirAll(candidate, 0755); mkErr == nil {
 		return candidate
 	}
@@ -2670,7 +2691,7 @@ func logMissingPhoneCountryCode(cc string) {
 // defaultPhoneDatabaseDir trả về folder chứa per-country phone pattern files.
 // Path: Config/phone_database (mỗi country: AnyName=CC.locale_REGION.txt với pattern phone bên trong).
 func defaultPhoneDatabaseDir() string {
-	candidate := filepath.Join(appDataDir(), "Config", "phone_database")
+	candidate := filepath.Join(AppDataDir(), "Config", "phone_database")
 	if mkErr := os.MkdirAll(candidate, 0755); mkErr == nil {
 		return candidate
 	}

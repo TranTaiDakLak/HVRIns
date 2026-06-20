@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -764,7 +764,7 @@ func (a *App) GetPermanentFileCounts() map[string]int {
 
 // setupLogging — cấu hình slog ghi vào thư mục logs/ cạnh file exe.
 func setupLogging() {
-	logDir := filepath.Join(appDataDir(), "logs")
+	logDir := filepath.Join(AppDataDir(), "logs")
 	_ = os.MkdirAll(logDir, 0755)
 	logFile := filepath.Join(logDir, "run-"+time.Now().Format("20060102")+".log")
 

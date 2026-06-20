@@ -1,169 +1,4 @@
-export namespace instagram {
-	
-	export class AddInfoConfig {
-	    enabled: boolean;
-	    city: boolean;
-	    hometown: boolean;
-	    school: boolean;
-	    college: boolean;
-	    work: boolean;
-	    relationship: boolean;
-	    dataDir: string;
-	    delayMs: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new AddInfoConfig(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.enabled = source["enabled"];
-	        this.city = source["city"];
-	        this.hometown = source["hometown"];
-	        this.school = source["school"];
-	        this.college = source["college"];
-	        this.work = source["work"];
-	        this.relationship = source["relationship"];
-	        this.dataDir = source["dataDir"];
-	        this.delayMs = source["delayMs"];
-	    }
-	}
-	export class VerifyConfig {
-	    verifyEnabled: boolean;
-	    mailProvider: string;
-	    mailList: string;
-	    checkLiveDieEnabled: boolean;
-	    timeDelayCheck: number;
-	    timeDelaySendCode: number;
-	    delayConfirmEmail: number;
-	    delayVeriReg: number;
-	    sendAgainCode: boolean;
-	    waitMailMs: number;
-	    maxResend: number;
-	    outputPath: string;
-	    uaIphoneList: string;
-	    zeusXApiKey: string;
-	    zeusXAccountCode: string;
-	    dvfbApiKey: string;
-	    dvfbAccountType: string;
-	    store1sApiKey: string;
-	    store1sProductId: string;
-	    mail30sApiKey: string;
-	    mail30sProductSlug: string;
-	    tempMailLolApiKey: string;
-	    tempMailDomain: string;
-	    muaMailApiKey: string;
-	    muaMailProductId: string;
-	    unlimitMailApiKey: string;
-	    unlimitMailProductId: string;
-	    sptMailApiKey: string;
-	    sptMailServiceCode: string;
-	    emailAPIInfoApiKey: string;
-	    emailAPIInfoProductCode: string;
-	    otpCheapApiKey: string;
-	    otpCheapServiceId: string;
-	    shopGmail9999ApiKey: string;
-	    shopGmail9999Service: string;
-	    rentGmailApiKey: string;
-	    rentGmailPlatform: string;
-	    otpCodesSmsApiKey: string;
-	    otpCodesSmsServiceId: string;
-	    wmemailApiKey: string;
-	    wmemailCommodity: string;
-	    priyoEmailApiKey: string;
-	    otpHotmailPriority?: string;
-	    tempMailToken?: string;
-	    reUseEmail: boolean;
-	    useEmailTime: number;
-	    fmUserTmpMail: boolean;
-	    deepFakeLocale: boolean;
-	    useProxyTempMail: boolean;
-	    useProxyGmail: boolean;
-	    enable2fa: boolean;
-	    addInfo?: AddInfoConfig;
-	
-	    static createFrom(source: any = {}) {
-	        return new VerifyConfig(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.verifyEnabled = source["verifyEnabled"];
-	        this.mailProvider = source["mailProvider"];
-	        this.mailList = source["mailList"];
-	        this.checkLiveDieEnabled = source["checkLiveDieEnabled"];
-	        this.timeDelayCheck = source["timeDelayCheck"];
-	        this.timeDelaySendCode = source["timeDelaySendCode"];
-	        this.delayConfirmEmail = source["delayConfirmEmail"];
-	        this.delayVeriReg = source["delayVeriReg"];
-	        this.sendAgainCode = source["sendAgainCode"];
-	        this.waitMailMs = source["waitMailMs"];
-	        this.maxResend = source["maxResend"];
-	        this.outputPath = source["outputPath"];
-	        this.uaIphoneList = source["uaIphoneList"];
-	        this.zeusXApiKey = source["zeusXApiKey"];
-	        this.zeusXAccountCode = source["zeusXAccountCode"];
-	        this.dvfbApiKey = source["dvfbApiKey"];
-	        this.dvfbAccountType = source["dvfbAccountType"];
-	        this.store1sApiKey = source["store1sApiKey"];
-	        this.store1sProductId = source["store1sProductId"];
-	        this.mail30sApiKey = source["mail30sApiKey"];
-	        this.mail30sProductSlug = source["mail30sProductSlug"];
-	        this.tempMailLolApiKey = source["tempMailLolApiKey"];
-	        this.tempMailDomain = source["tempMailDomain"];
-	        this.muaMailApiKey = source["muaMailApiKey"];
-	        this.muaMailProductId = source["muaMailProductId"];
-	        this.unlimitMailApiKey = source["unlimitMailApiKey"];
-	        this.unlimitMailProductId = source["unlimitMailProductId"];
-	        this.sptMailApiKey = source["sptMailApiKey"];
-	        this.sptMailServiceCode = source["sptMailServiceCode"];
-	        this.emailAPIInfoApiKey = source["emailAPIInfoApiKey"];
-	        this.emailAPIInfoProductCode = source["emailAPIInfoProductCode"];
-	        this.otpCheapApiKey = source["otpCheapApiKey"];
-	        this.otpCheapServiceId = source["otpCheapServiceId"];
-	        this.shopGmail9999ApiKey = source["shopGmail9999ApiKey"];
-	        this.shopGmail9999Service = source["shopGmail9999Service"];
-	        this.rentGmailApiKey = source["rentGmailApiKey"];
-	        this.rentGmailPlatform = source["rentGmailPlatform"];
-	        this.otpCodesSmsApiKey = source["otpCodesSmsApiKey"];
-	        this.otpCodesSmsServiceId = source["otpCodesSmsServiceId"];
-	        this.wmemailApiKey = source["wmemailApiKey"];
-	        this.wmemailCommodity = source["wmemailCommodity"];
-	        this.priyoEmailApiKey = source["priyoEmailApiKey"];
-	        this.otpHotmailPriority = source["otpHotmailPriority"];
-	        this.tempMailToken = source["tempMailToken"];
-	        this.reUseEmail = source["reUseEmail"];
-	        this.useEmailTime = source["useEmailTime"];
-	        this.fmUserTmpMail = source["fmUserTmpMail"];
-	        this.deepFakeLocale = source["deepFakeLocale"];
-	        this.useProxyTempMail = source["useProxyTempMail"];
-	        this.useProxyGmail = source["useProxyGmail"];
-	        this.enable2fa = source["enable2fa"];
-	        this.addInfo = this.convertValues(source["addInfo"], AddInfoConfig);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-
-}
-
-export namespace main {
+export namespace app {
 	
 	export class Account {
 	    id: number;
@@ -1171,6 +1006,171 @@ export namespace main {
 	        this.verifyConfig = this.convertValues(source["verifyConfig"], instagram.VerifyConfig);
 	        this.outputPath = source["outputPath"];
 	        this.proxy = source["proxy"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace instagram {
+	
+	export class AddInfoConfig {
+	    enabled: boolean;
+	    city: boolean;
+	    hometown: boolean;
+	    school: boolean;
+	    college: boolean;
+	    work: boolean;
+	    relationship: boolean;
+	    dataDir: string;
+	    delayMs: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new AddInfoConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.city = source["city"];
+	        this.hometown = source["hometown"];
+	        this.school = source["school"];
+	        this.college = source["college"];
+	        this.work = source["work"];
+	        this.relationship = source["relationship"];
+	        this.dataDir = source["dataDir"];
+	        this.delayMs = source["delayMs"];
+	    }
+	}
+	export class VerifyConfig {
+	    verifyEnabled: boolean;
+	    mailProvider: string;
+	    mailList: string;
+	    checkLiveDieEnabled: boolean;
+	    timeDelayCheck: number;
+	    timeDelaySendCode: number;
+	    delayConfirmEmail: number;
+	    delayVeriReg: number;
+	    sendAgainCode: boolean;
+	    waitMailMs: number;
+	    maxResend: number;
+	    outputPath: string;
+	    uaIphoneList: string;
+	    zeusXApiKey: string;
+	    zeusXAccountCode: string;
+	    dvfbApiKey: string;
+	    dvfbAccountType: string;
+	    store1sApiKey: string;
+	    store1sProductId: string;
+	    mail30sApiKey: string;
+	    mail30sProductSlug: string;
+	    tempMailLolApiKey: string;
+	    tempMailDomain: string;
+	    muaMailApiKey: string;
+	    muaMailProductId: string;
+	    unlimitMailApiKey: string;
+	    unlimitMailProductId: string;
+	    sptMailApiKey: string;
+	    sptMailServiceCode: string;
+	    emailAPIInfoApiKey: string;
+	    emailAPIInfoProductCode: string;
+	    otpCheapApiKey: string;
+	    otpCheapServiceId: string;
+	    shopGmail9999ApiKey: string;
+	    shopGmail9999Service: string;
+	    rentGmailApiKey: string;
+	    rentGmailPlatform: string;
+	    otpCodesSmsApiKey: string;
+	    otpCodesSmsServiceId: string;
+	    wmemailApiKey: string;
+	    wmemailCommodity: string;
+	    priyoEmailApiKey: string;
+	    otpHotmailPriority?: string;
+	    tempMailToken?: string;
+	    reUseEmail: boolean;
+	    useEmailTime: number;
+	    fmUserTmpMail: boolean;
+	    deepFakeLocale: boolean;
+	    useProxyTempMail: boolean;
+	    useProxyGmail: boolean;
+	    enable2fa: boolean;
+	    addInfo?: AddInfoConfig;
+	
+	    static createFrom(source: any = {}) {
+	        return new VerifyConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.verifyEnabled = source["verifyEnabled"];
+	        this.mailProvider = source["mailProvider"];
+	        this.mailList = source["mailList"];
+	        this.checkLiveDieEnabled = source["checkLiveDieEnabled"];
+	        this.timeDelayCheck = source["timeDelayCheck"];
+	        this.timeDelaySendCode = source["timeDelaySendCode"];
+	        this.delayConfirmEmail = source["delayConfirmEmail"];
+	        this.delayVeriReg = source["delayVeriReg"];
+	        this.sendAgainCode = source["sendAgainCode"];
+	        this.waitMailMs = source["waitMailMs"];
+	        this.maxResend = source["maxResend"];
+	        this.outputPath = source["outputPath"];
+	        this.uaIphoneList = source["uaIphoneList"];
+	        this.zeusXApiKey = source["zeusXApiKey"];
+	        this.zeusXAccountCode = source["zeusXAccountCode"];
+	        this.dvfbApiKey = source["dvfbApiKey"];
+	        this.dvfbAccountType = source["dvfbAccountType"];
+	        this.store1sApiKey = source["store1sApiKey"];
+	        this.store1sProductId = source["store1sProductId"];
+	        this.mail30sApiKey = source["mail30sApiKey"];
+	        this.mail30sProductSlug = source["mail30sProductSlug"];
+	        this.tempMailLolApiKey = source["tempMailLolApiKey"];
+	        this.tempMailDomain = source["tempMailDomain"];
+	        this.muaMailApiKey = source["muaMailApiKey"];
+	        this.muaMailProductId = source["muaMailProductId"];
+	        this.unlimitMailApiKey = source["unlimitMailApiKey"];
+	        this.unlimitMailProductId = source["unlimitMailProductId"];
+	        this.sptMailApiKey = source["sptMailApiKey"];
+	        this.sptMailServiceCode = source["sptMailServiceCode"];
+	        this.emailAPIInfoApiKey = source["emailAPIInfoApiKey"];
+	        this.emailAPIInfoProductCode = source["emailAPIInfoProductCode"];
+	        this.otpCheapApiKey = source["otpCheapApiKey"];
+	        this.otpCheapServiceId = source["otpCheapServiceId"];
+	        this.shopGmail9999ApiKey = source["shopGmail9999ApiKey"];
+	        this.shopGmail9999Service = source["shopGmail9999Service"];
+	        this.rentGmailApiKey = source["rentGmailApiKey"];
+	        this.rentGmailPlatform = source["rentGmailPlatform"];
+	        this.otpCodesSmsApiKey = source["otpCodesSmsApiKey"];
+	        this.otpCodesSmsServiceId = source["otpCodesSmsServiceId"];
+	        this.wmemailApiKey = source["wmemailApiKey"];
+	        this.wmemailCommodity = source["wmemailCommodity"];
+	        this.priyoEmailApiKey = source["priyoEmailApiKey"];
+	        this.otpHotmailPriority = source["otpHotmailPriority"];
+	        this.tempMailToken = source["tempMailToken"];
+	        this.reUseEmail = source["reUseEmail"];
+	        this.useEmailTime = source["useEmailTime"];
+	        this.fmUserTmpMail = source["fmUserTmpMail"];
+	        this.deepFakeLocale = source["deepFakeLocale"];
+	        this.useProxyTempMail = source["useProxyTempMail"];
+	        this.useProxyGmail = source["useProxyGmail"];
+	        this.enable2fa = source["enable2fa"];
+	        this.addInfo = this.convertValues(source["addInfo"], AddInfoConfig);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

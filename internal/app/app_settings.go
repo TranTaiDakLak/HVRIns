@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"bufio"
@@ -1137,7 +1137,7 @@ func proxyListPath(kind string) string {
 	default:
 		return ""
 	}
-	return filepath.Join(appDataDir(), "Config", "Proxy", filename)
+	return filepath.Join(AppDataDir(), "Config", "Proxy", filename)
 }
 
 // GetDefaultUACounts trả về số UA embedded sẵn cho mỗi pool (iphone/android/chrome).
@@ -1188,7 +1188,7 @@ func (a *App) GetDefaultCookiePaths() map[string]string {
 }
 
 func defaultCookieInitialPath() string {
-	absDir := filepath.Join(appDataDir(), cookie.DefaultDir)
+	absDir := filepath.Join(AppDataDir(), cookie.DefaultDir)
 	if err := os.MkdirAll(absDir, 0755); err == nil {
 		return filepath.Join(absDir, cookie.InitialFilename)
 	}
@@ -1196,7 +1196,7 @@ func defaultCookieInitialPath() string {
 }
 
 func defaultCookieDir() string {
-	absDir := filepath.Join(appDataDir(), cookie.DefaultDir)
+	absDir := filepath.Join(AppDataDir(), cookie.DefaultDir)
 	if err := os.MkdirAll(absDir, 0755); err == nil {
 		return absDir
 	}
@@ -1220,7 +1220,7 @@ func resolveCookieInitialPath(path string) string {
 				return candidate
 			}
 		}
-		return filepath.Join(appDataDir(), rel)
+		return filepath.Join(AppDataDir(), rel)
 	}
 	if filepath.IsAbs(clean) {
 		return clean
@@ -1228,7 +1228,7 @@ func resolveCookieInitialPath(path string) string {
 	if _, err := os.Stat(clean); err == nil {
 		return clean
 	}
-	candidate := filepath.Join(appDataDir(), clean)
+	candidate := filepath.Join(AppDataDir(), clean)
 	if _, statErr := os.Stat(candidate); statErr == nil {
 		return candidate
 	}
@@ -1939,7 +1939,7 @@ func mapSimNetworkType(t string) string {
 // defaultPermanentDir trả về folder chứa permanent phone.txt + mail.txt.
 // Port C# PathSingleton.PermanentPhonexMailFolder. Auto-create nếu chưa có.
 func defaultPermanentDir() string {
-	candidate := filepath.Join(appDataDir(), "Config", "Permanent")
+	candidate := filepath.Join(AppDataDir(), "Config", "Permanent")
 	if mkErr := os.MkdirAll(candidate, 0755); mkErr == nil {
 		return candidate
 	}

@@ -8,7 +8,7 @@ import {
   CloneProfile,
   RenameProfile,
   DeleteProfile,
-} from '../../../wailsjs/go/main/App'
+} from '../../../wailsjs/go/app/App'
 
 export const profileWails: IProfileService = {
   async list(): Promise<ProfileInfo[]> {

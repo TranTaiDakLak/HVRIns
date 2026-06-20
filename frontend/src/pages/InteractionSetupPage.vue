@@ -2185,7 +2185,7 @@ async function runVerUATest() {
 // Android      → Config/DeviceInfo/versions_and_builds_<kind>.txt
 async function openVersionsFile(kind: 'reg' | 'ver', platform: string) {
   try {
-    const { OpenVersionsAndBuildsFile } = await import('../../wailsjs/go/main/App')
+    const { OpenVersionsAndBuildsFile } = await import('../../wailsjs/go/app/App')
     const fileKind = IOS_PLATFORM_KEY_SET.has(platform) ? `${kind}-ios` : kind
     const result: string = await OpenVersionsAndBuildsFile(fileKind)
     if (result.startsWith('ERR|')) {

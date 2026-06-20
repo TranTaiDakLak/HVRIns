@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -142,7 +142,7 @@ func (a *App) OpenFolderInExplorer(path string) string {
 
 // OpenConfigFolder mở thư mục Config trong Windows Explorer.
 func (a *App) OpenConfigFolder() string {
-	return a.OpenFolderInExplorer(filepath.Join(appDataDir(), "Config"))
+	return a.OpenFolderInExplorer(filepath.Join(AppDataDir(), "Config"))
 }
 
 // GetDefaultResultPath trả về đường dẫn thư mục kết quả mặc định sẽ được dùng

@@ -10,7 +10,7 @@
 // callback để force-save khi user click chọn provider.
 
 import { ref, computed } from 'vue'
-import { FetchWeMakeMailDomains, FetchMailHVDomains, FetchVietXFDomains } from '../../../../wailsjs/go/main/App'
+import { FetchWeMakeMailDomains, FetchMailHVDomains, FetchVietXFDomains } from '../../../../wailsjs/go/app/App'
 import { BrowserOpenURL } from '../../../../wailsjs/runtime/runtime'
 import { ChevronRight } from 'lucide-vue-next'
 import type { VerifyConfig, MailProviderType } from '@/types/interaction.types'

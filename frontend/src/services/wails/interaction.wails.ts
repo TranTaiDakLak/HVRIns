@@ -1,7 +1,7 @@
 ﻿// interaction.wails.ts — Wails implementation cho IInteractionService
 import type { IInteractionService } from '@/services/contracts'
 import type { VerifyConfig } from '@/types/interaction.types'
-import { SaveInteractionConfig, LoadInteractionConfig } from '../../../wailsjs/go/main/App'
+import { SaveInteractionConfig, LoadInteractionConfig } from '../../../wailsjs/go/app/App'
 
 export const interactionWails: IInteractionService = {
   async save(data: VerifyConfig): Promise<string> {

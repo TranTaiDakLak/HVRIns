@@ -1,6 +1,6 @@
 // app_banclone.go — Banclone (e-commerce push) integration.
 // Tách nguyên khối từ app.go — KHÔNG sửa logic.
-package main
+package app
 
 import (
 	"HVRIns/internal/httpx"

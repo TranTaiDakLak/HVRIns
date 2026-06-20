@@ -5,7 +5,7 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { MAIL_PROVIDER_ENDPOINTS } from '@/constants/api-endpoints'
-import { FetchStore1sProducts } from '../../wailsjs/go/main/App'
+import { FetchStore1sProducts } from '../../wailsjs/go/app/App'
 import type { ZeusXItem, Mail30sProduct, DvfbItem, VerifyConfig } from '@/types/interaction.types'
 
 /**

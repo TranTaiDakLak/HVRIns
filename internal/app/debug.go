@@ -15,7 +15,7 @@
 //
 // Default (không env var): cả 2 feature TẮT, không tạo goroutine/listener thừa,
 // production builds không bị ảnh hưởng performance.
-package main
+package app
 
 import (
 	"context"

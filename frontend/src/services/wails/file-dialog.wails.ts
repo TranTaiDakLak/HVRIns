@@ -10,7 +10,7 @@ import {
   SetAccountSourceFolder,
   RefreshAccountSource,
   CheckCloneHVStock,
-} from '../../../wailsjs/go/main/App'
+} from '../../../wailsjs/go/app/App'
 
 export const fileDialogWails: IFileDialogService = {
   async openFolder(): Promise<string> {
@@ -46,7 +46,7 @@ export const fileDialogWails: IFileDialogService = {
   },
 
   async openFolderInExplorer(path: string): Promise<string> {
-    const fn = (window as any)?.go?.main?.App?.OpenFolderInExplorer
+    const fn = (window as any)?.go?.app?.App?.OpenFolderInExplorer
     if (fn) return await fn(path)
     return ''
   },

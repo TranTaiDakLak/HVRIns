@@ -4,7 +4,7 @@ import { ArrowUpToLine, PenLine, CheckCircle2, Eye, EyeOff, RefreshCw, Trash2 } 
 import { getUploadSiteService } from '@/services/client'
 import type { UploadSiteConfig } from '@/types/upload-site.types'
 import { DEFAULT_UPLOAD_SITE_CONFIG } from '@/types/upload-site.types'
-import { GetBancloneProducts } from '../../wailsjs/go/main/App'
+import { GetBancloneProducts } from '../../wailsjs/go/app/App'
 import { useUploadLogStore } from '@/stores/uploadLog.store'
 import { storeToRefs } from 'pinia'
 

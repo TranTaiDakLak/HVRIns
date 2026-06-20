@@ -2,12 +2,12 @@
 // Gọi trực tiếp Go bindings qua Wails generated code
 
 import type { IAccountService, Account, AccountFilter, AccountListResult, ImportResult, DeleteResult } from '@/services/contracts'
-import { ListAccounts, GetAccount, ImportAccounts, DeleteAccounts } from '../../../wailsjs/go/main/App'
-import { main } from '../../../wailsjs/go/models'
+import { ListAccounts, GetAccount, ImportAccounts, DeleteAccounts } from '../../../wailsjs/go/app/App'
+import { app } from '../../../wailsjs/go/models'
 
 // Chuyển đổi Wails AccountFilter sang Go struct
-function toWailsFilter(filter: AccountFilter): main.AccountFilter {
-  return new main.AccountFilter({
+function toWailsFilter(filter: AccountFilter): app.AccountFilter {
+  return new app.AccountFilter({
     keyword: filter.keyword ?? '',
     status: filter.status ?? '',
     categoryId: filter.categoryId,
@@ -17,7 +17,7 @@ function toWailsFilter(filter: AccountFilter): main.AccountFilter {
 }
 
 // Chuyển đổi Wails Account sang bridge Account
-function fromWailsAccount(wa: main.Account): Account {
+function fromWailsAccount(wa: app.Account): Account {
   return {
     id: wa.id,
     uid: wa.uid,

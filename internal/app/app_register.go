@@ -1,6 +1,6 @@
 // app_register.go — Luồng đăng ký tài khoản (RunRegister), tách từ app.go.
 // Di chuyển nguyên hàm — KHÔNG sửa logic.
-package main
+package app
 
 import (
 	"HVRIns/internal/cookie"

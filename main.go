@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	igapp "HVRIns/internal/app"
 )
 
 //go:embed all:frontend/dist
@@ -43,19 +43,22 @@ func instanceUniqueID() string {
 func main() {
 	flag.Parse()
 
+	igapp.SetBuildVersion(AppVersion)
+
 	// Chuyển CWD sang data dir ngay đầu — tất cả relative path (Config/, logs/) tính từ đây.
-	// Dev: bin/dev/  |  Production: thư mục chứa exe. Xem datadir.go.
-	if err := os.Chdir(appDataDir()); err != nil {
+	// Dev: bin/dev/  |  Production: thư mục chứa exe. Xem internal/app/datadir.go.
+	if err := os.Chdir(igapp.AppDataDir()); err != nil {
 		println("Warning: cannot chdir to data dir:", err.Error())
 	}
 
 	// Mở rộng Windows ephemeral port range từ 16k (mặc định) lên ~48k.
 	// Giảm WSAEADDRINUSE khi chạy nhiều thread concurrent qua proxy.
 	// netsh int ipv4 set dynamicport tcp start=16384 num=49152
-	expandEphemeralPortRange()
+	igapp.ExpandEphemeralPortRange()
 
 	// Tạo instance ứng dụng
-	app := NewApp()
+	app := igapp.NewApp()
+	app.SetVersion(AppVersion)
 
 	windowStartState := options.Normal
 	if *flagMinimized {
@@ -70,11 +73,7 @@ func main() {
 		SingleInstanceLock: &options.SingleInstanceLock{
 			UniqueId: instanceUniqueID(),
 			OnSecondInstanceLaunch: func(_ options.SecondInstanceData) {
-				wailsRuntime.WindowUnminimise(app.ctx)
-				wailsRuntime.Show(app.ctx)
-				wailsRuntime.WindowSetAlwaysOnTop(app.ctx, true)
-				time.Sleep(80 * time.Millisecond)
-				wailsRuntime.WindowSetAlwaysOnTop(app.ctx, false)
+				app.OnSecondInstance()
 			},
 		},
 		Title:     "Hạ Vũ",
@@ -88,7 +87,7 @@ func main() {
 		},
 		// Dark background mặc định (#0f1117)
 		BackgroundColour: &options.RGBA{R: 15, G: 17, B: 23, A: 1},
-		OnStartup:        app.startup,
+		OnStartup:        app.Startup,
 		// OnBeforeClose: chặn tắt nhầm khi user nhấn X / Alt+F4 / taskbar close.
 		// Trả true → block close + emit event để FE show dialog xác nhận.
 		// User confirm trong dialog → FE gọi app.RequestQuit() (set flag + Quit)

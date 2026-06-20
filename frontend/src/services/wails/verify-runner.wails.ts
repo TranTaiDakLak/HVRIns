@@ -9,12 +9,12 @@ import {
   StopRegister,
   LoadInteractionConfig,
   SimulatePlatformUA,
-} from '../../../wailsjs/go/main/App'
-import { main } from '../../../wailsjs/go/models'
+} from '../../../wailsjs/go/app/App'
+import { app } from '../../../wailsjs/go/models'
 
 export const verifyRunnerWails: IVerifyRunnerService = {
   async run(config: VerifyRunConfig): Promise<string> {
-    const cfg = new main.VerifyRunConfig({
+    const cfg = new app.VerifyRunConfig({
       accountIds: config.accountIds,
       maxThreads: config.maxThreads,
       verifyConfig: config.verifyConfig,

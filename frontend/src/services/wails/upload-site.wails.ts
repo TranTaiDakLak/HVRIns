@@ -1,6 +1,6 @@
 ﻿import type { IUploadSiteService } from '@/services/contracts'
 import type { UploadSiteConfig } from '@/types/upload-site.types'
-import { SaveUploadSiteConfig, LoadUploadSiteConfig } from '../../../wailsjs/go/main/App'
+import { SaveUploadSiteConfig, LoadUploadSiteConfig } from '../../../wailsjs/go/app/App'
 
 export const uploadSiteWails: IUploadSiteService = {
   async save(data: UploadSiteConfig): Promise<string> {

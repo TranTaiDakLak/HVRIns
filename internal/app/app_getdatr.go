@@ -1,4 +1,4 @@
-package main
+package app
 
 // app_getdatr.go — lấy datr mới từ account đã Live qua GraphQL profile-switcher.
 //

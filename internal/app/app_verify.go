@@ -1,6 +1,6 @@
 // app_verify.go — Luồng verify/xác thực (RunVerify), tách từ app.go.
 // Di chuyển nguyên hàm — KHÔNG sửa logic.
-package main
+package app
 
 import (
 	"HVRIns/internal/clonehv"
