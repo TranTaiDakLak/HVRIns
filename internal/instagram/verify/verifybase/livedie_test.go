@@ -5,13 +5,16 @@ package verifybase
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 )
 
 func TestCheckLiveDie_RealUIDs(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skip: cần network")
+	// Live/network test: gọi FB Graph API thật, account state thay đổi → non-deterministic.
+	// Chạy thủ công: RUN_LIVE_TESTS=1 go test -run TestCheckLiveDie -v
+	if os.Getenv("RUN_LIVE_TESTS") != "1" {
+		t.Skip("requires live account/network (FB Graph API); set RUN_LIVE_TESTS=1 để chạy")
 	}
 
 	cases := []struct {
