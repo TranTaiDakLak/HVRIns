@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // RegVerStatsTable.vue - bảng thống kê một nguồn (REG hoặc VERIFY).
 import { ref, computed, watch } from 'vue'
 import { useAppStore } from '@/stores/app.store'
@@ -129,7 +129,7 @@ async function exportSelection() {
   // Backend: ExportFbVersionPool(kind, fbavList) ghi file + lookup FBBV + mở Explorer.
   if (props.platformLabel === 'FBAV') {
     try {
-      const { ExportFbVersionPool } = await import('../../wailsjs/go/main/App')
+      const { ExportFbVersionPool } = await import('../../../../wailsjs/go/main/App')
       // exportKind: "reg" / "verify" — map sang backend "reg" / "ver".
       const kind = props.exportKind === 'verify' ? 'ver' : 'reg'
       const result: string = await ExportFbVersionPool(kind, list)

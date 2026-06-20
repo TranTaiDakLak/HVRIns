@@ -22,9 +22,9 @@ import { useMailProviderStock } from '@/composables/useMailProviderStock'
 import { useBackendProfiles } from '@/composables/useBackendProfiles'
 import { useAutoSave } from '@/composables/useAutoSave'
 import { useMarqueeSelect } from '@/composables/useMarqueeSelect'
-import FieldHelp from '@/components/settings/FieldHelp.vue'
-import ProfileManager from '@/components/settings/ProfileManager.vue'
-import InlineValidation from '@/components/settings/InlineValidation.vue'
+import FieldHelp from '@/features/settings/components/FieldHelp.vue'
+import ProfileManager from '@/features/settings/components/ProfileManager.vue'
+import InlineValidation from '@/features/settings/components/InlineValidation.vue'
 import SearchableSelect from '@/components/ui/SearchableSelect.vue'
 
 const appStore = useAppStore()

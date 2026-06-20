@@ -1,10 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // InlineValidation.vue — Inline validation indicator for form fields.
 // Shows error/warning below a field based on schema registry constraints.
 // Usage: <InlineValidation field="threadRequest" :value="form.threadRequest" />
 
 import { computed } from 'vue'
-import { validateFieldValue, getFieldMetaByFormKey } from '@/schema/settings-registry'
+import { validateFieldValue, getFieldMetaByFormKey } from '@/features/settings/schema/settings-registry'
 
 const props = defineProps<{
   /** Form key matching settings-registry.ts formKey */

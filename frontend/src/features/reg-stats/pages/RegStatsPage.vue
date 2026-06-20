@@ -1,10 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // RegStatsPage.vue — Thống kê REG / VERIFY / Mail Domain.
 // Dữ liệu từ backend, tự refresh mỗi 10s.
 
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import RegVerStatsTable from '@/components/RegVerStatsTable.vue'
-import MailDomainStatsTable from '@/components/MailDomainStatsTable.vue'
+import RegVerStatsTable from '@/features/reg-stats/components/RegVerStatsTable.vue'
+import MailDomainStatsTable from '@/features/reg-stats/components/MailDomainStatsTable.vue'
 
 interface StatRow { index: number; platform: string; success: number; fail: number; total: number }
 interface MailDomainRow { index: number; domain: string; veri: number; live: number; die: number; rate: number }

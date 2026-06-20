@@ -1,10 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // FieldHelp.vue — Inline help tooltip/hint cho settings fields
 // Usage: <FieldHelp field="threadRequest" /> hoặc <FieldHelp hint="Custom hint text" />
 // Hover icon → hiện tooltip. Click "?" → expand detail nếu có.
 
 import { ref, computed } from 'vue'
-import { getFieldHelp } from '@/schema/field-help'
+import { getFieldHelp } from '@/features/settings/schema/field-help'
 
 const props = defineProps<{
   /** Key trong FIELD_HELP registry (e.g. 'threadRequest') */

@@ -10,7 +10,7 @@ import { getSettingsService, getInteractionService } from '@/services/client'
 import type { GeneralConfig, IpConfig } from '@/types/settings.types'
 import { IP_PROVIDERS, API_CHECK_IP_PROVIDERS, DEFAULT_IP_CONFIG, DEFAULT_GENERAL_CONFIG } from '@/types/settings.types'
 import { ROUTE_NAMES } from '@/constants/routes'
-import FieldHelp from '@/components/settings/FieldHelp.vue'
+import FieldHelp from '@/features/settings/components/FieldHelp.vue'
 import { useAutoSave } from '@/composables/useAutoSave'
 
 const router = useRouter()

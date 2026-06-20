@@ -16,7 +16,7 @@ import { getInteractionService } from '@/services/client'
 import type { VerifyConfig } from '@/types/interaction.types'
 import { DEFAULT_VERIFY_CONFIG } from '@/types/interaction.types'
 import { useAutoSave } from '@/composables/useAutoSave'
-import AuthSourcePanel from '@/modules/auth-source/components/AuthSourcePanel.vue'
+import AuthSourcePanel from '@/features/auth-source/components/AuthSourcePanel.vue'
 
 const appStore = useAppStore()
 const router = useRouter()

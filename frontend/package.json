@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --max-old-space-size=512 ./node_modules/vite/bin/vite.js",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "lucide-vue-next": "^1.0.0",

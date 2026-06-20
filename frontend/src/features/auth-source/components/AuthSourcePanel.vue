@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AuthSourcePanel.vue — Panel tái sử dụng cho "Nguồn xác thực" (Mail / Phone).
 //
 // Trước đây nằm trong rp-shared-footer của InteractionSetupPage. Giờ tách ra
@@ -20,7 +20,7 @@ import {
   STORE1S_PRODUCTS,
 } from '@/types/interaction.types'
 import { useMailProviderStock } from '@/composables/useMailProviderStock'
-import FieldHelp from '@/components/settings/FieldHelp.vue'
+import FieldHelp from '@/features/settings/components/FieldHelp.vue'
 import SearchableSelect from '@/components/ui/SearchableSelect.vue'
 
 const props = defineProps<{

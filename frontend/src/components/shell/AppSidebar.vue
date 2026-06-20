@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AppSidebar.vue — Sidebar navigation chính
 // Collapsible, chạy full-height không có header riêng
 
@@ -6,7 +6,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Users, Globe, Wrench, Settings, Eye, Zap, ArrowUpToLine, Mail, BarChart3 } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/app.store'
-import { useAccountsStore } from '@/modules/accounts/store/useAccountsStore'
+import { useAccountsStore } from '@/features/accounts/store/useAccountsStore'
 import { ROUTE_PATHS } from '@/constants/routes'
 
 const route = useRoute()
