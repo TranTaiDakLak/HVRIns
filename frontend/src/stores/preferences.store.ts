@@ -7,7 +7,7 @@ import { ref, watch } from 'vue'
 export type ThemeMode = 'dark' | 'light'
 export type DensityMode = 'compact' | 'default' | 'comfortable'
 
-import { DEFAULT_VISIBLE_COLUMN_KEYS } from '../constants/columns'
+import { DEFAULT_VISIBLE_COLUMN_KEYS } from '@/constants/columns'
 
 // Danh sách columns mặc định hiển thị (từ columns.ts defaultVisible)
 const DEFAULT_VISIBLE_COLUMNS = DEFAULT_VISIBLE_COLUMN_KEYS

@@ -6,21 +6,21 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { X, AlertTriangle, Save, LogIn, FileText } from 'lucide-vue-next'
-import { useAppStore } from '../stores/app.store'
-import { getSettingsService, getFileDialogService, getCloneHVService } from '../bridge/client'
-import type { GeneralConfig, AccountSource } from '../types/settings.types'
-import { ROUTE_NAMES } from '../constants/routes'
+import { useAppStore } from '@/stores/app.store'
+import { getSettingsService, getFileDialogService, getCloneHVService } from '@/bridge/client'
+import type { GeneralConfig, AccountSource } from '@/types/settings.types'
+import { ROUTE_NAMES } from '@/constants/routes'
 import {
   DEFAULT_GENERAL_CONFIG,
   getLoginMethodsByPlatform,
   CAPTCHA_PROVIDERS,
   IP_PROVIDERS,
-} from '../types/settings.types'
-import { useBackendProfiles } from '../composables/useBackendProfiles'
-import { useAutoSave } from '../composables/useAutoSave'
-import FieldHelp from '../components/settings/FieldHelp.vue'
-import ProfileManager from '../components/settings/ProfileManager.vue'
-import InlineValidation from '../components/settings/InlineValidation.vue'
+} from '@/types/settings.types'
+import { useBackendProfiles } from '@/composables/useBackendProfiles'
+import { useAutoSave } from '@/composables/useAutoSave'
+import FieldHelp from '@/components/settings/FieldHelp.vue'
+import ProfileManager from '@/components/settings/ProfileManager.vue'
+import InlineValidation from '@/components/settings/InlineValidation.vue'
 
 const router = useRouter()
 const appStore = useAppStore()

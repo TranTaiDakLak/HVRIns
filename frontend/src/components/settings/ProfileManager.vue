@@ -4,7 +4,7 @@
 
 import { ref, computed } from 'vue'
 import { X } from 'lucide-vue-next'
-import type { SavedProfile } from '../../composables/useSettingsProfiles'
+import type { SavedProfile } from '@/composables/useSettingsProfiles'
 
 const props = defineProps<{
   profiles: SavedProfile[]

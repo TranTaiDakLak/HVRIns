@@ -1,7 +1,7 @@
 // routes.ts — Định nghĩa routes cho ứng dụng
 
 import type { RouteRecordRaw } from 'vue-router'
-import { ROUTE_NAMES, ROUTE_PATHS } from '../../constants/routes'
+import { ROUTE_NAMES, ROUTE_PATHS } from '@/constants/routes'
 
 export const routes: RouteRecordRaw[] = [
   {

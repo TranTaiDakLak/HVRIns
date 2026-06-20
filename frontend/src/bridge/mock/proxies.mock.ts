@@ -1,6 +1,6 @@
 // proxies.mock.ts — Mock implementation cho IProxyService
 
-import type { IProxyService, Proxy, ProxyTestResult } from '../contracts'
+import type { IProxyService, Proxy, ProxyTestResult } from '@/bridge/contracts'
 
 const mockProxies: Proxy[] = [
   { id: 1, name: 'US Proxy 1', host: '192.168.1.100', port: 8080, username: 'user1', password: 'pass1', type: 'HTTP', note: 'Proxy US nhanh', lastTestResult: 'OK - 120ms' },

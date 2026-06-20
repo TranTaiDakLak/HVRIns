@@ -1,7 +1,7 @@
 // accounts.wails.ts — Wails implementation cho IAccountService
 // Gọi trực tiếp Go bindings qua Wails generated code
 
-import type { IAccountService, Account, AccountFilter, AccountListResult, ImportResult, DeleteResult } from '../contracts'
+import type { IAccountService, Account, AccountFilter, AccountListResult, ImportResult, DeleteResult } from '@/bridge/contracts'
 import { ListAccounts, GetAccount, ImportAccounts, DeleteAccounts } from '../../../wailsjs/go/main/App'
 import { main } from '../../../wailsjs/go/models'
 

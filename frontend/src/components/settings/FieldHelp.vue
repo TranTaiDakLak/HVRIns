@@ -4,7 +4,7 @@
 // Hover icon → hiện tooltip. Click "?" → expand detail nếu có.
 
 import { ref, computed } from 'vue'
-import { getFieldHelp } from '../../schema/field-help'
+import { getFieldHelp } from '@/schema/field-help'
 
 const props = defineProps<{
   /** Key trong FIELD_HELP registry (e.g. 'threadRequest') */

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // RegVerStatsTable.vue - bảng thống kê một nguồn (REG hoặc VERIFY).
 import { ref, computed, watch } from 'vue'
-import { useAppStore } from '../stores/app.store'
+import { useAppStore } from '@/stores/app.store'
 
 interface StatRow {
   index?: number

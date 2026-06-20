@@ -1,6 +1,6 @@
 // verify-runner.wails.ts — Wails bridge cho RunVerify, StopVerify, RunRegister, StopRegister
-import type { IVerifyRunnerService, VerifyRunConfig } from '../contracts'
-import type { VerifyConfig } from '../../types/interaction.types'
+import type { IVerifyRunnerService, VerifyRunConfig } from '@/bridge/contracts'
+import type { VerifyConfig } from '@/types/interaction.types'
 import {
   RunVerify,
   StopVerify,

@@ -10,13 +10,13 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Copy, ClipboardPaste } from 'lucide-vue-next'
-import { ROUTE_PATHS } from '../constants/routes'
-import { useAppStore } from '../stores/app.store'
-import { getInteractionService } from '../bridge/client'
-import type { VerifyConfig } from '../types/interaction.types'
-import { DEFAULT_VERIFY_CONFIG } from '../types/interaction.types'
-import { useAutoSave } from '../composables/useAutoSave'
-import AuthSourcePanel from '../modules/auth-source/components/AuthSourcePanel.vue'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { useAppStore } from '@/stores/app.store'
+import { getInteractionService } from '@/bridge/client'
+import type { VerifyConfig } from '@/types/interaction.types'
+import { DEFAULT_VERIFY_CONFIG } from '@/types/interaction.types'
+import { useAutoSave } from '@/composables/useAutoSave'
+import AuthSourcePanel from '@/modules/auth-source/components/AuthSourcePanel.vue'
 
 const appStore = useAppStore()
 const router = useRouter()

@@ -1,7 +1,7 @@
 // accounts.mock.ts — Mock implementation cho IAccountService
 // Dùng khi chạy ngoài Wails (dev mode, unit test)
 
-import type { IAccountService, Account, AccountFilter, AccountListResult, ImportResult, DeleteResult } from '../contracts'
+import type { IAccountService, Account, AccountFilter, AccountListResult, ImportResult, DeleteResult } from '@/bridge/contracts'
 
 const statuses = ['live', 'die', 'checkpoint', 'new', 'unknown'] as const
 const cities = ['Hà Nội', 'TP.HCM', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng', '']

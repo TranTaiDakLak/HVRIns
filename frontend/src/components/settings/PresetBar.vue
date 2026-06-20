@@ -3,7 +3,7 @@
 // Hiển thị 5 preset buttons; click → apply, highlight active.
 
 import { defineProps, defineEmits } from 'vue'
-import type { VerifyPreset } from '../../types/interaction.types'
+import type { VerifyPreset } from '@/types/interaction.types'
 
 const props = defineProps<{
   presets: VerifyPreset[]

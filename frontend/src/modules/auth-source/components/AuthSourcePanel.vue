@@ -13,15 +13,15 @@ import { ref, computed } from 'vue'
 import { FetchWeMakeMailDomains, FetchMailHVDomains, FetchVietXFDomains } from '../../../../wailsjs/go/main/App'
 import { BrowserOpenURL } from '../../../../wailsjs/runtime/runtime'
 import { ChevronRight } from 'lucide-vue-next'
-import type { VerifyConfig, MailProviderType } from '../../../types/interaction.types'
+import type { VerifyConfig, MailProviderType } from '@/types/interaction.types'
 import {
   ZEUS_X_ACCOUNT_CODES,
   DONGVANFB_ACCOUNT_TYPES,
   STORE1S_PRODUCTS,
-} from '../../../types/interaction.types'
-import { useMailProviderStock } from '../../../composables/useMailProviderStock'
-import FieldHelp from '../../../components/settings/FieldHelp.vue'
-import SearchableSelect from '../../../components/ui/SearchableSelect.vue'
+} from '@/types/interaction.types'
+import { useMailProviderStock } from '@/composables/useMailProviderStock'
+import FieldHelp from '@/components/settings/FieldHelp.vue'
+import SearchableSelect from '@/components/ui/SearchableSelect.vue'
 
 const props = defineProps<{
   form: VerifyConfig

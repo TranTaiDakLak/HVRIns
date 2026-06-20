@@ -2,11 +2,11 @@
 // AppLayout.vue — Layout chính: Sidebar + Header + Content + StatusBar
 // Desktop-first, full viewport
 
-import AppTitleBar from '../components/shell/AppTitleBar.vue'
-import AppSidebar from '../components/shell/AppSidebar.vue'
-import AppHeader from '../components/shell/AppHeader.vue'
-import AppStatusBar from '../components/shell/AppStatusBar.vue'
-import { useAppStore } from '../stores/app.store'
+import AppTitleBar from '@/components/shell/AppTitleBar.vue'
+import AppSidebar from '@/components/shell/AppSidebar.vue'
+import AppHeader from '@/components/shell/AppHeader.vue'
+import AppStatusBar from '@/components/shell/AppStatusBar.vue'
+import { useAppStore } from '@/stores/app.store'
 
 const appStore = useAppStore()
 </script>

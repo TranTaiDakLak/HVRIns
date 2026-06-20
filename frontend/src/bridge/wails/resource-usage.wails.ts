@@ -1,5 +1,5 @@
 // resource-usage.wails.ts — Wails bridge cho GetResourceUsage
-import type { IResourceUsageService, AppResourceUsage } from '../contracts'
+import type { IResourceUsageService, AppResourceUsage } from '@/bridge/contracts'
 import { GetResourceUsage } from '../../../wailsjs/go/main/App'
 
 export const resourceUsageWails: IResourceUsageService = {

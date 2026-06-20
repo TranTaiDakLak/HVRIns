@@ -2,7 +2,7 @@
 // Consume preferences store, expose toggle/check helpers
 
 import { computed } from 'vue'
-import { usePreferencesStore } from '../stores/preferences.store'
+import { usePreferencesStore } from '@/stores/preferences.store'
 
 /** Định nghĩa 1 column trong DataGrid. */
 export interface ColumnDef {

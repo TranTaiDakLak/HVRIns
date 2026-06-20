@@ -1,5 +1,5 @@
 // event-bus.mock.ts — Mock event bus (no-op; events never fire in mock mode)
-import type { IEventBusService } from '../contracts'
+import type { IEventBusService } from '@/bridge/contracts'
 
 export const eventBusMock: IEventBusService = {
   // Task 6: contract trả về unsub fn — mock trả no-op fn để caller cleanup logic

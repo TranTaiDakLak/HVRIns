@@ -3,7 +3,7 @@
 // Teleport to body, click outside dismiss, Escape close
 
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import type { MenuItemDef } from '../../composables/useContextMenu'
+import type { MenuItemDef } from '@/composables/useContextMenu'
 
 const props = defineProps<{
   visible: boolean

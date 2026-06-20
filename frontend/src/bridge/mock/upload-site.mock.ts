@@ -1,6 +1,6 @@
-import type { IUploadSiteService } from '../contracts'
-import type { UploadSiteConfig } from '../../types/upload-site.types'
-import { DEFAULT_UPLOAD_SITE_CONFIG } from '../../types/upload-site.types'
+import type { IUploadSiteService } from '@/bridge/contracts'
+import type { UploadSiteConfig } from '@/types/upload-site.types'
+import { DEFAULT_UPLOAD_SITE_CONFIG } from '@/types/upload-site.types'
 
 let _store: UploadSiteConfig = JSON.parse(JSON.stringify(DEFAULT_UPLOAD_SITE_CONFIG))
 

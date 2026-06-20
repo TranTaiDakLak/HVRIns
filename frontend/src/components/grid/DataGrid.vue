@@ -4,7 +4,7 @@
 
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ChevronUp, ChevronDown } from 'lucide-vue-next'
-import type { ColumnDef } from '../../composables/useColumnVisibility'
+import type { ColumnDef } from '@/composables/useColumnVisibility'
 
 export interface DataGridProps {
   // Dữ liệu đã sorted/filtered (từ useDataGrid)

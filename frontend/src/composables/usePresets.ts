@@ -4,10 +4,10 @@
 
 import { ref } from 'vue'
 import type { Ref } from 'vue'
-import type { VerifyConfig } from '../types/interaction.types'
-import { VERIFY_PRESETS } from '../types/interaction.types'
+import type { VerifyConfig } from '@/types/interaction.types'
+import { VERIFY_PRESETS } from '@/types/interaction.types'
 
-export type { VerifyPreset } from '../types/interaction.types'
+export type { VerifyPreset } from '@/types/interaction.types'
 export { VERIFY_PRESETS }
 
 /**

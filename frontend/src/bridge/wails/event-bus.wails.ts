@@ -1,5 +1,5 @@
 // event-bus.wails.ts — Wails bridge cho EventsOn / EventsOff (Wails runtime events)
-import type { IEventBusService } from '../contracts'
+import type { IEventBusService } from '@/bridge/contracts'
 import { EventsOn, EventsOff } from '../../../wailsjs/runtime/runtime'
 
 export const eventBusWails: IEventBusService = {

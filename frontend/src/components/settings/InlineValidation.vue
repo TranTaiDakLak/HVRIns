@@ -4,7 +4,7 @@
 // Usage: <InlineValidation field="threadRequest" :value="form.threadRequest" />
 
 import { computed } from 'vue'
-import { validateFieldValue, getFieldMetaByFormKey } from '../../schema/settings-registry'
+import { validateFieldValue, getFieldMetaByFormKey } from '@/schema/settings-registry'
 
 const props = defineProps<{
   /** Form key matching settings-registry.ts formKey */

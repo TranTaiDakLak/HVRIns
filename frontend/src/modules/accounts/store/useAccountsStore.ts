@@ -3,9 +3,9 @@
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getAccountService } from '../../../bridge/client'
-import type { Account, AccountFilter, AccountStatus, BridgeError } from '../../../bridge/contracts'
-import { useAppStore } from '../../../stores/app.store'
+import { getAccountService } from '@/bridge/client'
+import type { Account, AccountFilter, AccountStatus, BridgeError } from '@/bridge/contracts'
+import { useAppStore } from '@/stores/app.store'
 
 /**
  * Store trung tâm cho Accounts module.

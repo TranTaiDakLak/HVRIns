@@ -1,7 +1,7 @@
 // interaction.mock.ts — Mock implementation cho IInteractionService
-import type { IInteractionService } from '../contracts'
-import type { VerifyConfig } from '../../types/interaction.types'
-import { DEFAULT_VERIFY_CONFIG } from '../../types/interaction.types'
+import type { IInteractionService } from '@/bridge/contracts'
+import type { VerifyConfig } from '@/types/interaction.types'
+import { DEFAULT_VERIFY_CONFIG } from '@/types/interaction.types'
 
 const STORAGE_KEY = 'ncs_interaction'
 

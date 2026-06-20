@@ -4,9 +4,9 @@
 
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getLegacyImportService } from '../bridge/client'
-import type { LegacyMappedField, LegacyMappingReport } from '../bridge/contracts'
-import { ROUTE_NAMES } from '../constants/routes'
+import { getLegacyImportService } from '@/bridge/client'
+import type { LegacyMappedField, LegacyMappingReport } from '@/bridge/contracts'
+import { ROUTE_NAMES } from '@/constants/routes'
 
 const router = useRouter()
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 // App.vue — Root component
 import { onMounted, onUnmounted, nextTick } from 'vue'
-import AppLayout from '../layouts/AppLayout.vue'
-import BaseToast from '../components/feedback/BaseToast.vue'
-import { useAppStore } from '../stores/app.store'
-import { useUploadLogStore } from '../stores/uploadLog.store'
-import { useAccountsStore } from '../modules/accounts/store/useAccountsStore'
+import AppLayout from '@/layouts/AppLayout.vue'
+import BaseToast from '@/components/feedback/BaseToast.vue'
+import { useAppStore } from '@/stores/app.store'
+import { useUploadLogStore } from '@/stores/uploadLog.store'
+import { useAccountsStore } from '@/modules/accounts/store/useAccountsStore'
 
 // Listen system:memory-warning từ Go memory watchdog (Phase 1 stability).
 // Khi Go heap > 500 MB → notify user warning để cân nhắc restart sau batch.

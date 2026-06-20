@@ -1,8 +1,8 @@
 // useClipboard.ts — Copy data vào clipboard
 // Dùng cho context menu "Sao chép" submenu
 
-import type { Account } from '../bridge/contracts'
-import { useAppStore } from '../stores/app.store'
+import type { Account } from '@/bridge/contracts'
+import { useAppStore } from '@/stores/app.store'
 
 /**
  * Composable cung cấp các hàm copy dữ liệu account vào clipboard.

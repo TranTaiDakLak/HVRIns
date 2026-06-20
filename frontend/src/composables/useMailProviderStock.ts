@@ -4,9 +4,9 @@
 
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
-import { MAIL_PROVIDER_ENDPOINTS } from '../constants/api-endpoints'
+import { MAIL_PROVIDER_ENDPOINTS } from '@/constants/api-endpoints'
 import { FetchStore1sProducts } from '../../wailsjs/go/main/App'
-import type { ZeusXItem, Mail30sProduct, DvfbItem, VerifyConfig } from '../types/interaction.types'
+import type { ZeusXItem, Mail30sProduct, DvfbItem, VerifyConfig } from '@/types/interaction.types'
 
 /**
  * Composable kiểm tra tồn kho của 4 nhà cung cấp mail (ZeusX, Mail30s, Store1s, DongVanFB).

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useAppStore } from '../stores/app.store'
+import { useAppStore } from '@/stores/app.store'
 
 interface MailDomainRow {
   index?: number

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePreferencesStore, type DensityMode } from '../stores/preferences.store'
-import { ACCOUNT_COLUMNS } from '../constants/columns'
+import { usePreferencesStore, type DensityMode } from '@/stores/preferences.store'
+import { ACCOUNT_COLUMNS } from '@/constants/columns'
 
 const prefs = usePreferencesStore()
 

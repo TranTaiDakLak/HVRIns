@@ -3,7 +3,7 @@
 // Thay thế title bar Windows native, có drag area + window controls
 
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import ConfirmDialog from '../feedback/ConfirmDialog.vue'
+import ConfirmDialog from '@/components/feedback/ConfirmDialog.vue'
 
 // Wails runtime window controls
 function minimise() { (window as any).runtime?.WindowMinimise() }

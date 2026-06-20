@@ -5,9 +5,9 @@
 
 import { ref, computed } from 'vue'
 import { FolderOpen, Key, ChevronUp, ChevronDown, AlertTriangle } from 'lucide-vue-next'
-import type { VerifyConfig } from '../../types/interaction.types'
-import { VERIFY_MAIL_PROVIDERS } from '../../types/interaction.types'
-import { IP_PROVIDERS } from '../../types/settings.types'
+import type { VerifyConfig } from '@/types/interaction.types'
+import { VERIFY_MAIL_PROVIDERS } from '@/types/interaction.types'
+import { IP_PROVIDERS } from '@/types/settings.types'
 
 const props = defineProps<{
   form: VerifyConfig

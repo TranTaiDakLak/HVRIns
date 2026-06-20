@@ -2,9 +2,9 @@
 // AppStatusBar.vue - global bottom status bar.
 
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { getBridgeMode, getResourceUsageService, getAppInfoService } from '../../bridge/client'
-import { useAppStore } from '../../stores/app.store'
-import { useUploadLogStore } from '../../stores/uploadLog.store'
+import { getBridgeMode, getResourceUsageService, getAppInfoService } from '@/bridge/client'
+import { useAppStore } from '@/stores/app.store'
+import { useUploadLogStore } from '@/stores/uploadLog.store'
 
 const bridgeMode = getBridgeMode()
 const appStore = useAppStore()

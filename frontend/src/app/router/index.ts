@@ -2,7 +2,7 @@
 
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { routes } from './routes'
-import { usePreferencesStore } from '../../stores/preferences.store'
+import { usePreferencesStore } from '@/stores/preferences.store'
 
 const router = createRouter({
   // Wails dùng hash history (không có server cho HTML5 history)

@@ -5,13 +5,13 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { X, Globe, Lock } from 'lucide-vue-next'
-import { useAppStore } from '../stores/app.store'
-import { getSettingsService, getInteractionService } from '../bridge/client'
-import type { GeneralConfig, IpConfig } from '../types/settings.types'
-import { IP_PROVIDERS, API_CHECK_IP_PROVIDERS, DEFAULT_IP_CONFIG, DEFAULT_GENERAL_CONFIG } from '../types/settings.types'
-import { ROUTE_NAMES } from '../constants/routes'
-import FieldHelp from '../components/settings/FieldHelp.vue'
-import { useAutoSave } from '../composables/useAutoSave'
+import { useAppStore } from '@/stores/app.store'
+import { getSettingsService, getInteractionService } from '@/bridge/client'
+import type { GeneralConfig, IpConfig } from '@/types/settings.types'
+import { IP_PROVIDERS, API_CHECK_IP_PROVIDERS, DEFAULT_IP_CONFIG, DEFAULT_GENERAL_CONFIG } from '@/types/settings.types'
+import { ROUTE_NAMES } from '@/constants/routes'
+import FieldHelp from '@/components/settings/FieldHelp.vue'
+import { useAutoSave } from '@/composables/useAutoSave'
 
 const router = useRouter()
 const appStore = useAppStore()

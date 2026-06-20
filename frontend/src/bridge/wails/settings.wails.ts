@@ -1,5 +1,5 @@
 // settings.wails.ts — Wails implementation cho ISettingsService
-import type { ISettingsService, SettingsData } from '../contracts'
+import type { ISettingsService, SettingsData } from '@/bridge/contracts'
 import { SaveSettings, LoadSettings } from '../../../wailsjs/go/main/App'
 
 export const settingsWails: ISettingsService = {

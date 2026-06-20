@@ -4,17 +4,17 @@
 
 import { ref, computed, watch } from 'vue'
 import { X, AlertTriangle, FolderOpen } from 'lucide-vue-next'
-import BaseModal from '../../../components/feedback/BaseModal.vue'
-import type { GeneralConfig, IpConfig } from '../../../types/settings.types'
+import BaseModal from '@/components/feedback/BaseModal.vue'
+import type { GeneralConfig, IpConfig } from '@/types/settings.types'
 import {
   DEFAULT_GENERAL_CONFIG, DEFAULT_IP_CONFIG,
   getLoginMethodsByPlatform,
   CAPTCHA_PROVIDERS,
   IP_PROVIDERS,
-} from '../../../types/settings.types'
-import { UA_POOLS } from '../../../types/interaction.types'
-import { getFileDialogService, getSettingsService } from '../../../bridge/client'
-import { useAppStore } from '../../../stores/app.store'
+} from '@/types/settings.types'
+import { UA_POOLS } from '@/types/interaction.types'
+import { getFileDialogService, getSettingsService } from '@/bridge/client'
+import { useAppStore } from '@/stores/app.store'
 
 const appStore = useAppStore()
 

@@ -1,7 +1,7 @@
 // columns.ts — Định nghĩa columns cho Accounts grid
 // Mapping đầy đủ từ WeBM frmFacebook.Core DataGridView
 
-import type { ColumnDef } from '../composables/useColumnVisibility'
+import type { ColumnDef } from '@/composables/useColumnVisibility'
 
 export const ACCOUNT_COLUMNS: ColumnDef[] = [
   // --- Cột cơ bản ---

@@ -4,8 +4,8 @@
 
 import { ref, computed } from 'vue'
 import { Check, AlertTriangle } from 'lucide-vue-next'
-import type { GeneralConfig, IpConfig } from '../../types/settings.types'
-import { IP_PROVIDERS, CAPTCHA_PROVIDERS } from '../../types/settings.types'
+import type { GeneralConfig, IpConfig } from '@/types/settings.types'
+import { IP_PROVIDERS, CAPTCHA_PROVIDERS } from '@/types/settings.types'
 
 const props = defineProps<{
   general: GeneralConfig

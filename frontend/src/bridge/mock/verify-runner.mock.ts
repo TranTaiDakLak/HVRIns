@@ -1,6 +1,6 @@
 // verify-runner.mock.ts - mock bridge for verify/register runner
-import type { IVerifyRunnerService, VerifyRunConfig } from '../contracts'
-import type { VerifyConfig, PlatformUAConfig } from '../../types/interaction.types'
+import type { IVerifyRunnerService, VerifyRunConfig } from '@/bridge/contracts'
+import type { VerifyConfig, PlatformUAConfig } from '@/types/interaction.types'
 
 const s23VersionBuilds: Record<string, string> = {
   s415: '415.0.0.34.107|475722615',

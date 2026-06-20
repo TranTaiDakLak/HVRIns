@@ -3,8 +3,8 @@
 // Brand, sidebar toggle, dark mode toggle, notifications, profile dropdown
 
 import { ref } from 'vue'
-import { useAppStore } from '../../stores/app.store'
-import { usePreferencesStore } from '../../stores/preferences.store'
+import { useAppStore } from '@/stores/app.store'
+import { usePreferencesStore } from '@/stores/preferences.store'
 
 const appStore = useAppStore()
 const prefs = usePreferencesStore()

@@ -3,7 +3,7 @@
 // Profile config is stored server-side in AppSettings; we only track id+name here.
 
 import { ref, onMounted, type Ref } from 'vue'
-import { getProfileService } from '../bridge/client'
+import { getProfileService } from '@/bridge/client'
 import type { SavedProfile } from './useSettingsProfiles'
 
 export interface UseBackendProfilesReturn {

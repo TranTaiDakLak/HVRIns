@@ -1,5 +1,5 @@
-import type { IUploadSiteService } from '../contracts'
-import type { UploadSiteConfig } from '../../types/upload-site.types'
+import type { IUploadSiteService } from '@/bridge/contracts'
+import type { UploadSiteConfig } from '@/types/upload-site.types'
 import { SaveUploadSiteConfig, LoadUploadSiteConfig } from '../../../wailsjs/go/main/App'
 
 export const uploadSiteWails: IUploadSiteService = {

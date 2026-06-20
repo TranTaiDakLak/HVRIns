@@ -1,4 +1,4 @@
-import type { IAppInfoService } from '../contracts'
+import type { IAppInfoService } from '@/bridge/contracts'
 
 export const appInfoMock: IAppInfoService = {
   async getVersion() {

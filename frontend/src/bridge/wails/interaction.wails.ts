@@ -1,6 +1,6 @@
 // interaction.wails.ts — Wails implementation cho IInteractionService
-import type { IInteractionService } from '../contracts'
-import type { VerifyConfig } from '../../types/interaction.types'
+import type { IInteractionService } from '@/bridge/contracts'
+import type { VerifyConfig } from '@/types/interaction.types'
 import { SaveInteractionConfig, LoadInteractionConfig } from '../../../wailsjs/go/main/App'
 
 export const interactionWails: IInteractionService = {

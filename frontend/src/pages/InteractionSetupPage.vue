@@ -5,10 +5,10 @@
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { X, ChevronDown, ChevronUp, ChevronRight, ArrowUpToLine } from 'lucide-vue-next'
-import { ROUTE_PATHS } from '../constants/routes'
-import { useAppStore } from '../stores/app.store'
-import { getInteractionService, getFileDialogService, getSettingsService, getVerifyRunnerService } from '../bridge/client'
-import type { VerifyConfig, MailProviderType, PlatformUAConfig } from '../types/interaction.types'
+import { ROUTE_PATHS } from '@/constants/routes'
+import { useAppStore } from '@/stores/app.store'
+import { getInteractionService, getFileDialogService, getSettingsService, getVerifyRunnerService } from '@/bridge/client'
+import type { VerifyConfig, MailProviderType, PlatformUAConfig } from '@/types/interaction.types'
 import {
   DEFAULT_VERIFY_CONFIG,
   VERIFY_MAIL_PROVIDERS,
@@ -17,15 +17,15 @@ import {
   DONGVANFB_ACCOUNT_TYPES,
   STORE1S_PRODUCTS,
   UA_POOLS,
-} from '../types/interaction.types'
-import { useMailProviderStock } from '../composables/useMailProviderStock'
-import { useBackendProfiles } from '../composables/useBackendProfiles'
-import { useAutoSave } from '../composables/useAutoSave'
-import { useMarqueeSelect } from '../composables/useMarqueeSelect'
-import FieldHelp from '../components/settings/FieldHelp.vue'
-import ProfileManager from '../components/settings/ProfileManager.vue'
-import InlineValidation from '../components/settings/InlineValidation.vue'
-import SearchableSelect from '../components/ui/SearchableSelect.vue'
+} from '@/types/interaction.types'
+import { useMailProviderStock } from '@/composables/useMailProviderStock'
+import { useBackendProfiles } from '@/composables/useBackendProfiles'
+import { useAutoSave } from '@/composables/useAutoSave'
+import { useMarqueeSelect } from '@/composables/useMarqueeSelect'
+import FieldHelp from '@/components/settings/FieldHelp.vue'
+import ProfileManager from '@/components/settings/ProfileManager.vue'
+import InlineValidation from '@/components/settings/InlineValidation.vue'
+import SearchableSelect from '@/components/ui/SearchableSelect.vue'
 
 const appStore = useAppStore()
 const router = useRouter()

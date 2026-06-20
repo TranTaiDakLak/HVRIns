@@ -5,9 +5,9 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { Users, Globe, Wrench, Settings, Eye, Zap, ArrowUpToLine, Mail, BarChart3 } from 'lucide-vue-next'
-import { useAppStore } from '../../stores/app.store'
-import { useAccountsStore } from '../../modules/accounts/store/useAccountsStore'
-import { ROUTE_PATHS } from '../../constants/routes'
+import { useAppStore } from '@/stores/app.store'
+import { useAccountsStore } from '@/modules/accounts/store/useAccountsStore'
+import { ROUTE_PATHS } from '@/constants/routes'
 
 const route = useRoute()
 const appStore = useAppStore()

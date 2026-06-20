@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import BaseModal from './BaseModal.vue'
-import BaseButton from '../ui/BaseButton.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
 // --- Props ---
 withDefaults(defineProps<{

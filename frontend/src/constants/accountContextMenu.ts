@@ -1,7 +1,7 @@
 // accountContextMenu.ts — Cấu trúc context menu cho Accounts grid
 // Mapping đầy đủ từ WeBM frmFacebook.Core cmsDGV
 
-import type { MenuItemDef } from '../composables/useContextMenu'
+import type { MenuItemDef } from '@/composables/useContextMenu'
 
 export interface AccountMenuHandlers {
   selectAll: () => void

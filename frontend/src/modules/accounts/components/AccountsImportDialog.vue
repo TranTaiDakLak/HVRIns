@@ -2,7 +2,7 @@
 // AccountsImportDialog.vue — Import accounts: thư mục nguồn (persistent) + paste/file (one-time)
 
 import { ref, computed, onMounted } from 'vue'
-import BaseModal from '../../../components/feedback/BaseModal.vue'
+import BaseModal from '@/components/feedback/BaseModal.vue'
 
 const props = defineProps<{
   show: boolean
