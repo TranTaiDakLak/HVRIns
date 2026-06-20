@@ -121,7 +121,12 @@ frontend/wailsjs/runtime/runtime.js
 /tmp_diff/
 
 # ── Secrets / runtime data (KHÔNG commit) ──
+# Các thư mục runtime mà app tạo ra tại chỗ — config/sample/ (tracked) không bị ảnh hưởng
 Config/Cookie/
+Config/Proxy/
+Config/TempMail/
+Config/Permanent/
+Config/DeviceInfo/
 test_accounts*.txt
 
 # ── Python build cache ──

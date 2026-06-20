@@ -32,17 +32,17 @@
 - [x] README.md gốc đã viết; CLAUDE.md đã viết lại; tests/ scaffold tồn tại ✅ (D2 done)
 
 ## Nghiệm thu Sprint 03
-- [ ] Alias `@/` bật; import đã convert; npm build xanh
-- [ ] Stub src/main.ts + App.vue đã xoá; entry chạy đúng
-- [ ] bridge→services (độ sâu giữ nguyên); modules→features; pages gom đúng feature
-- [ ] script `test` chạy `vitest run`; (có/không) test mẫu
-- [ ] Go: unit test thay cmd scratch pass; rà import cycle xong
+- [x] Alias `@/` bật; 195 import đã convert; npm build xanh ✅ (ba1e177)
+- [x] Stub src/main.ts + App.vue đã xoá; entry src/app/main.ts chạy đúng ✅ (c314943)
+- [x] bridge→services (độ sâu giữ nguyên); modules→features; pages gom đúng feature ✅ (681770e, a3d8210)
+- [x] script `test` chạy `vitest run`; passWithNoTests=true; npm test exit 0 ✅ (a3d8210)
+- [ ] Go: unit test thay cmd scratch pass; rà import cycle xong (Dev 1 scope)
 
 ## Nghiệm thu Sprint 04
-- [ ] Verify end-to-end xanh; platform count + version OK
-- [ ] Gốc repo chỉ còn: main.go, wails.json, go.mod/sum, README.md, CLAUDE.md, .gitignore/.gitattributes + thư mục chuẩn
-- [ ] Quyết định Pha 7 đã ghi decision-log
-- [ ] Tất cả file pm/ đã cập nhật (current-state, task-board, completed-log)
+- [ ] Verify end-to-end xanh; platform count + version OK (Dev 1 scope)
+- [ ] Gốc repo gọn: icongen.exe + empty cmd/ + empty Config/ đã xoá ✅ D2; root Go files còn chờ Dev 1 S02
+- [ ] Quyết định Pha 7 đã ghi decision-log (Dev 1 scope)
+- [x] Tất cả file pm/ D2 đã cập nhật: task-board, completed-log, progress, risks, review-checklist ✅
 
 ## Tiêu chí "hoàn thành toàn bộ"
 - [ ] Tất cả task bắt buộc = DONE (task tuỳ chọn có thể defer, ghi rõ)
