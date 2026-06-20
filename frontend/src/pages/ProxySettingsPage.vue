@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // ProxySettingsPage.vue — Kho proxy & provider đổi IP
 // §1+§2 có tab Verify / Reg để cấu hình proxy riêng cho từng loại chạy.
 
@@ -6,7 +6,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { X, Globe, Lock } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/app.store'
-import { getSettingsService, getInteractionService } from '@/bridge/client'
+import { getSettingsService, getInteractionService } from '@/services/client'
 import type { GeneralConfig, IpConfig } from '@/types/settings.types'
 import { IP_PROVIDERS, API_CHECK_IP_PROVIDERS, DEFAULT_IP_CONFIG, DEFAULT_GENERAL_CONFIG } from '@/types/settings.types'
 import { ROUTE_NAMES } from '@/constants/routes'

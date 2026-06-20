@@ -1,8 +1,8 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AccountsDetailPanel.vue — Side panel chi tiết account
 // Mở khi double-click row, quick actions
 
-import type { Account } from '@/bridge/contracts'
+import type { Account } from '@/services/contracts'
 import { useAppStore } from '@/stores/app.store'
 import { usePreferencesStore } from '@/stores/preferences.store'
 import { X, Copy, Key, Cookie, Hash } from 'lucide-vue-next'

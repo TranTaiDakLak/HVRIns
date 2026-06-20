@@ -1,5 +1,5 @@
-// profile.mock.ts — Mock bridge cho profile management
-import type { IProfileService, ProfileInfo } from '@/bridge/contracts'
+﻿// profile.mock.ts — Mock bridge cho profile management
+import type { IProfileService, ProfileInfo } from '@/services/contracts'
 
 const _profiles: ProfileInfo[] = [{ id: 'default', name: 'Default' }]
 let _activeId = 'default'

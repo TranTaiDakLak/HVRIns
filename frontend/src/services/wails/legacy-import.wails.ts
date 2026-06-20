@@ -1,6 +1,6 @@
-// legacy-import.wails.ts — Wails binding cho ParseLegacyConfig / ImportLegacyConfig
+﻿// legacy-import.wails.ts — Wails binding cho ParseLegacyConfig / ImportLegacyConfig
 
-import type { ILegacyImportService, LegacyParseResult } from '@/bridge/contracts'
+import type { ILegacyImportService, LegacyParseResult } from '@/services/contracts'
 import { ParseLegacyConfig, ImportLegacyConfig } from '../../../wailsjs/go/main/App'
 
 export const legacyImportWails: ILegacyImportService = {

@@ -1,5 +1,5 @@
-// settings.mock.ts — Mock implementation cho ISettingsService
-import type { ISettingsService, SettingsData } from '@/bridge/contracts'
+﻿// settings.mock.ts — Mock implementation cho ISettingsService
+import type { ISettingsService, SettingsData } from '@/services/contracts'
 import { DEFAULT_GENERAL_CONFIG, DEFAULT_IP_CONFIG } from '@/types/settings.types'
 
 const STORAGE_KEY = 'ncs_settings'

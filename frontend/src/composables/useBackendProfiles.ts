@@ -1,9 +1,9 @@
-// useBackendProfiles.ts — Profile CRUD backed by the Go/Wails profile API.
+﻿// useBackendProfiles.ts — Profile CRUD backed by the Go/Wails profile API.
 // Drop-in replacement for useSettingsProfiles for pages that use backend settings.
 // Profile config is stored server-side in AppSettings; we only track id+name here.
 
 import { ref, onMounted, type Ref } from 'vue'
-import { getProfileService } from '@/bridge/client'
+import { getProfileService } from '@/services/client'
 import type { SavedProfile } from './useSettingsProfiles'
 
 export interface UseBackendProfilesReturn {

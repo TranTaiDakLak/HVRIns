@@ -1,4 +1,4 @@
-import type { IUploadSiteService } from '@/bridge/contracts'
+﻿import type { IUploadSiteService } from '@/services/contracts'
 import type { UploadSiteConfig } from '@/types/upload-site.types'
 import { DEFAULT_UPLOAD_SITE_CONFIG } from '@/types/upload-site.types'
 

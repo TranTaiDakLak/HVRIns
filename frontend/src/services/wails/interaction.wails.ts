@@ -1,5 +1,5 @@
-// interaction.wails.ts — Wails implementation cho IInteractionService
-import type { IInteractionService } from '@/bridge/contracts'
+﻿// interaction.wails.ts — Wails implementation cho IInteractionService
+import type { IInteractionService } from '@/services/contracts'
 import type { VerifyConfig } from '@/types/interaction.types'
 import { SaveInteractionConfig, LoadInteractionConfig } from '../../../wailsjs/go/main/App'
 

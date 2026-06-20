@@ -1,7 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { Zap, FolderOpen } from 'lucide-vue-next'
-import { getInteractionService, getFileDialogService } from '@/bridge/client'
+import { getInteractionService, getFileDialogService } from '@/services/client'
 import { DEFAULT_VERIFY_CONFIG } from '@/types/interaction.types'
 import type { VerifyConfig } from '@/types/interaction.types'
 import { useAppStore } from '@/stores/app.store'

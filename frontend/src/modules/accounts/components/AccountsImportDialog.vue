@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AccountsImportDialog.vue — Import accounts: thư mục nguồn (persistent) + paste/file (one-time)
 
 import { ref, computed, onMounted } from 'vue'
@@ -22,7 +22,7 @@ const folderLoading = ref(false)
 
 onMounted(async () => {
   try {
-    const { getBridgeMode } = await import('../../../bridge/client')
+    const { getBridgeMode } = await import('@/services/client')
     if (getBridgeMode() === 'wails') {
       const { GetAccountSourceFolder, ValidatePath } = await import('../../../../wailsjs/go/main/App')
       const path = await GetAccountSourceFolder()
@@ -41,7 +41,7 @@ async function handleChooseFolder() {
   folderLoading.value = true
   folderStatus.value = { type: '', msg: '' }
   try {
-    const { getBridgeMode } = await import('../../../bridge/client')
+    const { getBridgeMode } = await import('@/services/client')
     if (getBridgeMode() === 'wails') {
       const { OpenFolderDialog, SetAccountSourceFolder } = await import('../../../../wailsjs/go/main/App')
       const path = await OpenFolderDialog()
@@ -65,7 +65,7 @@ async function handleRefreshFolder() {
   folderLoading.value = true
   folderStatus.value = { type: '', msg: '' }
   try {
-    const { getBridgeMode } = await import('../../../bridge/client')
+    const { getBridgeMode } = await import('@/services/client')
     if (getBridgeMode() === 'wails') {
       const { RefreshAccountSource } = await import('../../../../wailsjs/go/main/App')
       const result = await RefreshAccountSource()
@@ -95,7 +95,7 @@ async function handleChooseFileSource() {
   fileLoading.value = true
   fileStatus.value = { type: '', msg: '' }
   try {
-    const { getBridgeMode } = await import('../../../bridge/client')
+    const { getBridgeMode } = await import('@/services/client')
     if (getBridgeMode() === 'wails') {
       const { OpenFileDialogPath, LoadAccountsFromFile } = await import('../../../../wailsjs/go/main/App')
       const path = await OpenFileDialogPath()
@@ -126,7 +126,7 @@ const loadingFile = ref(false)
 async function handleChooseFile() {
   loadingFile.value = true
   try {
-    const { getBridgeMode } = await import('../../../bridge/client')
+    const { getBridgeMode } = await import('@/services/client')
     if (getBridgeMode() === 'wails') {
       const { OpenTextFileDialog } = await import('../../../../wailsjs/go/main/App')
       const content = await OpenTextFileDialog()

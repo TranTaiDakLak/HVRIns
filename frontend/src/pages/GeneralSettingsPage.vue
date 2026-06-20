@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // GeneralSettingsPage.vue — Cài đặt chung
 // Layout 1 cột: global settings only (threads, login, captcha, hành vi)
 // Proxy/IP config → ProxySettings. Nguồn TK config → Thiết lập chạy.
@@ -7,7 +7,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { X, AlertTriangle, Save, LogIn, FileText } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/app.store'
-import { getSettingsService, getFileDialogService, getCloneHVService } from '@/bridge/client'
+import { getSettingsService, getFileDialogService, getCloneHVService } from '@/services/client'
 import type { GeneralConfig, AccountSource } from '@/types/settings.types'
 import { ROUTE_NAMES } from '@/constants/routes'
 import {

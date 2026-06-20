@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router'
 import { X, ChevronDown, ChevronUp, ChevronRight, ArrowUpToLine } from 'lucide-vue-next'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useAppStore } from '@/stores/app.store'
-import { getInteractionService, getFileDialogService, getSettingsService, getVerifyRunnerService } from '@/bridge/client'
+import { getInteractionService, getFileDialogService, getSettingsService, getVerifyRunnerService } from '@/services/client'
 import type { VerifyConfig, MailProviderType, PlatformUAConfig } from '@/types/interaction.types'
 import {
   DEFAULT_VERIFY_CONFIG,

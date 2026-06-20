@@ -1,7 +1,7 @@
-// useClipboard.ts — Copy data vào clipboard
+﻿// useClipboard.ts — Copy data vào clipboard
 // Dùng cho context menu "Sao chép" submenu
 
-import type { Account } from '@/bridge/contracts'
+import type { Account } from '@/services/contracts'
 import { useAppStore } from '@/stores/app.store'
 
 /**

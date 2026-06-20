@@ -1,10 +1,10 @@
-// useAccountsStore.ts — Store quản lý state cho Accounts module
+﻿// useAccountsStore.ts — Store quản lý state cho Accounts module
 // Rows, selection, filters, sort, loading, error
 
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getAccountService } from '@/bridge/client'
-import type { Account, AccountFilter, AccountStatus, BridgeError } from '@/bridge/contracts'
+import { getAccountService } from '@/services/client'
+import type { Account, AccountFilter, AccountStatus, BridgeError } from '@/services/contracts'
 import { useAppStore } from '@/stores/app.store'
 
 /**

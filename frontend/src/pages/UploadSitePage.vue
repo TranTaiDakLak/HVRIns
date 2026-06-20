@@ -1,7 +1,7 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ArrowUpToLine, PenLine, CheckCircle2, Eye, EyeOff, RefreshCw, Trash2 } from 'lucide-vue-next'
-import { getUploadSiteService } from '@/bridge/client'
+import { getUploadSiteService } from '@/services/client'
 import type { UploadSiteConfig } from '@/types/upload-site.types'
 import { DEFAULT_UPLOAD_SITE_CONFIG } from '@/types/upload-site.types'
 import { GetBancloneProducts } from '../../wailsjs/go/main/App'

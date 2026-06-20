@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // GeneralSettingsModal.vue — Modal cài đặt chung (đầy đủ như GeneralSettingsPage)
 // Layout 2 cột: trái (Nguồn TK, Mạng IP) | phải (Đăng nhập, Môi trường, Captcha, Sau khi chạy)
 
@@ -13,7 +13,7 @@ import {
   IP_PROVIDERS,
 } from '@/types/settings.types'
 import { UA_POOLS } from '@/types/interaction.types'
-import { getFileDialogService, getSettingsService } from '@/bridge/client'
+import { getFileDialogService, getSettingsService } from '@/services/client'
 import { useAppStore } from '@/stores/app.store'
 
 const appStore = useAppStore()

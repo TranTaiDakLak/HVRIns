@@ -1,5 +1,5 @@
-// profile.wails.ts — Wails bridge cho profile management API
-import type { IProfileService, ProfileInfo } from '@/bridge/contracts'
+﻿// profile.wails.ts — Wails bridge cho profile management API
+import type { IProfileService, ProfileInfo } from '@/services/contracts'
 import {
   ListProfiles,
   GetActiveProfileID,

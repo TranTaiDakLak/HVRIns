@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AccountsPage.vue — Trang Accounts chính
 // 2 trạng thái chọn giống WeBM:
 //   - Highlighted (bôi đen): click/drag row → xanh dương, dùng cho copy/context menu
@@ -6,7 +6,7 @@
 
 import { ref, onMounted, onUnmounted, onActivated, onDeactivated, computed, nextTick, watch } from 'vue'
 import { Users, FolderOpen, Key, X } from 'lucide-vue-next'
-import { getSettingsService, getVerifyRunnerService, getEventBusService, getFileDialogService, getInteractionService } from '@/bridge/client'
+import { getSettingsService, getVerifyRunnerService, getEventBusService, getFileDialogService, getInteractionService } from '@/services/client'
 import DataGrid from '@/components/grid/DataGrid.vue'
 import ContextMenu from '@/components/grid/ContextMenu.vue'
 import AccountsToolbar from '@/modules/accounts/components/AccountsToolbar.vue'
@@ -24,7 +24,7 @@ import { useContextMenu } from '@/composables/useContextMenu'
 import { useClipboard } from '@/composables/useClipboard'
 import { buildAccountContextMenu } from '@/constants/accountContextMenu'
 import { ACCOUNT_COLUMNS } from '@/constants/columns'
-import type { Account } from '@/bridge/contracts'
+import type { Account } from '@/services/contracts'
 import type { GeneralConfig, IpConfig } from '@/types/settings.types'
 import { DEFAULT_GENERAL_CONFIG, DEFAULT_IP_CONFIG } from '@/types/settings.types'
 
@@ -1301,7 +1301,7 @@ async function setupVerifyListeners() {
     selection.checkedIds.value = new Set(selection.checkedIds.value)
     const acc = accountsStore.accountsIndex.get(data.accountId)
     if (acc) {
-      if (data.status) acc.status = data.status.toLowerCase() as import('../bridge/contracts').AccountStatus
+      if (data.status) acc.status = data.status.toLowerCase() as import('@/services/contracts').AccountStatus
       if (data.message) acc.activity = data.message
       acc.token = preferUserAccessToken(acc.token, data.token || '')
       if (data.cookie) acc.cookie = data.cookie // cookie MỚI sau login verify → cập nhật cột COOKIE

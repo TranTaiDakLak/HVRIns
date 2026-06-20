@@ -1,6 +1,6 @@
-// legacy-import.mock.ts — Mock cho legacy import (dev/preview mode)
+﻿// legacy-import.mock.ts — Mock cho legacy import (dev/preview mode)
 
-import type { ILegacyImportService, LegacyParseResult } from '@/bridge/contracts'
+import type { ILegacyImportService, LegacyParseResult } from '@/services/contracts'
 
 const SAMPLE_RESULT: LegacyParseResult = {
   error: '',

@@ -1,4 +1,4 @@
-import type { IAppInfoService } from '@/bridge/contracts'
+﻿import type { IAppInfoService } from '@/services/contracts'
 import { GetAppVersion } from '../../../wailsjs/go/main/App'
 
 export const appInfoWails: IAppInfoService = {

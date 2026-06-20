@@ -1,8 +1,8 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AppStatusBar.vue - global bottom status bar.
 
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { getBridgeMode, getResourceUsageService, getAppInfoService } from '@/bridge/client'
+import { getBridgeMode, getResourceUsageService, getAppInfoService } from '@/services/client'
 import { useAppStore } from '@/stores/app.store'
 import { useUploadLogStore } from '@/stores/uploadLog.store'
 

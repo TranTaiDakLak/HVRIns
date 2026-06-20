@@ -1,6 +1,6 @@
-// flows.mock.ts — Mock implementation cho IFlowService
+﻿// flows.mock.ts — Mock implementation cho IFlowService
 
-import type { IFlowService, Flow } from '@/bridge/contracts'
+import type { IFlowService, Flow } from '@/services/contracts'
 
 const mockFlows: Flow[] = [
   {

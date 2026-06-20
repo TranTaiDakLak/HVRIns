@@ -1,5 +1,5 @@
-// interaction.mock.ts — Mock implementation cho IInteractionService
-import type { IInteractionService } from '@/bridge/contracts'
+﻿// interaction.mock.ts — Mock implementation cho IInteractionService
+import type { IInteractionService } from '@/services/contracts'
 import type { VerifyConfig } from '@/types/interaction.types'
 import { DEFAULT_VERIFY_CONFIG } from '@/types/interaction.types'
 

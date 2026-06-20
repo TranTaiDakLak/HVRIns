@@ -13,5 +13,6 @@
 | D-007 | 2026-06-20 | **Cú chuyển internal/app là MỘT commit nguyên tử**; chỉ verify trên **Windows**; cổng kiểm tra là `wails build` | 12+ file cùng package (trạng thái nửa vời không compile); app Windows-only; `go build ./...` lỗi go:embed trên cây sạch. | Chốt |
 | D-008 | 2026-06-20 | **Phân vai: D1=Go/Build, D2=Cleanup/Infra/FE**; D2-Sprint03 (FE) đợi D1-Sprint02 | Tránh 2 dev sửa trùng `frontend/src/bridge/wails` và root `*.go`. | Chốt |
 
-> Quyết định để dev điền thêm khi thực thi (ví dụ: có làm phẳng `src/app/` hay giữ; có viết stub
-> cross-platform `_other.go` không; có rewrite git history không) — thêm dòng D-009, D-010...
+| D-009 | 2026-06-20 | **Giữ `src/app/`** (KHÔNG làm phẳng `src/app/main.ts`→`src/main.ts`) | Flattening yêu cầu cập nhật `index.html` + mọi `@/app/router/...` import → rủi ro không cần thiết ở giai đoạn này. Stub cũ đã xoá; entry `src/app/main.ts` rõ ràng. | Chốt (S03-D2-T002) |
+
+> Quyết định để dev điền thêm khi thực thi — thêm dòng D-010, D-011...

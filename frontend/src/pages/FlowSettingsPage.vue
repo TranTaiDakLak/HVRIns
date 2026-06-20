@@ -1,10 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // FlowSettingsPage.vue — Khung cơ bản cho Flow Settings
 // Flow list bên trái, form chỉnh flow bên phải
 
 import { ref, onMounted } from 'vue'
-import { getFlowService } from '@/bridge/client'
-import type { Flow } from '@/bridge/contracts'
+import { getFlowService } from '@/services/client'
+import type { Flow } from '@/services/contracts'
 
 const flows = ref<Flow[]>([])
 const selectedFlow = ref<Flow | null>(null)

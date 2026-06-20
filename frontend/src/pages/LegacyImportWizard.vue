@@ -1,11 +1,11 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // LegacyImportWizard.vue — Wizard 4 bước import cấu hình từ tool cũ (WeBM)
 // Bước 1: Nhập JSON  | Bước 2: Xem report  | Bước 3: Xác nhận  | Bước 4: Xong
 
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getLegacyImportService } from '@/bridge/client'
-import type { LegacyMappedField, LegacyMappingReport } from '@/bridge/contracts'
+import { getLegacyImportService } from '@/services/client'
+import type { LegacyMappedField, LegacyMappingReport } from '@/services/contracts'
 import { ROUTE_NAMES } from '@/constants/routes'
 
 const router = useRouter()

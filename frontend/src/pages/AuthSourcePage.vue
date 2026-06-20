@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 // AuthSourcePage.vue — Tab top-level "Email/Phone" (Mail / Phone).
 //
 // Trước đây phần này nằm trong rp-shared-footer của InteractionSetupPage.
@@ -12,7 +12,7 @@ import { useRouter } from 'vue-router'
 import { ArrowLeft, Copy, ClipboardPaste } from 'lucide-vue-next'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useAppStore } from '@/stores/app.store'
-import { getInteractionService } from '@/bridge/client'
+import { getInteractionService } from '@/services/client'
 import type { VerifyConfig } from '@/types/interaction.types'
 import { DEFAULT_VERIFY_CONFIG } from '@/types/interaction.types'
 import { useAutoSave } from '@/composables/useAutoSave'

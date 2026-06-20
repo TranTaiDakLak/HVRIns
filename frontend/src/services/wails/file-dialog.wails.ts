@@ -1,5 +1,5 @@
-// file-dialog.wails.ts — Wails implementation cho IFileDialogService
-import type { IFileDialogService, ICloneHVService, ImportResult, CloneHVStockResult } from '@/bridge/contracts'
+﻿// file-dialog.wails.ts — Wails implementation cho IFileDialogService
+import type { IFileDialogService, ICloneHVService, ImportResult, CloneHVStockResult } from '@/services/contracts'
 import {
   OpenFolderDialog,
   OpenFileDialogPath,

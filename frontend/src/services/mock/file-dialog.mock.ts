@@ -1,5 +1,5 @@
-// file-dialog.mock.ts — Mock implementation cho IFileDialogService + ICloneHVService
-import type { IFileDialogService, ICloneHVService, ImportResult, CloneHVStockResult } from '@/bridge/contracts'
+﻿// file-dialog.mock.ts — Mock implementation cho IFileDialogService + ICloneHVService
+import type { IFileDialogService, ICloneHVService, ImportResult, CloneHVStockResult } from '@/services/contracts'
 
 export const fileDialogMock: IFileDialogService = {
   async openFolder(): Promise<string> {
