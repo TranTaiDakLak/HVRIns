@@ -11,6 +11,7 @@ import (
 // Nếu thay đổi file data/versions_and_builds.txt, số expected sẽ thay đổi — đó là tín hiệu
 // test cần update chứ không phải bug.
 func TestFbDataEmbedLoaded(t *testing.T) {
+	skipIfNoConfigData(t)
 	size := fbdata.Size()
 	if size < 100 {
 		t.Errorf("expected embed dataset > 100 entries (C# merged data ~2320), got %d", size)
@@ -33,6 +34,7 @@ func TestRandomFbVersion_ValidFormat(t *testing.T) {
 }
 
 func TestSimList_HasGlobalCoverage(t *testing.T) {
+	skipIfNoConfigData(t)
 	// Sau khi import full mcc-mnc.csv (~2695 entries), list phải cover đủ các country lớn.
 	if len(simList) < 1000 {
 		t.Errorf("simList quá ít: %d — kỳ vọng > 1000 entries (C# mcc-mnc.csv full)", len(simList))
@@ -48,6 +50,7 @@ func TestSimList_HasGlobalCoverage(t *testing.T) {
 }
 
 func TestNames_FullDataset(t *testing.T) {
+	skipIfNoConfigData(t)
 	if len(firstNames) < 500 {
 		t.Errorf("firstNames %d < 500 — kỳ vọng 999 từ C# US/firstname.txt", len(firstNames))
 	}
@@ -57,6 +60,7 @@ func TestNames_FullDataset(t *testing.T) {
 }
 
 func TestRandomLocale(t *testing.T) {
+	skipIfNoConfigData(t)
 	if len(localeList) < 30 {
 		t.Errorf("localeList %d < 30 — kỳ vọng 42 từ C# locales.txt", len(localeList))
 	}

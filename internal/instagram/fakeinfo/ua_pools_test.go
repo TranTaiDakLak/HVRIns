@@ -6,6 +6,7 @@ import (
 )
 
 func TestUAPools_AllLoaded(t *testing.T) {
+	skipIfNoConfigData(t)
 	tests := []struct {
 		kind UAPoolKind
 		min  int
@@ -22,6 +23,7 @@ func TestUAPools_AllLoaded(t *testing.T) {
 }
 
 func TestRandomUAFromPool_AndroidFormat(t *testing.T) {
+	skipIfNoConfigData(t)
 	ua := RandomUAFromPool(UAKindAndroid)
 	if ua == "" {
 		t.Fatal("RandomUAFromPool(android) empty")
@@ -33,6 +35,7 @@ func TestRandomUAFromPool_AndroidFormat(t *testing.T) {
 }
 
 func TestRandomUAFromPool_IOSFormat(t *testing.T) {
+	skipIfNoConfigData(t)
 	ua := RandomUAFromPool(UAKindIOS)
 	if ua == "" {
 		t.Fatal("RandomUAFromPool(ios) empty")
@@ -47,6 +50,7 @@ func TestRandomUAFromPool_IOSFormat(t *testing.T) {
 }
 
 func TestRandomUAFromPool_Randomness(t *testing.T) {
+	skipIfNoConfigData(t)
 	seen := make(map[string]struct{})
 	for i := 0; i < 50; i++ {
 		seen[RandomUAFromPool(UAKindAndroid)] = struct{}{}
@@ -71,7 +75,7 @@ func TestUAOverridePath(t *testing.T) {
 	cases := map[UAPoolKind]string{
 		UAKindAndroid: "Config/UserAgent/Android_UG.txt",
 		UAKindIOS:     "Config/UserAgent/iOS_UG.txt",
-		UAKindRequest: "Config/UserAgent/Request_UG.txt",
+		UAKindRequest: "Config/UserAgent/PC_UG.txt", // đổi từ Request_UG.txt (ua_pools.go 2026-05)
 	}
 	for kind, want := range cases {
 		got := UAOverridePath(kind)

@@ -5,12 +5,14 @@ import (
 )
 
 func TestPhoneCodes_LoadedFullDataset(t *testing.T) {
+	skipIfNoConfigData(t)
 	if got := len(phoneList); got < 200 {
 		t.Errorf("phoneList = %d entries, expected >= 200 (C# 221)", got)
 	}
 }
 
 func TestLookupPhoneCode_MajorCountries(t *testing.T) {
+	skipIfNoConfigData(t)
 	tests := []struct {
 		cc   string
 		want string // expected prefix
@@ -35,6 +37,7 @@ func TestLookupPhoneCode_MajorCountries(t *testing.T) {
 }
 
 func TestLookupPhoneCode_CaseInsensitive(t *testing.T) {
+	skipIfNoConfigData(t)
 	p1, _ := LookupPhoneCode("vn")
 	p2, _ := LookupPhoneCode("VN")
 	if p1.PhoneCode != p2.PhoneCode || p1.PhoneCode == "" {
@@ -49,6 +52,7 @@ func TestLookupPhoneCode_NotFound(t *testing.T) {
 }
 
 func TestPhoneCodeFor(t *testing.T) {
+	skipIfNoConfigData(t)
 	if got := PhoneCodeFor("VN"); got != "+84" {
 		t.Errorf("PhoneCodeFor(VN) = %q, want +84", got)
 	}
@@ -58,6 +62,7 @@ func TestPhoneCodeFor(t *testing.T) {
 }
 
 func TestFindCountryByPhonePrefix(t *testing.T) {
+	skipIfNoConfigData(t)
 	tests := []struct {
 		phone string
 		want  string // expected country code
@@ -80,6 +85,7 @@ func TestFindCountryByPhonePrefix(t *testing.T) {
 }
 
 func TestPhoneCountries_ReturnsCopy(t *testing.T) {
+	skipIfNoConfigData(t)
 	snapshot := PhoneCountries()
 	if len(snapshot) == 0 {
 		t.Fatal("phoneCountries empty")
