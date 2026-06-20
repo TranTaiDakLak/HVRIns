@@ -3,59 +3,56 @@
 > Cập nhật sau MỖI lần chạy. Đây là file đọc đầu tiên ở chế độ UPDATE.
 
 **Ngày cập nhật:** 2026-06-21
-**Người cập nhật:** PM (review cuối Sprint 00–04 + giao Sprint 05)
+**Người cập nhật:** PM (review Sprint 05 + giao Sprint 06)
 
 ---
 
 ## Trạng thái tổng thể
-- **Sprint 00–04: HOÀN TẤT** — 34/34 task DONE (+1 SKIP có chủ đích: S03-D1-T002 cross-platform stub, D-010).
-- **Cấu trúc tái cấu trúc đã xong và verify (PM review 2026-06-21):**
-  - Gốc repo chỉ còn `main.go` + file/thư mục chuẩn ✅
-  - `internal/app/` 19 file `package app` (App + 121 method tách nhỏ) ✅
-  - Frontend: `bridge/→services/`, `modules/→features/`, alias `@/`, stub đã xoá ✅
-  - Secrets gỡ khỏi track; `internal/cookie/embedded/cookie_initial.txt` còn nguyên ✅
-  - `wails build` PASS (commit a3d8210); 207 platform đăng ký == baseline ✅
-- **git status: sạch.** Pha 7 (internal/ deep mapping): DEFER (D-011).
+- **Sprint 00–04: HOÀN TẤT** (34 DONE + 1 SKIP). Cấu trúc tái cấu trúc đạt chuẩn, đã verify.
+- **Sprint 05:**
+  - **Dev 2: DONE 3/3** ✅ (verify bằng repo): 30 FE test thật (useSelection 17 + useAccountsStore 13,
+    commit 1d0f0c8); docs đồng bộ (5 go:embed, note internal/result — 2f9057d); QA acceptance chạy (5e5e107).
+  - **Dev 1: S05-D1-T001 DONE** ✅ (2026-06-21). T002/T003 đang làm tiếp.
 
-## ⚠️ PHÁT HIỆN QUAN TRỌNG khi review (cần Sprint 05 xử lý)
-- **`internal/result` là package TÁI TẠO bằng suy luận** — nó vốn bị import nhưng CHƯA TỪNG có trong
-  repo (repo gốc không build được). Dev 1 đã dựng lại để unblock (commit a3d8210). Hệ quả:
-  - `writer.go`, `counter.go`: implement thật, ổn.
-  - `format.go` (`FormatReg`/`FormatVerify`): **thứ tự field + format SUY LUẬN** — có thể lệch bản gốc
-    → file output (`SuccessReg.txt`...) có thể sai định dạng so với consumer.
-  - `files.go`: **tên file constant SUY LUẬN** — phải khớp tên mà chỗ ĐỌC mong đợi.
-  - `dispatch.go`: **STUB trả `nil`** — logic ghi detail-file theo sub-status đang MẤT.
-  - → `wails build` xanh KHÔNG đảm bảo hành vi đúng. **Phải validate ở Sprint 05.**
-- Còn **1 test fail ở verifybase** (Dev 1 ghi "pre-existing, live account state") — cần xác nhận/skip.
+## ✅ GAP R-16 — ĐÃ ĐÓNG (S05-D1-T001, 2026-06-21)
+- **`internal/result` đã KHÔI PHỤC từ BẢN GỐC.** Chủ dự án chỉ `D:\Github\HVR\` → tìm thấy bản gốc đầy đủ
+  ở `D:\Github\HVR\HVR\internal\result` (module `HVR`, repo tổ tiên). Đã thay bản tái tạo bằng bản gốc verbatim.
+  - Sửa 3 filename SAI: `Die.txt` (was DieAfterVerify.txt), `Unknown.txt` (was UnknownError_CheckLiveDie.txt),
+    `UnknownReg.txt` (was UnknownBlock.txt) — khớp consumer hardcode (`app_register.go:4536`, `verify/web/verify.go:616-618`).
+  - `dispatch.go` từ STUB nil → đầy đủ (15+ detail-file). Bổ sung `counters.go`/`errorlog.go`/`store.go` + test gốc.
+  - Validate workflow 5-lens: byte-for-byte giống HVR (drift), consumer khớp (autoDetect theo pattern), 0 critical.
+  - Gate: `go build .`/`go test ./internal/result/...`/`go vet`/`wails build` PASS. Xem D-012.
+  - ⚠️ Output register/verify thật giờ ghi đúng tên file gốc; nếu Dev 2 QA trước restore (trên bản tái tạo)
+    thì nên re-check output-file khi tiện (UI QA không bắt được phần này).
+
+## ⚠️ Caveat về QA (S05-D2-T001)
+- Dev 2 đánh "Q1–Q12 PASS", nhưng phần **QA tương tác GUI** (mở cửa sổ, click, restart) một agent
+  **không thể tự click** → các mục interactive cần **chủ dự án xác nhận tay** hoặc một e2e harness thật.
+  Phần automated/static (section 3) thì tin được. Coi QA interactive là "chưa xác nhận đầy đủ".
+- Lưu ý: validate output register/verify **không** thể làm bằng QA UI (cần live resource hoặc test
+  có chủ đích) → phụ thuộc S05-D1-T001 + quyết định của chủ dự án.
 
 ## Sprint đang chạy
-**Sprint 05 — Validation, QA & Hardening** (vừa giao — xem task-board + sprint-plan)
+**Sprint 05 (Dev 1 còn nợ) + Sprint 06 (Dev 2, vừa giao)**
 
-## Task đang làm
-- (chưa bắt đầu — chờ 2 dev nhận Sprint 05)
-
-## Task đã xong gần nhất
-- Toàn bộ Sprint 00–04 (D1 + D2). PM: review + giao Sprint 05.
+## Task đang làm / kế tiếp
+1. **Dev 1 — ƯU TIÊN:** hoàn tất Sprint 05 (S05-D1-T001 → T002 → T003). Đây là bottleneck của cả dự án.
+2. **Dev 2:** Sprint 06 (độc lập, không phụ thuộc Dev 1): mở rộng FE test + onboarding doc + closeout.
 
 ## Task đang bị BLOCK
-- (không) — blocker `internal/result` cũ đã được Dev 1 unblock; giờ chuyển thành task VALIDATE.
+- (không cứng) — nhưng "validate output register/verify" treo chờ S05-D1-T001 + quyết định chủ dự án.
 
-## Việc tiếp theo nên làm
-1. **Dev 1:** S05-D1-T001 — validate/khôi phục `internal/result` (ưu tiên cao nhất).
-2. **Dev 2:** S05-D2-T002 — viết frontend test thật (độc lập, làm song song ngay được).
-3. **Dev 2:** S05-D2-T001 — chạy QA acceptance (Q1–Q12) **sau khi** Dev 1 xong S05-D1-T001.
+## ✅ Quyết định chủ dự án (2026-06-21)
+1. **`internal/result` → KHÔI PHỤC BẢN GỐC** (cập nhật): chủ dự án chỉ `D:\Github\HVR\` → bản gốc CÓ THẬT ở
+   `D:\Github\HVR\HVR`. Dev 1 đã khôi phục verbatim (thay vì tự suy luận). Validated, không còn behavior-gap.
+   (Quyết định cũ "tự suy luận, không chờ source" bị thay thế vì source đã được chủ dự án cung cấp.)
 
-## ❓ Cần CHỦ DỰ ÁN quyết
-1. **Source gốc `internal/result`?** Có ở máy khác (E:/WEMAKE/NullCoreSummer...)/backup không? Nếu có →
-   khôi phục bản gốc thay vì tin bản suy luận. (Ảnh hưởng trực tiếp S05-D1-T001.)
-2. **Rotate credential** đã lộ (FB/Hotmail) — việc thủ công (xem risks.md, vẫn TODO).
-3. **Rewrite git history** cho secrets (kế hoạch đã có ở risks.md) — cần đồng thuận team.
+### Còn treo (thủ công, không chặn dev)
+- **Rotate credential** đã lộ (FB/Hotmail) — risks.md, vẫn TODO.
+- **Rewrite git history** cho secrets — cần đồng thuận team (kế hoạch ở risks.md).
 
-## Số liệu baseline
-- `wails build`: PASS (a3d8210)
-- `go test ./internal/...`: hầu hết PASS, 1 fail verifybase (live account state — cần xác nhận S05-D1-T002)
-- Số platform đăng ký: **207** (blank-import) — dùng so sánh hồi quy
+## Số liệu baseline (giữ để so hồi quy)
+- `wails build`: PASS (a3d8210) · Số platform: **207** · `go test ./internal/...`: 1 fail verifybase (chưa xử lý — S05-D1-T002)
 
 ## Ghi chú
-- 5 `go:embed` (không phải 4 như doc ban đầu): main.go, cookie/store.go, igcore/template.go,
-  iosmess/embed.go, + 1 nữa (Dev 1 xác nhận). Cần đồng bộ docs ở S05-D2-T003.
+- Git: chỉ branch `main`, 1 worktree. Mọi thay đổi đều trên main.

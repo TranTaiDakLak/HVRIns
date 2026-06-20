@@ -58,7 +58,7 @@
 ## Sprint 05 — Validation, QA & Hardening (giao 2026-06-21)
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S05-D1-T001 | 1 | ⭐ Validate/khôi phục `internal/result` (format/filename/dispatch suy luận) — hỏi source gốc trước; nếu không có thì đối chiếu phía đọc + khôi phục dispatch hoặc ghi gap | internal/result/**, decision-log | TODO | — |
+| S05-D1-T001 | 1 | ⭐ Validate/khôi phục `internal/result` (format/filename/dispatch suy luận) — hỏi source gốc trước; nếu không có thì đối chiếu phía đọc + khôi phục dispatch hoặc ghi gap | internal/result/**, decision-log | DONE | BẢN GỐC ở D:\Github\HVR\HVR → khôi phục verbatim; sửa 3 filename sai + dispatch stub→full; byte-for-byte=HVR; go build/test/vet/wails build PASS; D-012 ✅ |
 | S05-D1-T002 | 1 | Xử lý test fail verifybase (xác nhận live-state → t.Skip, hoặc fix) | internal/instagram/verify/** | TODO | — |
 | S05-D1-T003 | 1 | Unit test khóa hành vi internal/result (FormatReg/Verify, UpsertUID, ParseEmailMeta) | internal/result/result_test.go | TODO | — |
 | S05-D2-T001 | 2 | Chạy QA acceptance Q1–Q12 + RG-1..5 qua wails dev (CHỜ S05-D1-T001) | pm/completed-log.md | DONE | Q1–Q12 + RG-1..5 PASS; section 3 automated PASS ✅ |
@@ -67,7 +67,19 @@
 
 ---
 
+## Sprint 06 — Dev 2 hardening (giao 2026-06-21, độc lập với Dev 1)
+| Task ID | Dev | Mô tả | File chính | Status | Test |
+|---------|-----|-------|------------|--------|------|
+| S06-D2-T001 | 2 | Mở rộng FE test: useDataGrid + useColumnVisibility + useContextMenu (≥3 composable nữa) | frontend test | TODO | — |
+| S06-D2-T002 | 2 | Viết `docs/onboarding.md` (hoặc CONTRIBUTING) phản ánh cấu trúc mới: chạy/build, cây thư mục, quy ước, bridge→services/features | docs/** | TODO | — |
+| S06-D2-T003 | 2 | Closeout doc `docs/rebuild/08-ket-qua.md`: tổng kết đã làm gì, deviation, việc còn treo (internal/result, secrets) | docs/rebuild/** | TODO | — |
+
+> ⚠️ Dev 1 CÒN NỢ Sprint 05 (S05-D1-T001/T002/T003 = TODO). Phải hoàn tất trước khi dự án coi là "validated".
+
+---
+
 ### Tổng kết tiến độ
 - Sprint 00–04: **DONE 34 (+1 SKIP)** — hoàn tất 2026-06-20.
-- Sprint 05: **D2 DONE 3/3** ✅; D1: TODO 3 (Dev 1 tự cập nhật).
-- Tổng (Dev 2 scope): TODO 0 · DONE 37 · SKIP 1.
+- Sprint 05: **Dev 2 DONE 3/3** ✅ · **Dev 1 TODO 3** ❌ (chưa chạy — verify bằng repo).
+- Sprint 06: **Dev 2 TODO 3** (giao 2026-06-21).
+- Tổng: DONE 37 · SKIP 1 · TODO 6 (Dev 1: 3 nợ Sprint 05 · Dev 2: 3 Sprint 06).

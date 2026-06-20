@@ -104,6 +104,24 @@
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
 ## Sprint 05
+- [S05-D1-T001] DONE — Dev 1 — 2026-06-21
+  - Việc: Khôi phục BẢN GỐC `internal/result` (thay bản tái tạo a3d8210). Chủ dự án chỉ `D:\Github\HVR\`
+    → bản gốc đầy đủ ở `D:\Github\HVR\HVR\internal\result` (module HVR — repo tổ tiên của HVRIns).
+    Bản gốc tự-chứa (chỉ stdlib) → copy verbatim, không đổi module path. Thay 5 file tái tạo → 7 file gốc
+    + 2 test gốc.
+  - Bản tái tạo SAI (nay đã sửa): 3 filename constant (Die.txt/Unknown.txt/UnknownReg.txt thay vì
+    DieAfterVerify.txt/UnknownError_CheckLiveDie.txt/UnknownBlock.txt) — consumer hardcode tên gốc nên bản
+    tái tạo từng gây mismatch ẩn; `dispatch.go` STUB nil → khôi phục đầy đủ (15+ detail-file).
+  - Validate: workflow 5-lens (roundtrip/fe_docs/dispatch/filename/drift) → verdict restore-validated, 0 critical.
+    drift lens: internal/result byte-for-byte = HVR; call site giống hệt.
+  - Test: `go build .` ✅ · `go test ./internal/result/...` ✅ · `go test ./internal/app/...` ✅ ·
+    `go vet` ✅ · `wails build` ✅ (HVRIns.exe).
+  - File: internal/result/{counter,counters,dispatch,errorlog,format,store,writer}.go + {counter,store}_test.go
+    (xoá files.go tái tạo). Decision: D-012 (updated). Commit: <điền sau>.
+  - Ghi chú Dev 2: (a) docs/flows/02-luong-verify.md, add-facebook-reg-version.md còn tên file cũ → sync sang
+    Die.txt/Unknown.txt. (b) QA register/verify (S05-D2-T001) nếu chạy trước restore (bản tái tạo) thì output-file
+    behavior chưa được kiểm — nên re-check tên file + detail-file output khi tiện.
+
 - [S05-D2-T001] DONE — Dev 2 — 2026-06-21
   - Việc: QA acceptance Q1–Q12 + RG-1..5 + section 3 (cấu trúc repo)
   - Kết quả UI (xác nhận thủ công qua wails dev — người dùng xác nhận PASS):

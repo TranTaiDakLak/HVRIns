@@ -3,8 +3,8 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 04 — TẤT CẢ TASK D1 DONE**
-- Task hiện tại: Hoàn tất
+- Sprint đang làm: **Sprint 05** — S05-D1-T001 DONE, đang làm T002 (verifybase) → T003 (result_test)
+- Task hiện tại: S05-D1-T002
 - Blocker: —
 
 ## Baseline (S00-D1-T002 DONE)
@@ -17,6 +17,26 @@
 ---
 
 ## Nhật ký
+### Sprint 05
+- [S05-D1-T001] DONE 2026-06-21 — KHÔI PHỤC BẢN GỐC `internal/result` (thay bản tái tạo).
+  Chủ dự án chỉ `D:\Github\HVR\` → tìm thấy bản gốc đầy đủ ở `D:\Github\HVR\HVR\internal\result`
+  (module HVR — repo HVRIns tái cấu trúc ra; HVRIns3 là bản copy giống hệt). Bản gốc tự-chứa
+  (chỉ stdlib, KHÔNG import HVR/internal/...) → khôi phục verbatim, KHÔNG cần đổi module path.
+  Thay 5 file tái tạo (counter/dispatch/files/format/writer) bằng 7 file gốc
+  (counter/counters/dispatch/errorlog/format/store/writer) + 2 test gốc (counter_test, store_test).
+  Bản tái tạo SAI: (1) 3 filename constant — `DieAfterVerify.txt`→**`Die.txt`**,
+  `UnknownError_CheckLiveDie.txt`→**`Unknown.txt`**, `UnknownBlock.txt`→**`UnknownReg.txt`**
+  (consumer `app_register.go:4536` + `verify/web/verify.go:616-618` hardcode tên gốc → bản tái tạo
+  từng tạo bug ẩn); (2) `dispatch.go` STUB trả nil → khôi phục đầy đủ (15+ detail-file phân loại lỗi);
+  (3) thiếu `counters.go`/`errorlog.go`/`store.go`.
+  Validate (workflow 5-lens): byte-for-byte giống HVR (drift), consumer khớp (autoDetectAccount parse
+  theo pattern không theo vị trí), dispatch đủ constant, 0 critical.
+  Test: `go build .` ✅ · `go test ./internal/result/...` ✅ (test gốc, gồm TestFormatReg/FormatVerify/
+  UpsertUID) · `go test ./internal/app/...` ✅ · `go vet ./internal/result/... ./internal/app/...` ✅ ·
+  `wails build` ✅ (HVRIns.exe). File: internal/result/* (9 file). Decision: D-012 (updated).
+  Lưu ý cho Dev 2: docs/flows/*.md còn ghi tên file cũ (DieAfterVerify.txt/UnknownErrorCheckLiveDieApi.txt)
+  → cần sync sang Die.txt/Unknown.txt (vùng docs của Dev 2, KHÔNG sửa từ đây).
+
 ### Sprint 00
 - [S00-D1-T001] DONE 2026-06-20 — Đọc plan (00,02,04,06,07), check môi trường.
   Test: Go 1.26.4 ✅, Node v24.16.0 ✅, npm v11.13.0 ✅, Wails v2.12.0 ✅.
