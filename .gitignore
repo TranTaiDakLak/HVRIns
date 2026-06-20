@@ -119,3 +119,11 @@ frontend/wailsjs/runtime/runtime.js
 /createreq_*.txt
 /createresp_*.json
 /tmp_diff/
+
+# ── Secrets / runtime data (KHÔNG commit) ──
+Config/Cookie/
+test_accounts*.txt
+
+# ── Python build cache ──
+__pycache__/
+*.pyc
