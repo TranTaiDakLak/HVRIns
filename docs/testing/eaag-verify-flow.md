@@ -1,5 +1,9 @@
 # Test iOS Messenger Verification Flow với EAAG Token
 
+> ⚠️ **OUTDATED** (2026-06-20): Các đường dẫn file trong tài liệu này có thể tham chiếu đến
+> `E:/WEMAKE/...` hoặc các path tuyệt đối không còn tồn tại. Dùng làm tham khảo luồng logic,
+> không dùng làm hướng dẫn chạy trực tiếp.
+
 ## 📋 Mô tả
 
 Test script để verify flow iOS Messenger sử dụng **EAAG (User Token)** thay vì APP Token.
