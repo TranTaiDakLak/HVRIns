@@ -1,5 +1,7 @@
 @echo off
 REM Build script — inject version theo format vMM.DD.HH.mm
+REM Phải cd về gốc repo trước khi gọi wails build (wails cần go.mod ở thư mục hiện tại)
+cd /d "%~dp0\.."
 
 for /f "tokens=1-5 delims=:./- " %%a in ("%date% %time%") do (
     set MM=%%b
