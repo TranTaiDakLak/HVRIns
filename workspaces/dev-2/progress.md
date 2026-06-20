@@ -3,9 +3,10 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Hoàn tất** (Sprint 00–05 Dev 2 scope ALL DONE)
+- Sprint đang làm: **Sprint 07** (Dev 2 DONE 1/1 ✅; Dev 1 TODO 1)
 - Task hiện tại: —
-- Blocker: Không còn (Dev 1 hoàn thành S05-D1; Dev 2 DONE 3/3 Sprint 05)
+- Blocker: Không còn
+- **Dev 2 idle 03:05 — chờ PM giao việc**
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)
