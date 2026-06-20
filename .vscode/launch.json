@@ -9,7 +9,7 @@
             "program": "${workspaceFolder}",
             "buildFlags": "-tags dev",
             "env": {
-                "HVR_DATA_DIR": "${workspaceFolder}/build/bin"
+                "HVRINS_DATA_DIR": "${workspaceFolder}/build/bin"
             },
             "args": []
         }
