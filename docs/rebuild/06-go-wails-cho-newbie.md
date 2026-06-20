@@ -59,9 +59,9 @@ Và `app.ctx` (thường) thì **không** truy cập trực tiếp được từ
 👉 **Đây là lý do #1** khiến `main.go` **phải ở gốc** (cạnh `frontend/`). Nếu đưa vào `cmd/app/`,
 nó không thể `//go:embed ../../frontend/dist`.
 
-- Repo có đúng **4** chỗ dùng `go:embed`:
+- Repo có **5** chỗ dùng `go:embed` (đã xác nhận lại 2026-06-21):
   1. `main.go` → `frontend/dist`
-  2. `internal/cookie/store.go` → `embedded/`
+  2. `internal/cookie/store.go` → `embedded/` (2 directives)
   3. `internal/igcore/template.go` → `templates/`
   4. `internal/instagram/register/ios/iosmess/embed.go` → `templates/`
 - Nếu di chuyển 3 package internal đó, **phải mang theo thư mục asset** cạnh file `.go`, nếu không

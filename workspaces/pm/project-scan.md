@@ -26,7 +26,7 @@
 
 ## Điểm kỹ thuật then chốt
 - **207 blank-import** kích hoạt đăng ký platform (206 trong app.go, 1 trong app_reg_sxxx.go).
-- **4 go:embed**: main.go(frontend/dist) · internal/cookie/store.go(embedded/) · internal/igcore/template.go(templates/) · internal/instagram/register/ios/iosmess/embed.go(templates/).
+- **5 go:embed** (xác nhận 2026-06-21): main.go(frontend/dist) · internal/cookie/store.go(embedded/ — 2 directives) · internal/igcore/template.go(templates/) · internal/instagram/register/ios/iosmess/embed.go(templates/).
 - **Windows-only**: cpu/portrange không có bản `_other.go`.
 - **go:embed cấm `../`** → main.go phải ở gốc.
 - `os.Chdir(appDataDir())` ở main() là hành động đầu tiên → mọi path tương đối tính từ đó.

@@ -17,5 +17,5 @@
 | D-010 | 2026-06-20 | **SKIP cross-platform stubs** (S03-D1-T002) — app dứt khoát Windows-only | `internal/proxy/transport_pool.go` dùng `syscall.Handle` (Windows-only); `wails.json` target Windows; không có CI Linux cần `go build ./...` xanh. Không cần `cpu_other.go`/`portrange_other.go`. | Chốt |
 
 | D-011 | 2026-06-20 | **DEFER Pha 7** (internal/ deep mapping → domain/usecase/adapter) | 207 blank-import cross ~2900 file + circular risk settings/adapter → rủi ro cao, lợi ích thấp. D-004 xác nhận. Backlog item tạo trong current-state.md. | Chốt (DEFER) |
-
-> Quyết định để dev điền thêm khi thực thi — thêm dòng D-012...
+| D-012 | 2026-06-21 | **`internal/result` là package tái tạo** — ghi nhận để người sau biết | Package bị import nhưng chưa từng có trong repo gốc. Dev 1 dựng lại bằng suy luận (commit a3d8210). format.go/files.go/dispatch.go cần validate hành vi thật trước production. | Chốt (S05-D1-T001) |
+| D-013 | 2026-06-21 | **`cmd/` xoá hoàn toàn** (khác target doc giữ empty `cmd/app/`) | Target `02-cau-truc-dich.md` nói `cmd/app/` để trống; nhưng cmd/ đã dọn sạch từ S01 (17 scratch xoá) → xoá thư mục trống thừa. Độ lệch nhỏ, chấp nhận được. | Chốt (S05-D2-T003) |
