@@ -12,7 +12,9 @@
 - **Sprint 05:**
   - **Dev 2: DONE 3/3** ✅ (verify bằng repo): 30 FE test thật (useSelection 17 + useAccountsStore 13,
     commit 1d0f0c8); docs đồng bộ (5 go:embed, note internal/result — 2f9057d); QA acceptance chạy (5e5e107).
-  - **Dev 1: S05-D1-T001 DONE** ✅ (2026-06-21). T002/T003 đang làm tiếp.
+  - **Dev 1: DONE 3/3** ✅ (2026-06-21): T001 restore internal/result (f50bba2); T002 fix 16 test fail
+    → suite GREEN (verifybase gate RUN_LIVE_TESTS c559808 + fakeinfo skipIfNoConfigData/UA path fix 716d0d3);
+    T003 result_test.go khóa hành vi (e0b3031). `go test ./internal/...` GREEN · `wails build` PASS.
 
 ## ✅ GAP R-16 — ĐÃ ĐÓNG (S05-D1-T001, 2026-06-21)
 - **`internal/result` đã KHÔI PHỤC từ BẢN GỐC.** Chủ dự án chỉ `D:\Github\HVR\` → tìm thấy bản gốc đầy đủ
@@ -33,7 +35,8 @@
   có chủ đích) → phụ thuộc S05-D1-T001 + quyết định của chủ dự án.
 
 ## Sprint đang chạy
-**Sprint 05 (Dev 1 còn nợ) + Sprint 06 (Dev 2, vừa giao)**
+**Sprint 05 + 06: TẤT CẢ task Dev 1 + Dev 2 DONE.** Còn treo (ngoài scope dev): QA interactive GUI cần
+chủ dự án click tay; re-check output register/verify sau restore; rotate creds + rewrite git history (thủ công).
 
 ## Task đang làm / kế tiếp
 1. **Dev 1 — ƯU TIÊN:** hoàn tất Sprint 05 (S05-D1-T001 → T002 → T003). Đây là bottleneck của cả dự án.

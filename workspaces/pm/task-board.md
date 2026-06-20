@@ -60,7 +60,7 @@
 |---------|-----|-------|------------|--------|------|
 | S05-D1-T001 | 1 | ⭐ Validate/khôi phục `internal/result` (format/filename/dispatch suy luận) — hỏi source gốc trước; nếu không có thì đối chiếu phía đọc + khôi phục dispatch hoặc ghi gap | internal/result/**, decision-log | DONE | BẢN GỐC ở D:\Github\HVR\HVR → khôi phục verbatim; sửa 3 filename sai + dispatch stub→full; byte-for-byte=HVR; go build/test/vet/wails build PASS; D-012 ✅ |
 | S05-D1-T002 | 1 | Xử lý test fail verifybase (xác nhận live-state → t.Skip, hoặc fix) | internal/instagram/verify/** | DONE | gate sau RUN_LIVE_TESTS (c559808); go test verifybase PASS không cần live · **PM REVIEW PASS** ✅ |
-| S05-D1-T003 | 1 | Unit test khóa hành vi internal/result (FormatReg/Verify, UpsertUID, ParseEmailMeta) | internal/result/result_test.go | TODO | — |
+| S05-D1-T003 | 1 | Unit test khóa hành vi internal/result (FormatReg/Verify, UpsertUID, ParseEmailMeta) | internal/result/result_test.go | DONE | result_test.go: ParseEmailMeta (gap) + round-trip + field-order lock + UpsertUID; go test ./internal/... GREEN; wails build PASS (e0b3031) |
 | S05-D2-T001 | 2 | Chạy QA acceptance Q1–Q12 + RG-1..5 qua wails dev (CHỜ S05-D1-T001) | pm/completed-log.md | DONE | Q1–Q12 + RG-1..5 PASS; section 3 automated PASS ✅ |
 | S05-D2-T002 | 2 | Viết frontend test thật (useAccountsStore + 1 composable) — bỏ passWithNoTests | frontend tests | DONE | 30 tests (17 useSelection + 13 useAccountsStore) PASS ✅ (1d0f0c8) |
 | S05-D2-T003 | 2 | Audit cấu trúc cuối + đồng bộ docs (4→5 go:embed, note internal/result) + xác nhận no-secret | docs/**, pm/project-scan.md | DONE | docs updated; secrets clean; D-012/D-013 ghi decision-log ✅ (2f9057d) |
@@ -78,6 +78,6 @@
 
 ### Tổng kết tiến độ
 - Sprint 00–04: **DONE 34 (+1 SKIP)** — hoàn tất 2026-06-20.
-- Sprint 05: **Dev 2 DONE 3/3** ✅ · Dev 1: T001 DONE, T002/T003 cần verify.
+- Sprint 05: **Dev 2 DONE 3/3** ✅ · **Dev 1 DONE 3/3** ✅ (T001 restore, T002 verifybase gate, T003 result_test) — 2026-06-21.
 - Sprint 06: **Dev 2 DONE 3/3** ✅ — hoàn tất 2026-06-21.
-- **Dev 2 scope: TẤT CẢ DONE** (37 DONE + 1 SKIP). Dự án chờ Dev 1 hoàn tất S05-D1-T002/T003.
+- **TẤT CẢ task Dev 1 + Dev 2: DONE** (40 DONE + 1 SKIP). `go test ./internal/...` GREEN, `wails build` PASS.

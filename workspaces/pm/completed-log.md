@@ -124,6 +124,26 @@
   - Commit: 69bd4b7
 
 ## Sprint 05
+- [S05-D1-T003] DONE — Dev 1 — 2026-06-21
+  - Việc: Viết internal/result/result_test.go khóa hành vi. Test gốc (store_test.go) đã có FormatReg/
+    FormatVerify/UpsertUID; file này bổ sung (tên riêng) khóa GAP + hợp đồng chéo:
+    TestParseEmailMetaFromLine (gap chưa có test gốc), TestFormatReg_EmailMetaRoundTrip (writer↔reader,
+    meta chứa "|"/unicode), TestFormatReg/Verify_FieldOrderLock (vị trí field tường minh, timestamp cố định),
+    TestUpsertUID_BehaviorLock (t.TempDir: UID mới append, UID trùng replace).
+  - Test: go test ./internal/result/... PASS; go vet/go build .; go test ./internal/... GREEN; wails build PASS.
+  - File: internal/result/result_test.go (200 dòng, git add -f vì result/ gitignore). Commit: e0b3031.
+
+- [S05-D1-T002] DONE — Dev 1 — 2026-06-21
+  - Việc: Xử lý 16 test Go fail. (1) verifybase: 2 test live-network (livedie_test, livedie_combined) gọi
+    FB Graph API thật với token hết-hạn → non-deterministic. Thay guard `testing.Short()` (ngược logic) bằng
+    opt-in env `RUN_LIVE_TESTS=1` + lý do skip rõ. (2) fakeinfo: 15 test khẳng định "full dataset" fail vì
+    data Config/* runtime gitignored vắng lúc `go test` (CWD=package dir). Thêm helper skipIfNoConfigData
+    (testdata_guard_test.go) skip khi Config vắng — áp 14 test data-dependent. (3) Bonus FIX: TestUAOverridePath
+    là test cũ lệch code (UAKindRequest đổi Request_UG.txt→PC_UG.txt 2026-05) → sửa expected.
+  - Test: go test ./internal/... GREEN (live + data test skip có lý do; còn lại PASS). PM REVIEW PASS.
+  - File: verify/verifybase/{livedie_test,livedie_combined_test}.go (c559808);
+    fakeinfo/{testdata_guard_test,phonecode_test,ua_pools_test,useragent_test}.go (716d0d3).
+
 - [S05-D1-T001] DONE — Dev 1 — 2026-06-21
   - Việc: Khôi phục BẢN GỐC `internal/result` (thay bản tái tạo a3d8210). Chủ dự án chỉ `D:\Github\HVR\`
     → bản gốc đầy đủ ở `D:\Github\HVR\HVR\internal\result` (module HVR — repo tổ tiên của HVRIns).
@@ -137,7 +157,7 @@
   - Test: `go build .` ✅ · `go test ./internal/result/...` ✅ · `go test ./internal/app/...` ✅ ·
     `go vet` ✅ · `wails build` ✅ (HVRIns.exe).
   - File: internal/result/{counter,counters,dispatch,errorlog,format,store,writer}.go + {counter,store}_test.go
-    (xoá files.go tái tạo). Decision: D-012 (updated). Commit: <điền sau>.
+    (xoá files.go tái tạo). Decision: D-012 (updated). Commit: f50bba2.
   - Ghi chú Dev 2: (a) docs/flows/02-luong-verify.md, add-facebook-reg-version.md còn tên file cũ → sync sang
     Die.txt/Unknown.txt. (b) QA register/verify (S05-D2-T001) nếu chạy trước restore (bản tái tạo) thì output-file
     behavior chưa được kiểm — nên re-check tên file + detail-file output khi tiện.
