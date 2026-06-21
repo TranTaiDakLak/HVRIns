@@ -27,8 +27,8 @@ function quitClick() {
 function onQuitConfirm() {
   // User confirm → gọi backend RequestQuit để set flag + close
   const w = window as any
-  if (typeof w?.go?.main?.App?.RequestQuit === 'function') {
-    w.go.main.App.RequestQuit()
+  if (typeof w?.go?.app?.App?.RequestQuit === 'function') {
+    w.go.app.App.RequestQuit()
   } else {
     // Fallback: gọi runtime.Quit() lần nữa (flag chưa set → sẽ block lại).
     // Trường hợp này chỉ xảy ra trong dev khi Wails bindings chưa regen.

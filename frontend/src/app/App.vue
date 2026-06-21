@@ -59,7 +59,7 @@ let unsubUIReload: (() => void) | null = null
 // emitter (300ms → 2s) khi hidden, tiết kiệm IPC + JSON serialize CPU.
 function notifyVisibility() {
   const w = window as any
-  const fn = w?.go?.main?.App?.NotifyVisibilityChange
+  const fn = w?.go?.app?.App?.NotifyVisibilityChange
   if (typeof fn !== 'function') return
   try { fn(document.hidden) } catch { /* ignore */ }
 }

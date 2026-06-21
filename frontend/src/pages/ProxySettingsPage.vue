@@ -59,13 +59,13 @@ watch([useProxyTempmail, useProxyRentmail], () => {
 
 async function loadProxyMailList(kind: 'tempmail' | 'gmail'): Promise<string> {
   try {
-    const load = (window as any)?.go?.main?.App?.LoadProxyList
+    const load = (window as any)?.go?.app?.App?.LoadProxyList
     if (typeof load === 'function') return await load(kind)
   } catch { /* ignore */ }
   return ''
 }
 async function saveProxyMailList(kind: 'tempmail' | 'gmail', content: string) {
-  const save = (window as any)?.go?.main?.App?.SaveProxyList
+  const save = (window as any)?.go?.app?.App?.SaveProxyList
   if (typeof save !== 'function') return
   try {
     const result = await save(kind, content)
@@ -93,7 +93,7 @@ async function checkCurrentIp() {
   checkingIp.value = true
   currentIp.value = ''
   try {
-    const checkViaProxy = (window as any)?.go?.main?.App?.CheckCurrentIPViaProxy
+    const checkViaProxy = (window as any)?.go?.app?.App?.CheckCurrentIPViaProxy
     if (typeof checkViaProxy === 'function') {
       const result = await checkViaProxy()
       currentIp.value = result || 'Không xác định'

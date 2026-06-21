@@ -25,7 +25,7 @@ const verRunning = ref<boolean | null>(null)
 let timer: number | null = null
 
 async function fetchStats() {
-  const api = (window as any)?.go?.main?.App
+  const api = (window as any)?.go?.app?.App
   if (!api) { available.value = false; return }
   available.value = true
   loading.value = true

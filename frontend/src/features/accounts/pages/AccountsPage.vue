@@ -552,7 +552,7 @@ onMounted(async () => {
   // Ignore value save trong interaction.json — backend cũng force dùng default.
   // User không cần chọn thư mục — app tự quản lý như C# VerifyCloneVIP.
   try {
-    const getDefault = (window as any)?.go?.main?.App?.GetDefaultResultPath
+    const getDefault = (window as any)?.go?.app?.App?.GetDefaultResultPath
     if (typeof getDefault === 'function') {
       resultFolderPath.value = await getDefault() ?? ''
     }
@@ -637,19 +637,19 @@ onMounted(async () => {
     let isVerRunning = false
     let isRegStopping = false
     let isVerStopping = false
-    if (typeof w?.go?.main?.App?.GetRunStatus === 'function') {
-      const s = await w.go.main.App.GetRunStatus()
+    if (typeof w?.go?.app?.App?.GetRunStatus === 'function') {
+      const s = await w.go.app.App.GetRunStatus()
       isRegRunning = !!s?.registerRunning
       isVerRunning = !!s?.verifyRunning
       isRegStopping = !!s?.registerStopping
       isVerStopping = !!s?.verifyStopping
     } else {
       // Fallback (Wails binding chưa regen)
-      if (typeof w?.go?.main?.App?.IsRegisterRunning === 'function') {
-        isRegRunning = Boolean(await w.go.main.App.IsRegisterRunning())
+      if (typeof w?.go?.app?.App?.IsRegisterRunning === 'function') {
+        isRegRunning = Boolean(await w.go.app.App.IsRegisterRunning())
       }
-      if (typeof w?.go?.main?.App?.IsVerifyRunning === 'function') {
-        isVerRunning = Boolean(await w.go.main.App.IsVerifyRunning())
+      if (typeof w?.go?.app?.App?.IsVerifyRunning === 'function') {
+        isVerRunning = Boolean(await w.go.app.App.IsVerifyRunning())
       }
     }
     // Reflect stopping state vào UI ngay (toolbar disable Start, hiện "Đang dừng...")
@@ -1138,7 +1138,7 @@ function handleContextMenu(id: number, event: MouseEvent) {
 // ACTIONS
 // =====================================================
 async function handleOpenConfigFolder() {
-  const fn = (window as any)?.go?.main?.App?.OpenConfigFolder
+  const fn = (window as any)?.go?.app?.App?.OpenConfigFolder
   if (!fn) return
   const err = await fn()
   if (err) appStore.notify('error', err)
@@ -1183,7 +1183,7 @@ async function handleOpenResultFolder() {
   // Vẫn chưa có config → fallback về default path (backend auto-tạo KetQua/ hoặc Documents/KetQua/).
   // Không hiện dialog — user không cần chọn, app luôn biết mở về đâu.
   try {
-    const getDefault = (window as any)?.go?.main?.App?.GetDefaultResultPath
+    const getDefault = (window as any)?.go?.app?.App?.GetDefaultResultPath
     if (typeof getDefault === 'function') {
       const defaultPath = await getDefault()
       if (defaultPath) {

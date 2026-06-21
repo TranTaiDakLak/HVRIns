@@ -82,16 +82,16 @@ export const useUploadLogStore = defineStore('uploadLog', () => {
     logs.value = []
     const w = window as any
     // Gọi backend để clear file luôn (sync UI ↔ disk)
-    if (typeof w?.go?.main?.App?.ClearUploadLog === 'function') {
-      try { w.go.main.App.ClearUploadLog() } catch { /* ignore */ }
+    if (typeof w?.go?.app?.App?.ClearUploadLog === 'function') {
+      try { w.go.app.App.ClearUploadLog() } catch { /* ignore */ }
     }
   }
 
   async function refreshStats() {
     const w = window as any
-    if (typeof w?.go?.main?.App?.GetUploadStats !== 'function') return
+    if (typeof w?.go?.app?.App?.GetUploadStats !== 'function') return
     try {
-      const s = await w.go.main.App.GetUploadStats()
+      const s = await w.go.app.App.GetUploadStats()
       if (s) stats.value = { ...EMPTY_STATS, ...s }
     } catch { /* ignore */ }
   }

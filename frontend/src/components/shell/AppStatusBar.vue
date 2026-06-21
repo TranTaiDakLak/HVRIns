@@ -25,8 +25,8 @@ async function softCleanup() {
     window.dispatchEvent(new CustomEvent('app:soft-cleanup'))
     await nextTick()
     const w = window as any
-    if (typeof w?.go?.main?.App?.ForceMemoryCleanup === 'function') {
-      const r = await w.go.main.App.ForceMemoryCleanup()
+    if (typeof w?.go?.app?.App?.ForceMemoryCleanup === 'function') {
+      const r = await w.go.app.App.ForceMemoryCleanup()
       appStore.notify('success', `Đã dọn ${r.iosSessionsClosed + r.androidSessionsClosed} session, giải phóng ${r.freedMB} MB`)
     } else {
       appStore.notify('success', 'Đã dọn buffer giao diện')

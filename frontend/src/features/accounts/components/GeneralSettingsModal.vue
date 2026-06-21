@@ -108,14 +108,14 @@ async function browseFolderSource() {
 async function browseFileSource() {
   try {
     const w = window as any
-    const pickFn = w?.go?.main?.App?.OpenFileDialogPath
+    const pickFn = w?.go?.app?.App?.OpenFileDialogPath
     if (typeof pickFn !== 'function') return
     const path = await pickFn()
     if (!path) return
     form.value = { ...form.value, accountSourcePath: path, accountSource: 'file' as any }
     // LoadAccountsFromFile — backend clear store + parse file + SaveSettings('file' + path).
     // Backend tự persist accountSource='file' vào general.json trước khi return.
-    const loadFn = w?.go?.main?.App?.LoadAccountsFromFile
+    const loadFn = w?.go?.app?.App?.LoadAccountsFromFile
     if (typeof loadFn === 'function') {
       try {
         const result = await loadFn(path)

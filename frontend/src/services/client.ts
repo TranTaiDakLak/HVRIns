@@ -11,7 +11,7 @@ function isWails(): boolean {
   try {
     return typeof window !== 'undefined' &&
       (window as any)['go'] !== undefined &&
-      (window as any)['go']['main'] !== undefined
+      (window as any)['go']['app'] !== undefined
   } catch {
     return false
   }

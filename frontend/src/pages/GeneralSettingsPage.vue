@@ -120,7 +120,7 @@ async function handleBrowseAccountFile() {
   try {
     // OpenFileDialogPath — Go binding, mở file picker + trả path (.txt)
     const w = window as any
-    const fn = w?.go?.main?.App?.OpenFileDialogPath
+    const fn = w?.go?.app?.App?.OpenFileDialogPath
     if (typeof fn !== 'function') {
       appStore.notify('error', 'File picker chưa được hỗ trợ bởi backend')
       return
@@ -131,7 +131,7 @@ async function handleBrowseAccountFile() {
       accountForm.value.accountSource = 'file'
       accountForm.value.accountSourcePath = path
       // Auto trigger load accounts từ file vào store + emit event → AccountsPage refresh grid.
-      const loadFn = w?.go?.main?.App?.LoadAccountsFromFile
+      const loadFn = w?.go?.app?.App?.LoadAccountsFromFile
       if (typeof loadFn === 'function') {
         try {
           const result = await loadFn(path)

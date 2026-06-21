@@ -59,7 +59,7 @@ onMounted(async () => {
     }
     // FORCE: Result folder luôn là default (./result/ cạnh exe) — port C# hardcode path.
     // Bỏ qua value user đã save trong interaction.json để tránh trỏ về path cũ không mong muốn.
-    const getDefault = (window as any)?.go?.main?.App?.GetDefaultResultPath
+    const getDefault = (window as any)?.go?.app?.App?.GetDefaultResultPath
     if (typeof getDefault === 'function') {
       const defaultPath = await getDefault()
       if (defaultPath) form.value.resultFolderPath = defaultPath
@@ -67,7 +67,7 @@ onMounted(async () => {
 
     // Cookie Initial: luôn dùng file mặc định cạnh app, không cho chọn file riêng.
     // Backend GetDefaultCookiePaths() auto-tạo file rỗng để user paste datr.
-    const getCookiePaths = (window as any)?.go?.main?.App?.GetDefaultCookiePaths
+    const getCookiePaths = (window as any)?.go?.app?.App?.GetDefaultCookiePaths
     if (typeof getCookiePaths === 'function') {
       const paths = await getCookiePaths()
       if (paths?.initial) form.value.cookieInitialFile = paths.initial
@@ -80,7 +80,7 @@ onMounted(async () => {
     }
 
     // Load proxy lists (TempMail + Gmail) từ Config/Proxy/*.txt.
-    const loadProxy = (window as any)?.go?.main?.App?.LoadProxyList
+    const loadProxy = (window as any)?.go?.app?.App?.LoadProxyList
     if (typeof loadProxy === 'function') {
       try {
         proxyTempmailList.value = await loadProxy('tempmail')
@@ -90,7 +90,7 @@ onMounted(async () => {
 
     // Sync VerifySourceFolderPath ↔ General.AccountSourcePath — 2 field là 1 nguồn duy nhất.
     if (!form.value.verifySourceFolderPath || !form.value.verifySourceFolderPath.trim()) {
-      const getAccountSource = (window as any)?.go?.main?.App?.GetAccountSourceFolder
+      const getAccountSource = (window as any)?.go?.app?.App?.GetAccountSourceFolder
       if (typeof getAccountSource === 'function') {
         try {
           const generalPath = await getAccountSource()
@@ -185,7 +185,7 @@ onBeforeUnmount(() => {
   _datrPoolTimer = null
 })
 async function saveProxyList(kind: 'tempmail' | 'gmail', content: string) {
-  const save = (window as any)?.go?.main?.App?.SaveProxyList
+  const save = (window as any)?.go?.app?.App?.SaveProxyList
   if (typeof save !== 'function') {
     appStore.notify('error', 'Backend chưa sẵn sàng')
     return
@@ -307,7 +307,7 @@ async function handleBrowseVerifySourceFolder() {
     if (!path) return
     form.value.verifySourceFolderPath = path
     // Sync vào Cài đặt chung > Nguồn tài khoản — 2 field này là 1 nguồn duy nhất.
-    const setAccountSource = (window as any)?.go?.main?.App?.SetAccountSourceFolder
+    const setAccountSource = (window as any)?.go?.app?.App?.SetAccountSourceFolder
     if (typeof setAccountSource === 'function') {
       try { await setAccountSource(path) } catch { /* ignore */ }
     }
@@ -324,7 +324,7 @@ async function handleBrowseRegisterFolder() {
 
 
 async function openCookieInitialFile() {
-  const fn = (window as any)?.go?.main?.App?.OpenCookieInitialFile
+  const fn = (window as any)?.go?.app?.App?.OpenCookieInitialFile
   if (typeof fn !== 'function') return
   try {
     const result = await fn('')
@@ -364,7 +364,7 @@ const cookieInitialFileStatus = ref('')
 const cookieInitialResolvedPath = ref('')
 
 async function loadCookieInitialStatus() {
-  const fn = (window as any)?.go?.main?.App?.GetCookieInitialStatus
+  const fn = (window as any)?.go?.app?.App?.GetCookieInitialStatus
   if (typeof fn !== 'function') return
   try {
     const status = await fn(form.value.cookieInitialFile)
@@ -382,8 +382,8 @@ const poolFileSaveCount = ref(0)
 let _datrPoolTimer: ReturnType<typeof setInterval> | null = null
 
 async function loadDatrPoolCount() {
-  const fnPool = (window as any)?.go?.main?.App?.GetDatrPoolSize
-  const fnSaved = (window as any)?.go?.main?.App?.GetPoolFileSaveCount
+  const fnPool = (window as any)?.go?.app?.App?.GetDatrPoolSize
+  const fnSaved = (window as any)?.go?.app?.App?.GetPoolFileSaveCount
   try {
     if (typeof fnPool === 'function') datrPoolCount.value = Number(await fnPool())
     if (typeof fnSaved === 'function') poolFileSaveCount.value = Number(await fnSaved())
@@ -416,7 +416,7 @@ const activeUaPoolMeta = computed(() => UA_POOLS.find(p => p.key === form.value.
 const uaCounts = ref<Record<string, number>>({ android: 0, iphone: 0, request: 0, webchrome: 0, android_mess: 0, ios_mess: 0 })
 
 async function loadUACounts() {
-  const fn = (window as any)?.go?.main?.App?.GetUAPoolsStatus
+  const fn = (window as any)?.go?.app?.App?.GetUAPoolsStatus
   if (typeof fn !== 'function') return
   try {
     const statuses: Array<{ kind: string; count: number }> = await fn()
@@ -428,7 +428,7 @@ async function loadUACounts() {
 }
 
 async function openUAFile() {
-  const fn = (window as any)?.go?.main?.App?.OpenUAFileInEditor
+  const fn = (window as any)?.go?.app?.App?.OpenUAFileInEditor
   if (typeof fn !== 'function') return
   await fn(form.value.uaPoolKey)
 }
