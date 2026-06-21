@@ -94,7 +94,22 @@
 
 ---
 
+## Sprint 09 — TEST THẬT CẨN THẬN (runtime behavior, giao 2026-06-21 theo yêu cầu user)
+| Task ID | Dev | Mô tả | File chính | Status | Test |
+|---------|-----|-------|------------|--------|------|
+| S09-D1-T001 | 1 | Integration test GỌI THẬT App method (không cần network) với temp data dir (HVRINS_DATA_DIR=t.TempDir + SetVersion): SaveSettings↔LoadSettings round-trip, ImportAccounts→ListAccounts→DeleteAccounts, CreateProfile→ListProfiles→DeleteProfile, LoadProxyList↔SaveProxyList, result writing, GetCookieInitialStatus. Verify HÀNH VI (đọc lại đúng dữ liệu), không chỉ existence | internal/app/integration_test.go | DONE | 5 nhóm test (Accounts CRUD+filter+status · Proxy RT · Settings RT · Profile lifecycle · BasicGetters); 8 TestIntegration_* PASS; go test ./internal/... GREEN ✅ |
+| S09-D2-T001 | 2 | Component/interaction test (vitest+@vue/test-utils): mount page/nút THẬT, fire click, mock window.go.app.App.*, assert gọi đúng method + ĐÚNG ARGS + xử lý kết quả/lỗi. Cover tối thiểu: AppTitleBar (nút thoát→RequestQuit), ProxySettingsPage (load/save proxy), GeneralSettings (lưu), AccountsPage toolbar (nút chính), file dialog (OpenFileDialogPath/LoadAccountsFromFile) | frontend/src/**/*.test.ts | DONE | 121/121 PASS |
+
+> Mục tiêu: test ở mức RUNTIME (click→handler→binding gọi đúng; method backend chạy đúng hành vi) —
+> xa hơn static binding-coverage. GUI render + OS dialog thật vẫn cần user/e2e (ngoài phạm vi này).
+
+---
+
 ### Tổng kết tiến độ
-- Sprint 00–07: **DONE 42 (+1 SKIP)** + Hotfix #1 (go.main→go.app, commit 4373035).
-- Sprint 08 (từ Hotfix #1): Dev 1 DONE 1/1 ✅ · Dev 2 DONE 1/1 ✅ — **Sprint 08 HOÀN TẤT**.
-- Tổng: DONE 44 · SKIP 1 · TODO 0.
+- Sprint 00–08: **DONE 44 (+1 SKIP)** + Hotfix #1.
+- Sprint 09 (test thật, theo yêu cầu user): **DONE 2** (D1 integration Go · D2 component/click FE).
+- Tổng: **DONE 46** · SKIP 1 · TODO 0.
+
+> ✅ **PM REVIEW Sprint 08 (loop #8, 2026-06-21):** PASS. binding-coverage 110/110 — **25 method FE gọi
+> đều tồn tại trong go/app binding**; go vet PASS; regression go.main SẠCH. Lớp "nút chết" tĩnh ĐÃ ĐÓNG.
+> Còn lại: runtime/logic chỉ click-test GUI thật (user) hoặc e2e harness mới bắt được. → Audit #3.

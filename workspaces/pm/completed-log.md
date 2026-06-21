@@ -103,6 +103,13 @@
   - File: frontend/src/features/**, frontend/package.json, frontend/vitest.config.ts, frontend/src/app/router/routes.ts
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
+## Sprint 09
+- [S09-D2-T001] DONE — Dev 2 — 2026-06-21
+  - Việc: Viết `interaction.test.ts`: mount AppTitleBar/ProxySettingsPage/GeneralSettingsPage với shallowMount+vi.mock; fire click nút thật; assert binding calls + đúng args + nhánh lỗi
+  - Test: 121/121 PASS ✅ (từ 110→121, thêm 11 tests); npm build PASS ✅
+  - File: frontend/src/pages/interaction.test.ts (mới)
+  - Ghi chú: T1-T4 AppTitleBar (X→Quit, EventsOn, onQuitConfirm→RequestQuit, no-runtime); T5-T7 ProxySettingsPage (checkIP btn, render IP, error); T8-T11 GeneralSettingsPage file browse (button trong v-else-if='file', cần setValue radio trước; OpenFileDialogPath+LoadAccountsFromFile; empty path; throw)
+
 ## Sprint 08
 - [S08-D1-T001] DONE — Dev 1 — 2026-06-21
   - Việc: Regenerate & verify Wails bindings (wails build → "Generating bindings: Done.")
