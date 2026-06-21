@@ -104,6 +104,12 @@
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
 ## Sprint 08
+- [S08-D1-T001] DONE — Dev 1 — 2026-06-21
+  - Việc: Regenerate & verify Wails bindings (wails build → "Generating bindings: Done.")
+  - Test: wails build PASS ✅; go vet ./internal/app/... PASS ✅; 0 file binding thay đổi (đã đồng bộ)
+  - File: — (bindings không thay đổi → không commit)
+  - Ghi chú: 91 Go exported method; Startup bị Wails exclude đúng (lifecycle hook nhận context.Context). App.d.ts = 90 method = 100% khớp. `wails generate module` không chạy trực tiếp được (cần bin/dev/wails.json); dùng wails build thay.
+
 - [S08-D2-T001] DONE — Dev 2 — 2026-06-21
   - Việc: Viết `binding-coverage.test.ts`: parse App.d.ts (90 methods) → quét 25 call site go.app.App.X + 15 wails service imports → assert 0 nút chết
   - Test: 110/110 PASS ✅ (từ 102→110, thêm 4 tests); npm build PASS ✅

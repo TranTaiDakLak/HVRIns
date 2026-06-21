@@ -86,7 +86,7 @@
 ## Sprint 08 — Chống "nút chết": cross-check FE↔binding (giao 2026-06-21, từ Hotfix #1)
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S08-D1-T001 | 1 | `wails generate module` regenerate bindings; xác nhận `frontend/wailsjs/go/app/App.d.ts` khớp 100% method exported của App; xuất danh sách method; wails build PASS; commit nếu bindings đổi | wailsjs/go/app/**, internal/app | TODO | — |
+| S08-D1-T001 | 1 | `wails generate module` regenerate bindings; xác nhận `frontend/wailsjs/go/app/App.d.ts` khớp 100% method exported của App; xuất danh sách method; wails build PASS; commit nếu bindings đổi | wailsjs/go/app/**, internal/app | DONE | wails build PASS (regenerated: bindings đã đồng bộ — không có thay đổi); 90 method bind = Go exported trừ Startup (lifecycle ctx); go vet PASS ✅ |
 | S08-D2-T001 | 2 | Viết `binding-coverage.test.ts`: parse go/app/App.d.ts → set method; quét MỌI call site `go.app.App.X` + service wails calls trong frontend/src; assert mọi method FE gọi ĐỀU tồn tại trong bindings. FIX/báo cáo method FE gọi mà thiếu (typo/sai tên/sai struct = nút chết) | frontend/src/** | DONE | 110/110 PASS |
 
 > ⚠️ Mục tiêu: bắt HẾT các "nút chết" còn lại (gọi method không tồn tại trong binding) mà không cần click GUI.
@@ -96,5 +96,5 @@
 
 ### Tổng kết tiến độ
 - Sprint 00–07: **DONE 42 (+1 SKIP)** + Hotfix #1 (go.main→go.app, commit 4373035).
-- Sprint 08 (từ Hotfix #1): **TODO 2** (D1: 1 regenerate/verify bindings · D2: 1 cross-check + test).
-- Tổng: DONE 42 · SKIP 1 · TODO 2.
+- Sprint 08 (từ Hotfix #1): Dev 1 DONE 1/1 ✅ · Dev 2 DONE 1/1 ✅ — **Sprint 08 HOÀN TẤT**.
+- Tổng: DONE 44 · SKIP 1 · TODO 0.

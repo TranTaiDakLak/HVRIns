@@ -3,10 +3,10 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 07 — S07-D1-T001 DONE**
-- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: DONE 42, TODO 0)
+- Sprint đang làm: **Sprint 08 — S08-D1-T001 DONE**
+- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: DONE 44, TODO 0)
 - Blocker: —
-- Trạng thái suite: `go test ./internal/...` GREEN · `go vet ./internal/...` PASS · 207 platform giữ nguyên
+- Trạng thái suite: `wails build` PASS · `go vet ./internal/app/...` PASS · bindings 90 method đồng bộ
 
 ## Baseline (S00-D1-T002 DONE)
 - wails build: **PASS** (commit a3d8210, HVRIns.exe 48.8s)
@@ -18,6 +18,23 @@
 ---
 
 ## Nhật ký
+### Sprint 08
+- [S08-D1-T001] DONE 2026-06-21 — Regenerate & verify Wails bindings.
+  wails generate module yêu cầu bin/dev/wails.json (chỉ có trong wails dev) → dùng wails build thay.
+  wails build PASS (23s) → "Generating bindings: Done." — bindings regenerated, 0 file thay đổi (đã sync).
+  So sánh: 91 Go exported method; Startup bị exclude đúng (lifecycle ctx.Context, không bind được).
+  App.d.ts: 90 method = khớp 100%. go vet PASS. Không cần commit (bindings không đổi).
+  Danh sách 90 method ghi trong completed-log.
+
+### Sprint 07 — Idle
+- Dev 1 idle 08:52 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+- Dev 1 idle 08:47 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+- Dev 1 idle 08:42 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+- Dev 1 idle 08:37 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+- Dev 1 idle 08:32 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+- Dev 1 idle 08:27 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+- Dev 1 idle 08:22 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)
+
 ### Sprint 07
 - [S07-D1-T001] DONE 2026-06-21 — White-box test helper thuần internal/app.
   Thêm internal/app/helpers_test.go (60 test case mới, package app):
