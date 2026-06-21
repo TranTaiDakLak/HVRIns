@@ -4,6 +4,11 @@
 > đọc lại chi tiết task. Thêm dòng mới lên ĐẦU mỗi mục sprint.
 
 ## Sprint 10
+- [S10-D2-T001] DONE — Dev 2 — 2026-06-21
+  - Việc: Viết `s10-interaction.test.ts` — AppStatusBar (ForceMemoryCleanup, cleaning guard, no-binding); InteractionSetupPage (OpenCookieInitialFile+args, OpenUAFileInEditor+uaPoolKey, GetDatrPoolSize/GetPoolFileSaveCount/GetUAPoolsStatus on mount); AccountsPage (GetRunStatus on mount, open-config-folder→OpenConfigFolder, error path)
+  - Test: 134/134 PASS ✅ (từ 121→134); npm build PASS ✅; File: frontend/src/pages/s10-interaction.test.ts
+  - Ghi chú: useMarqueeSelect mock phải có state.box = {visible:false,...}; T3 test double-click guard thay vì throw (throw=unhandled rejection)
+
 - [S10-D1-T001] DONE — Dev 1 — 2026-06-21
   - Việc: 6 nhóm integration test bổ sung (tổng 14 TestIntegration_* trong integration_test.go).
     RunStatus: IsRegisterRunning/IsVerifyRunning/GetRunStatus = false (trạng thái mặc định chưa chạy).

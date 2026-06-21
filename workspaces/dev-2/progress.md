@@ -6,7 +6,7 @@
 - Sprint đang làm: **Sprint 09** (Dev 2 DONE 1/1 ✅; Dev 1 TODO 1)
 - Task hiện tại: —
 - Blocker: Không còn
-- **S09-D2-T001 DONE 09:35 — interaction.test.ts; 11 tests; AppTitleBar+ProxySettings+GeneralSettings; 121/121 PASS**
+- **S10-D2-T001 DONE 09:48 — s10-interaction.test.ts; 13 tests; AppStatusBar+InteractionSetupPage+AccountsPage; 134/134 PASS**
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)

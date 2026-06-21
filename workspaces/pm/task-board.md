@@ -109,7 +109,7 @@
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
 | S10-D1-T001 | 1 | Integration test thêm cho App method sau các nút CHƯA test runtime: GetCookieInitialStatus(chi tiết)/GetDatrPoolSize/GetPoolFileSaveCount/GetUAPoolsStatus/GetDefaultUACounts/SetAccountSourceFolder↔GetAccountSourceFolder/GetRunStatus+IsRegisterRunning+IsVerifyRunning(trạng thái mặc định). Bỏ method cần network/ctx (ghi lý do) | internal/app/integration_test.go | DONE | 6 nhóm mới (RunStatus · DatrPool · UAPools · CookiePaths · CookieStatus chi tiết · AccountSourceFolder RT); 14 TestIntegration_* PASS; go test GREEN ✅ |
-| S10-D2-T001 | 2 | Interaction test cho cụm nút lớn còn lại: InteractionSetupPage (cookie init/datr pool/UA pools/load-save proxy/account source), AccountsPage run-controls (GetRunStatus/IsRegisterRunning), AppStatusBar (ForceMemoryCleanup). Mỗi nút: click→assert binding gọi đúng+args+nhánh lỗi | frontend/src/**/*.test.ts | TODO | — |
+| S10-D2-T001 | 2 | Interaction test cho cụm nút lớn còn lại: InteractionSetupPage (cookie init/datr pool/UA pools/load-save proxy/account source), AccountsPage run-controls (GetRunStatus/IsRegisterRunning), AppStatusBar (ForceMemoryCleanup). Mỗi nút: click→assert binding gọi đúng+args+nhánh lỗi | frontend/src/**/*.test.ts | DONE | 134/134 PASS |
 
 > Sau Sprint 10: coi như đã phủ runtime test cho HẦU HẾT nút user-facing. Mở rộng thêm là tùy chọn.
 
