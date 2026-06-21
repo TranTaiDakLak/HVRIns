@@ -103,6 +103,13 @@
   - File: frontend/src/features/**, frontend/package.json, frontend/vitest.config.ts, frontend/src/app/router/routes.ts
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
+## Sprint 08
+- [S08-D2-T001] DONE — Dev 2 — 2026-06-21
+  - Việc: Viết `binding-coverage.test.ts`: parse App.d.ts (90 methods) → quét 25 call site go.app.App.X + 15 wails service imports → assert 0 nút chết
+  - Test: 110/110 PASS ✅ (từ 102→110, thêm 4 tests); npm build PASS ✅
+  - File: frontend/src/services/binding-coverage.test.ts (mới)
+  - Ghi chú: 25 method FE gọi đều tồn tại trong binding. 0 typo, 0 nút chết phát hiện. Wails service imports sạch 100%.
+
 ## Sprint 07
 - [S07-D1-T001] DONE — Dev 1 — 2026-06-21
   - Việc: White-box test helper thuần internal/app: isGUID, isAlphaNumeric, hasLetterAndDigit, isAllDigits, extractCUserFromCookie, extractFBAV, verifyPlatformDisplayName, autoDetectAccount

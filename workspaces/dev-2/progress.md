@@ -3,10 +3,10 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 07** (Dev 2 DONE 1/1 ✅; Dev 1 TODO 1)
+- Sprint đang làm: **Sprint 08** (Dev 2 DONE 1/1 ✅; Dev 1 TODO 1)
 - Task hiện tại: —
 - Blocker: Không còn
-- **Dev 2 idle 03:05 — chờ PM giao việc**
+- **S08-D2-T001 DONE 08:55 — binding-coverage.test.ts; 25 method, 0 nút chết; 110/110 PASS**
 
 ## Secrets status (S00-D2-T002/T003)
 - 4 file lộ đã rm --cached? ✅ DONE (commit 9bfe34a)
