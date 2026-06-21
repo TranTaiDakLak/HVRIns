@@ -3,10 +3,10 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 08 — S08-D1-T001 DONE**
-- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: DONE 44, TODO 0)
+- Sprint đang làm: **Sprint 09 — S09-D1-T001 DONE**
+- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: DONE 46, TODO 0)
 - Blocker: —
-- Trạng thái suite: `wails build` PASS · `go vet ./internal/app/...` PASS · bindings 90 method đồng bộ
+- Trạng thái suite: `go test ./internal/...` GREEN · integration_test.go 8 test PASS · `go vet ./internal/app/...` PASS
 
 ## Baseline (S00-D1-T002 DONE)
 - wails build: **PASS** (commit a3d8210, HVRIns.exe 48.8s)
@@ -18,6 +18,22 @@
 ---
 
 ## Nhật ký
+### Sprint 09
+- [S09-D1-T001] DONE 2026-06-21 — Integration test gọi thật App method (không cần network).
+  Tạo internal/app/integration_test.go (package app, white-box). 5 nhóm test:
+  (1) Accounts CRUD: ImportAccounts("uid|pw") → ListAccounts → DeleteAccounts (in-memory);
+  (2) Accounts filter: keyword / status;
+  (3) Proxy RT: SaveProxyList("tempmail") → LoadProxyList (AppDataDir = HVRINS_DATA_DIR);
+  (4) Settings RT: SaveSettings + appSettings=Default() → LoadSettings (t.Chdir + CWD-relative);
+  (5) Profile lifecycle: CreateProfile → ListProfiles → SetActiveProfile → DeleteProfile;
+  (6) BasicGetters: GetDefaultResultPath (có "result"), GetCookieInitialStatus (map keys),
+      GetAccountSourceFolder (no panic), GetDefaultUACounts (chrome=53 hardcode).
+  Vấn đề phát sinh: appsettings.Save() cần version>=1 → phải set a.appSettings=appsettings.Default().
+  dataDirOnce là sync.Once → phải reset giữa test qua resetDataDirCache().
+  t.Chdir(t.TempDir()) (Go 1.24+) cô lập CWD-relative paths.
+  Test: go test ./internal/app/... -run Integration -v → 8 TestIntegration_* PASS;
+  go test ./internal/... GREEN (0 FAIL). File: internal/app/integration_test.go.
+
 ### Sprint 08
 - [S08-D1-T001] DONE 2026-06-21 — Regenerate & verify Wails bindings.
   wails generate module yêu cầu bin/dev/wails.json (chỉ có trong wails dev) → dùng wails build thay.
@@ -25,6 +41,12 @@
   So sánh: 91 Go exported method; Startup bị exclude đúng (lifecycle ctx.Context, không bind được).
   App.d.ts: 90 method = khớp 100%. go vet PASS. Không cần commit (bindings không đổi).
   Danh sách 90 method ghi trong completed-log.
+
+### Sprint 08 — Idle
+- Dev 1 idle 09:20 2026-06-21 — chờ PM giao việc (task-board: DONE 44, TODO 0)
+- Dev 1 idle 09:15 2026-06-21 — chờ PM giao việc (task-board: DONE 44, TODO 0)
+- Dev 1 idle 09:10 2026-06-21 — chờ PM giao việc (task-board: DONE 44, TODO 0)
+- Dev 1 idle 09:05 2026-06-21 — chờ PM giao việc (task-board: DONE 44, TODO 0)
 
 ### Sprint 07 — Idle
 - Dev 1 idle 08:52 2026-06-21 — chờ PM giao việc (task-board: DONE 42, TODO 0)

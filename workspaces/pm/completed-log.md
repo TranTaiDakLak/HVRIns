@@ -3,6 +3,21 @@
 > Ghi lại task đã DONE (ai làm, test gì, file đã sửa, ghi chú). Người sau đọc file này thay vì
 > đọc lại chi tiết task. Thêm dòng mới lên ĐẦU mỗi mục sprint.
 
+## Sprint 09
+- [S09-D1-T001] DONE — Dev 1 — 2026-06-21
+  - Việc: Integration test gọi thật 5 nhóm App method (không cần network/ctx).
+    Isolation: `t.Setenv("HVRINS_DATA_DIR", t.TempDir())` + `t.Chdir(t.TempDir())` + `resetDataDirCache()` (reset sync.Once).
+    Test groups: (1) Accounts CRUD — ImportAccounts/ListAccounts/DeleteAccounts in-memory;
+    (2) Accounts filter keyword + status; (3) Proxy RT — SaveProxyList/LoadProxyList (AppDataDir);
+    (4) Settings RT — SaveSettings→LoadSettings (CWD-relative Config/Settings);
+    (5) Profile lifecycle — CreateProfile/ListProfiles/SetActiveProfile/DeleteProfile;
+    (6) BasicGetters — GetDefaultResultPath/GetCookieInitialStatus/GetAccountSourceFolder/GetDefaultUACounts.
+    Phát hiện: `appsettings.Save()` yêu cầu `version>=1` — phải init `a.appSettings=appsettings.Default()`.
+    Methods bỏ qua (ghi trong header file): RegisterFacebook, RunVerify, Startup, CheckCloneHVStock, v.v.
+  - Test: `go test ./internal/app/... -run Integration -v` → 8 TestIntegration_* PASS;
+    `go test ./internal/...` GREEN (0 FAIL)
+  - File: internal/app/integration_test.go (tạo mới, 240 dòng)
+
 ## Sprint 00
 - [S00-D1-T001] DONE — Dev 1 — 2026-06-20
   - Việc: Đọc plan docs (00,02,04,06,07), check môi trường Go/Node/Wails
