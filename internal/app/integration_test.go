@@ -1,4 +1,4 @@
-// integration_test.go — S09-D1-T001: integration test gọi THẬT App method.
+// integration_test.go — S09-D1-T001 + S10-D1-T001: integration test gọi THẬT App method.
 //
 // Cách cô lập:
 //   - withIsolatedDataDir(t): reset dataDirOnce + HVRINS_DATA_DIR → temp dir (cho AppDataDir)
@@ -331,4 +331,151 @@ func TestIntegration_BasicGetters(t *testing.T) {
 				counts["iphone"], counts["android"])
 		}
 	})
+}
+
+// ─── Group 6 (S10): Run status — trạng thái mặc định khi chưa chạy ──────────
+
+func TestIntegration_RunStatus_DefaultState(t *testing.T) {
+	a := NewApp()
+
+	// IsRegisterRunning và IsVerifyRunning = false khi chưa start bao giờ
+	if a.IsRegisterRunning() {
+		t.Error("IsRegisterRunning: want false khi mới khởi tạo")
+	}
+	if a.IsVerifyRunning() {
+		t.Error("IsVerifyRunning: want false khi mới khởi tạo")
+	}
+
+	// GetRunStatus trả map với 4 key, tất cả = false
+	status := a.GetRunStatus()
+	for _, key := range []string{"registerRunning", "registerStopping", "verifyRunning", "verifyStopping"} {
+		v, ok := status[key]
+		if !ok {
+			t.Errorf("GetRunStatus: thiếu key %q", key)
+			continue
+		}
+		if v {
+			t.Errorf("GetRunStatus[%q]=%v; want false (mặc định chưa chạy)", key, v)
+		}
+	}
+}
+
+// ─── Group 7 (S10): Datr pool — zero khi không có run ────────────────────────
+
+func TestIntegration_DatrPool_ZeroWhenEmpty(t *testing.T) {
+	a := NewApp()
+
+	// SharedPool = nil khi chưa khởi động register → Size() = 0, không panic
+	size := a.GetDatrPoolSize()
+	if size < 0 {
+		t.Errorf("GetDatrPoolSize=%d; want >=0", size)
+	}
+
+	// poolFileSaved atomic = 0 khi mới tạo App, không có run nào
+	saved := a.GetPoolFileSaveCount()
+	if saved != 0 {
+		t.Errorf("GetPoolFileSaveCount=%d; want 0 khi chưa có run", saved)
+	}
+}
+
+// ─── Group 8 (S10): UA pools status — cấu trúc hợp lệ ───────────────────────
+
+func TestIntegration_UAPoolsStatus_Structure(t *testing.T) {
+	a := NewApp()
+
+	pools := a.GetUAPoolsStatus()
+
+	// Phải trả ≥1 entry (6 kind được hardcode trong GetUAPoolsStatus)
+	if len(pools) == 0 {
+		t.Fatal("GetUAPoolsStatus: trả slice rỗng; want ≥1 entry")
+	}
+
+	// Mỗi entry phải có Kind không rỗng và Count >= 0
+	for i, p := range pools {
+		if p.Kind == "" {
+			t.Errorf("pools[%d].Kind rỗng", i)
+		}
+		if p.Count < 0 {
+			t.Errorf("pools[%d].Count=%d; want >=0 (kind=%s)", i, p.Count, p.Kind)
+		}
+	}
+
+	// 6 kind cố định: android, ios, request, web_chrome, android_mess, ios_mess
+	if len(pools) != 6 {
+		t.Errorf("GetUAPoolsStatus: len=%d; want 6 (hardcoded kinds)", len(pools))
+	}
+}
+
+// ─── Group 9 (S10): Default cookie paths — keys hợp lệ ──────────────────────
+
+func TestIntegration_DefaultCookiePaths_Keys(t *testing.T) {
+	withIsolatedDataDir(t)
+	a := NewApp()
+	a.SetVersion("test")
+
+	paths := a.GetDefaultCookiePaths()
+
+	for _, key := range []string{"dir", "initial"} {
+		v, ok := paths[key]
+		if !ok {
+			t.Errorf("GetDefaultCookiePaths: thiếu key %q", key)
+			continue
+		}
+		if v == "" {
+			t.Errorf("GetDefaultCookiePaths[%q]: empty string; want non-empty path", key)
+		}
+	}
+
+	// "initial" phải kết thúc bằng tên file đúng
+	if initial, ok := paths["initial"]; ok {
+		if !strings.HasSuffix(initial, "cookie_initial.txt") {
+			t.Errorf("GetDefaultCookiePaths[initial]=%q; want suffix 'cookie_initial.txt'", initial)
+		}
+	}
+}
+
+// ─── Group 10 (S10): GetCookieInitialStatus chi tiết ─────────────────────────
+
+func TestIntegration_CookieInitialStatus_Detailed(t *testing.T) {
+	withIsolatedDataDir(t)
+	a := NewApp()
+	a.SetVersion("test")
+
+	status := a.GetCookieInitialStatus("")
+
+	// path phải non-empty và trỏ đến cookie_initial.txt
+	path, _ := status["path"].(string)
+	if path == "" {
+		t.Error("GetCookieInitialStatus.path: empty; want non-empty")
+	}
+	if !strings.HasSuffix(path, "cookie_initial.txt") {
+		t.Errorf("GetCookieInitialStatus.path=%q; want suffix 'cookie_initial.txt'", path)
+	}
+
+	// File chưa tồn tại trong temp dir → exists=false, error non-empty
+	if status["exists"] != false {
+		t.Errorf("GetCookieInitialStatus.exists=%v; want false (file chưa tạo)", status["exists"])
+	}
+	errMsg, _ := status["error"].(string)
+	if errMsg == "" {
+		t.Error("GetCookieInitialStatus.error: empty; want non-empty khi file không tồn tại")
+	}
+}
+
+// ─── Group 11 (S10): SetAccountSourceFolder ↔ GetAccountSourceFolder ─────────
+
+func TestIntegration_AccountSourceFolder_RoundTrip(t *testing.T) {
+	withIsolatedCWD(t)
+	a := NewApp()
+	a.SetVersion("test")
+	// Cần profile active để Set/GetAccountSourceFolder hoạt động
+	a.appSettings = appsettings.Default()
+
+	wantPath := `/C/TestAccounts`
+	a.SetAccountSourceFolder(wantPath)
+
+	got := a.GetAccountSourceFolder()
+	if got != wantPath {
+		t.Errorf("GetAccountSourceFolder=%q; want %q", got, wantPath)
+	}
 }

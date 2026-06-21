@@ -3,6 +3,18 @@
 > Ghi lại task đã DONE (ai làm, test gì, file đã sửa, ghi chú). Người sau đọc file này thay vì
 > đọc lại chi tiết task. Thêm dòng mới lên ĐẦU mỗi mục sprint.
 
+## Sprint 10
+- [S10-D1-T001] DONE — Dev 1 — 2026-06-21
+  - Việc: 6 nhóm integration test bổ sung (tổng 14 TestIntegration_* trong integration_test.go).
+    RunStatus: IsRegisterRunning/IsVerifyRunning/GetRunStatus = false (trạng thái mặc định chưa chạy).
+    DatrPool: GetDatrPoolSize=0 khi SharedPool=nil; GetPoolFileSaveCount=0 chưa có run.
+    UAPoolsStatus: 6 kind hardcode (android/ios/request/web_chrome/android_mess/ios_mess); Count>=0.
+    DefaultCookiePaths: keys "dir"+"initial" non-empty; "initial" suffix "cookie_initial.txt".
+    CookieInitialStatus chi tiết: path suffix đúng; exists=false; error non-empty khi file vắng.
+    AccountSourceFolder round-trip: SetAccountSourceFolder→GetAccountSourceFolder (cần appsettings.Default()).
+  - Test: `go test ./internal/app/... -run Integration -v` → 14 PASS; `go test ./internal/...` GREEN
+  - File: internal/app/integration_test.go (mở rộng S09, +6 nhóm, +6 func)
+
 ## Sprint 09
 - [S09-D1-T001] DONE — Dev 1 — 2026-06-21
   - Việc: Integration test gọi thật 5 nhóm App method (không cần network/ctx).

@@ -105,10 +105,21 @@
 
 ---
 
+## Sprint 10 — Test thật: phủ nốt cụm nút còn lại (giao 2026-06-21, từ Audit #4)
+| Task ID | Dev | Mô tả | File chính | Status | Test |
+|---------|-----|-------|------------|--------|------|
+| S10-D1-T001 | 1 | Integration test thêm cho App method sau các nút CHƯA test runtime: GetCookieInitialStatus(chi tiết)/GetDatrPoolSize/GetPoolFileSaveCount/GetUAPoolsStatus/GetDefaultUACounts/SetAccountSourceFolder↔GetAccountSourceFolder/GetRunStatus+IsRegisterRunning+IsVerifyRunning(trạng thái mặc định). Bỏ method cần network/ctx (ghi lý do) | internal/app/integration_test.go | DONE | 6 nhóm mới (RunStatus · DatrPool · UAPools · CookiePaths · CookieStatus chi tiết · AccountSourceFolder RT); 14 TestIntegration_* PASS; go test GREEN ✅ |
+| S10-D2-T001 | 2 | Interaction test cho cụm nút lớn còn lại: InteractionSetupPage (cookie init/datr pool/UA pools/load-save proxy/account source), AccountsPage run-controls (GetRunStatus/IsRegisterRunning), AppStatusBar (ForceMemoryCleanup). Mỗi nút: click→assert binding gọi đúng+args+nhánh lỗi | frontend/src/**/*.test.ts | TODO | — |
+
+> Sau Sprint 10: coi như đã phủ runtime test cho HẦU HẾT nút user-facing. Mở rộng thêm là tùy chọn.
+
+---
+
 ### Tổng kết tiến độ
 - Sprint 00–08: **DONE 44 (+1 SKIP)** + Hotfix #1.
-- Sprint 09 (test thật, theo yêu cầu user): **DONE 2** (D1 integration Go · D2 component/click FE).
-- Tổng: **DONE 46** · SKIP 1 · TODO 0.
+- Sprint 09 (test thật): **DONE 2** ✅ **PM REVIEW PASS** — integration 8 test (gọi thật method+assert) + interaction 11 test (click thật+args+nhánh lỗi); go test GREEN; npm 121/121.
+- Sprint 10 (phủ nốt cụm nút, Audit #4): **D1 DONE** · D2 TODO 1.
+- Tổng: **DONE 47** · SKIP 1 · TODO 1.
 
 > ✅ **PM REVIEW Sprint 08 (loop #8, 2026-06-21):** PASS. binding-coverage 110/110 — **25 method FE gọi
 > đều tồn tại trong go/app binding**; go vet PASS; regression go.main SẠCH. Lớp "nút chết" tĩnh ĐÃ ĐÓNG.

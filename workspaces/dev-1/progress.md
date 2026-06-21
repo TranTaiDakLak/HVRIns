@@ -3,10 +3,10 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 09 — S09-D1-T001 DONE**
-- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: DONE 46, TODO 0)
+- Sprint đang làm: **Sprint 10 — S10-D1-T001 DONE**
+- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: D1 DONE 47, TODO 0)
 - Blocker: —
-- Trạng thái suite: `go test ./internal/...` GREEN · integration_test.go 8 test PASS · `go vet ./internal/app/...` PASS
+- Trạng thái suite: `go test ./internal/...` GREEN · integration_test.go 14 test PASS · `go vet ./internal/app/...` PASS
 
 ## Baseline (S00-D1-T002 DONE)
 - wails build: **PASS** (commit a3d8210, HVRIns.exe 48.8s)
@@ -18,6 +18,17 @@
 ---
 
 ## Nhật ký
+### Sprint 10
+- [S10-D1-T001] DONE 2026-06-21 — Integration test bổ sung (6 nhóm mới, tổng 14 TestIntegration_*).
+  RunStatus default (IsRegisterRunning/IsVerifyRunning/GetRunStatus = false khi chưa chạy).
+  DatrPool zero (GetDatrPoolSize=0 khi SharedPool=nil; GetPoolFileSaveCount=0 khi chưa run).
+  UAPoolsStatus structure (6 kind hardcode; mỗi entry có Kind+Count>=0; Count có thể 0 thiếu runtime data).
+  DefaultCookiePaths keys ("dir"+"initial" non-empty; suffix "cookie_initial.txt").
+  CookieInitialStatus chi tiết (path suffix; exists=false; error non-empty khi file vắng).
+  AccountSourceFolder round-trip (SetAccountSourceFolder→GetAccountSourceFolder, cần appsettings.Default()).
+  Test: go test ./internal/app/... -run Integration -v → 14 PASS; go test ./internal/... GREEN.
+  File: internal/app/integration_test.go (mở rộng từ S09).
+
 ### Sprint 09
 - [S09-D1-T001] DONE 2026-06-21 — Integration test gọi thật App method (không cần network).
   Tạo internal/app/integration_test.go (package app, white-box). 5 nhóm test:
