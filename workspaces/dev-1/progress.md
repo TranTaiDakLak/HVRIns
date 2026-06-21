@@ -3,10 +3,10 @@
 > Tự cập nhật sau mỗi task: làm gì, test gì, còn vướng gì. Mục mới lên trên cùng mỗi sprint.
 
 ## Trạng thái hiện tại
-- Sprint đang làm: **Sprint 05 — TẤT CẢ TASK D1 DONE** (T001 restore · T002 test-fix · T003 result_test)
-- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1
+- Sprint đang làm: **Sprint 07 — S07-D1-T001 DONE**
+- Task hiện tại: HẾT VIỆC — không còn TODO/BLOCKED của Dev 1 (task-board: DONE 42, TODO 0)
 - Blocker: —
-- Trạng thái suite: `go test ./internal/...` GREEN · `wails build` PASS · 207 platform giữ nguyên
+- Trạng thái suite: `go test ./internal/...` GREEN · `go vet ./internal/...` PASS · 207 platform giữ nguyên
 
 ## Baseline (S00-D1-T002 DONE)
 - wails build: **PASS** (commit a3d8210, HVRIns.exe 48.8s)
@@ -18,6 +18,14 @@
 ---
 
 ## Nhật ký
+### Sprint 07
+- [S07-D1-T001] DONE 2026-06-21 — White-box test helper thuần internal/app.
+  Thêm internal/app/helpers_test.go (60 test case mới, package app):
+  isGUID (10), isAlphaNumeric (9), hasLetterAndDigit (7), isAllDigits (8),
+  extractCUserFromCookie (6), extractFBAV (6), verifyPlatformDisplayName (6), autoDetectAccount (8).
+  Bỏ qua hàm cần a.ctx/network/Wails runtime (ghi rõ trong header file).
+  Test: go test ./internal/app/... → 96 tests PASS; go test ./internal/... GREEN; go vet PASS.
+
 ### Sprint 05
 - [S05-D1-T003] DONE 2026-06-21 — Viết internal/result/result_test.go khóa hành vi.
   Test gốc đã có FormatReg/FormatVerify/UpsertUID → file này khóa GAP + hợp đồng chéo (tên riêng):

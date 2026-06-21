@@ -104,6 +104,12 @@
   - Ghi chú: changes swept vào commit a3d8210 (Dev 1 commit overlap — staging area shared)
 
 ## Sprint 07
+- [S07-D1-T001] DONE — Dev 1 — 2026-06-21
+  - Việc: White-box test helper thuần internal/app: isGUID, isAlphaNumeric, hasLetterAndDigit, isAllDigits, extractCUserFromCookie, extractFBAV, verifyPlatformDisplayName, autoDetectAccount
+  - Test: go test ./internal/app/... → 96 PASS (60 mới); go test ./internal/... GREEN; go vet PASS ✅
+  - File: internal/app/helpers_test.go (mới, 60 test cases)
+  - Ghi chú: Bỏ hàm cần a.ctx/network (ghi rõ trong header). autoDetectAccount: test cả basic, 2FA, email, phone, SRN/SCUID, GUID→Note, cookie-only extract UID.
+
 - [S07-D2-T001] DONE — Dev 2 — 2026-06-21
   - Việc: Test 3 global Pinia store: app.store(11 tests), preferences.store(16 tests), uploadLog.store(14 tests)
   - Test: 102/102 PASS ✅ (từ 61→102, thêm 41 tests)

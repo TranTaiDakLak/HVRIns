@@ -80,12 +80,12 @@
 ## Sprint 07 — Hardening coverage (giao 2026-06-21, từ Audit #1 — TỰ NGUYỆN, không phải lỗi chặn)
 | Task ID | Dev | Mô tả | File chính | Status | Test |
 |---------|-----|-------|------------|--------|------|
-| S07-D1-T001 | 1 | White-box test cho helper THUẦN trong internal/app (parse/format/filter account, settings normalize — không cần ctx/network) | internal/app/*_test.go | TODO | — |
-| S07-D2-T001 | 2 | Test các global Pinia store (app.store, preferences.store, uploadLog.store) | frontend store tests | DONE | 102 tests PASS (app 11 + prefs 16 + uploadLog 14 = +41) ✅ (ea25286) |
+| S07-D1-T001 | 1 | White-box test cho helper THUẦN trong internal/app (parse/format/filter account, settings normalize — không cần ctx/network) | internal/app/*_test.go | DONE | helpers_test.go: isGUID(10) + isAlphaNumeric(9) + hasLetterAndDigit(7) + isAllDigits(8) + extractCUserFromCookie(6) + extractFBAV(6) + verifyPlatformDisplayName(6) + autoDetectAccount(8) = 60 tests mới; 96 total in pkg; go test ./internal/... GREEN ✅ |
+| S07-D2-T001 | 2 | Test các global Pinia store (app.store, preferences.store, uploadLog.store) | frontend store tests | DONE | 102 tests PASS (app 11 + prefs 16 + uploadLog 14 = +41) ✅ (ea25286) · **PM REVIEW PASS** (npm test 102/102) |
 
 ---
 
 ### Tổng kết tiến độ
 - Sprint 00–06: **DONE 40 (+1 SKIP)** — Sprint 05 (D1) + 06 (D2) DONE & PM-REVIEWED PASS 2026-06-21.
-- Sprint 07: Dev 2 DONE 1/1 ✅; Dev 1 TODO 1.
-- Tổng: DONE 41 · SKIP 1 · TODO 1 (D1 S07-D1-T001).
+- Sprint 07: Dev 1 DONE 1/1 ✅ · Dev 2 DONE 1/1 ✅ — **Sprint 07 HOÀN TẤT**.
+- Tổng: DONE 42 · SKIP 1 · TODO 0.
