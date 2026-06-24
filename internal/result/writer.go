@@ -10,24 +10,25 @@ import (
 // User quen format C# copy-paste thấy file quen thuộc.
 const (
 	// Register
-	FileSuccessReg             = "SuccessReg.txt"             // uid|pass|cookie|token|time|country|NVR
-	FileSuccessNVRPhone        = "SuccessNVR_Phone.txt"       // phone đã reg
-	FileSuccessNVREmail        = "SuccessNVR_Email.txt"       // email đã reg
-	FileCheckpoint             = "Checkpoint.txt"             // reg bị checkpoint
-	FileBlocked                = "Blocked.txt"                // reg bị FB block
-	FileUnknownBlockType       = "UnknownReg.txt"              // reg unknown (block không xác định) — tách riêng khỏi verify unknown
+	FileSuccessReg               = "SuccessReg.txt"       // uid|pass|cookie|token|time|country|NVR
+	FileSuccessNVRPhone          = "SuccessNVR_Phone.txt" // phone đã reg
+	FileSuccessNVREmail          = "SuccessNVR_Email.txt" // email đã reg
+	FileCheckpoint               = "Checkpoint.txt"       // reg bị checkpoint
+	FileBlocked                  = "Blocked.txt"          // reg bị FB block
+	FileUnknownBlockType         = "UnknownReg.txt"       // reg unknown (block không xác định) — tách riêng khỏi verify unknown
 	FileSuccessButErrorCheckLive = "Success_but_error_checklive.txt"
+	FileLive                     = "Live.txt" // reg success + check-live xác nhận CÒN SỐNG (sau delay)
 
 	// Verify — gộp Die/Unknown về tên ngắn để folder output clean hơn
-	FileSuccessVerify                = "SuccessVerify.txt"                 // uid|pass|2fa|cookie|token|email|fullname|time|country
-	FileSuccessVerifyNo2FA           = "SuccessVerify_No2FA.txt"           // verify ok nhưng chưa bật 2FA
-	FileSuccessVerifyFailedDeactive  = "SuccessVerify_FailedDeactive.txt"  // verify ok nhưng deactive fail
-	FileDieAfterVerify               = "Die.txt"                           // UPSERT by UID (was DieAfterVerify.txt)
-	FileUnknownErrorCheckLiveDieApi  = "Unknown.txt"                       // verify unknown (was UnknownErrorCheckLiveDieApi.txt)
+	FileSuccessVerify               = "SuccessVerify.txt"                // uid|pass|2fa|cookie|token|email|fullname|time|country
+	FileSuccessVerifyNo2FA          = "SuccessVerify_No2FA.txt"          // verify ok nhưng chưa bật 2FA
+	FileSuccessVerifyFailedDeactive = "SuccessVerify_FailedDeactive.txt" // verify ok nhưng deactive fail
+	FileDieAfterVerify              = "Die.txt"                          // UPSERT by UID (was DieAfterVerify.txt)
+	FileUnknownErrorCheckLiveDieApi = "Unknown.txt"                      // verify unknown (was UnknownErrorCheckLiveDieApi.txt)
 
 	// Error details
-	FileUnknownErrorApi     = "UnknownErrorApi.txt"
-	FileCfemUnknownErrorApi = "CfemUnknownErrorApi.txt"
+	FileUnknownErrorApi      = "UnknownErrorApi.txt"
+	FileCfemUnknownErrorApi  = "CfemUnknownErrorApi.txt"
 	FileChinaMailCantGetCode = "ChinaMail_CantGetCode.txt" // mail service (rent mail TQ) không trả code
 	FileBuyMailCantGetCode   = "BuyMail_CantGetCode.txt"
 	FileNotTokenIn           = "not_token_in.txt"
@@ -35,7 +36,7 @@ const (
 	FileRemainData           = "RemainData.txt"
 
 	// Counter tracking (Phase B — auto-save mỗi 5-10s, overwrite)
-	FileFbAppVersionSuccess  = "FbAppVersisonSuccess.txt" // Note: typo "Verison" giữ giống C#
+	FileFbAppVersionSuccess = "FbAppVersisonSuccess.txt" // Note: typo "Verison" giữ giống C#
 )
 
 // Writer quản lý việc ghi kết quả vào 1 thư mục root.

@@ -159,6 +159,11 @@ type Session struct {
 	// session email tạm. Set từ RegResult.EmailMeta khi RegMode=TempMail.
 	// Empty → verify dùng flow CreateEmail mới (existing behavior).
 	EmailMeta string
+
+	// Username — tên người dùng Instagram (vd "falcon.3900382").
+	// Set từ AccountInput.Username khi verify IG account.
+	// Dùng cho CheckLiveByCheckerCookie sau khi verify unknown.
+	Username string
 }
 
 // LoginResult kết quả login
@@ -213,6 +218,12 @@ type RegInput struct {
 	// Dùng cho reg multi-step cần confirm OTP NGAY trong reg (Messenger appmv3reg).
 	// Nil cho platform khác / mode không cần OTP trong reg.
 	GetOTP func(ctx context.Context) (string, error)
+
+	// GetNewEmail — nếu được cấp, registerer gọi callback này khi session bị flag (system_error)
+	// để lấy email mới + GetOTP mới và retry toàn bộ flow với danh tính mới.
+	// Signature: (ctx) → (email, getOTP, error).
+	// Nil → registerer không tự retry khi SESSION_FLAGGED.
+	GetNewEmail func(ctx context.Context) (email string, getOTP func(context.Context) (string, error), err error)
 }
 
 // RegSession — trạng thái phiên đăng ký (tokens + state từ server)
@@ -299,6 +310,15 @@ type RegResult struct {
 	// SessionlessCryptedUID: fb_partially_created_reg_info — dùng làm sessionless_crypted_user_id.
 	Srnonce               string
 	SessionlessCryptedUID string
+
+	// Username — tên người dùng Instagram đã được tạo (vd "falcon.3900382").
+	// Được sinh trong buildIGUsername() và lưu vào file kết quả với prefix "IGU:".
+	Username string
+
+	// LiveStatus — kết quả check live/die ngay sau khi reg thành công.
+	// Giá trị: "live" | "checkpoint" | "suspended" | "die" | "unknown"
+	// "unknown" = không xác định được (throttle / network lỗi) → coi như live.
+	LiveStatus string
 }
 
 // ══════════════════════════════════════════════════════════════

@@ -11,10 +11,9 @@ import (
 	"time"
 
 	"HVRIns/internal/cookie"
+	"HVRIns/internal/igcore"
 	"HVRIns/internal/instagram"
 	"HVRIns/internal/instagram/fakeinfo"
-	"HVRIns/internal/instagram/register/web"
-	"HVRIns/internal/instagram/verify/verifybase"
 	"HVRIns/internal/proxy"
 )
 
@@ -22,6 +21,7 @@ import (
 type AccountInput struct {
 	ID             int    `json:"id"`
 	UID            string `json:"uid"`
+	Username       string `json:"username,omitempty"` // Instagram username (vd "falcon.3900382")
 	FullName       string `json:"fullName"`
 	Phone          string `json:"phone"`
 	Cookie         string `json:"cookie"`
@@ -526,6 +526,7 @@ func runOneAccount(ctx context.Context, acc AccountInput, config RunConfig, date
 		HeadersFlowID: acc.HeadersFlowID,
 		PassRaw:       acc.PassRaw,
 		PassTS:        acc.PassTS,
+		Username:      acc.Username,
 	}
 
 	// Country-aware UA cho S55x: extract country từ proxy suffix "/<cc>"
@@ -695,19 +696,7 @@ func runOneAccount(ctx context.Context, acc AccountInput, config RunConfig, date
 				}
 				needFetch := !isValidAndroidToken(session.Token) && session.UID != "" && session.Password != ""
 				if needFetch {
-					notify(fmt.Sprintf("[Login][Android] Token chưa có/không hợp lệ (platform=%s) → REST /auth/login lấy EAA...", verifyPlatform))
-					tokCtx, tokCancel := context.WithTimeout(ctx, 30*time.Second)
-					tok, newCookie := web.FetchAndroidTokenLegacyWithCookie(tokCtx, session.UID, session.Password, session.Datr, "en_US", "", session.Proxy, "", notify)
-					tokCancel()
-					if strings.HasPrefix(tok, "EAAAAU") {
-						session.Token = tok
-						result.Token = tok // propagate về caller để ghi file result
-						if newCookie != "" {
-							session.Cookie = newCookie // cookie mới từ login → propagate lên UI
-							result.Cookie = newCookie
-						}
-						notify(fmt.Sprintf("✅ Lấy EAA OK (len=%d)", len(tok)))
-					}
+					notify(fmt.Sprintf("[Login][Android] Token chưa có/không hợp lệ (platform=%s) → bỏ qua (REST login đã bị gỡ)", verifyPlatform))
 				} else if result.Token == "" && isValidAndroidToken(session.Token) {
 					// Token đã hợp lệ — không fetch mới, nhưng phải propagate
 					// để OnAccountDone / file output / UI nhận được token.
@@ -881,16 +870,18 @@ func runOneAccount(ctx context.Context, acc AccountInput, config RunConfig, date
 	if result.Status != "Live" && result.Status != "Die" && result.UID != "" {
 		notify("[CheckUID] Verify unknown — kiểm tra UID còn sống không...")
 		checkCtx, checkCancel := context.WithTimeout(ctx, 12*time.Second)
-		liveStatus := verifybase.CheckLiveDieByPicture(checkCtx, session.UserAgent, result.UID)
+		var liveStatus string
+		if session.Cookie != "" {
+			liveStatus = igcore.CheckLiveByCookie(checkCtx, session.Cookie, session.UserAgent, session.Proxy)
+		}
 		checkCancel()
 		switch liveStatus {
-		case "Die":
+		case "die":
 			notify("[CheckUID] UID đã chết → Die")
 			result.Status = "Die"
-		case "Live":
+		case "live":
 			notify("[CheckUID] UID còn sống — đã hết số lượt retry, giữ Unknown")
 			result.Status = "unknown"
-			// "Unknown" từ checkLive (network lỗi) → giữ nguyên unknown
 		}
 	}
 

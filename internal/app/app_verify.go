@@ -1108,6 +1108,7 @@ func (a *App) RunVerify(cfgOverride VerifyRunConfig) string {
 			return runner.AccountInput{
 				ID:       slotID,
 				UID:      acc.UID,
+				Username: acc.Username,
 				FullName: acc.FullName,
 				Phone:    acc.Phone,
 				Cookie:   acc.Cookie,
@@ -1354,6 +1355,7 @@ func (a *App) RunVerify(cfgOverride VerifyRunConfig) string {
 			targets = append(targets, runner.AccountInput{
 				ID:                    acc.ID,
 				UID:                   acc.UID,
+				Username:              acc.Username,
 				FullName:              acc.FullName,
 				Phone:                 acc.Phone,
 				Cookie:                acc.Cookie,
@@ -1559,6 +1561,7 @@ func (a *App) RunVerify(cfgOverride VerifyRunConfig) string {
 				startWorker(runner.AccountInput{
 					ID:                    slotID,
 					UID:                   acc.UID,
+					Username:              acc.Username,
 					FullName:              acc.FullName,
 					Phone:                 acc.Phone,
 					Cookie:                acc.Cookie,

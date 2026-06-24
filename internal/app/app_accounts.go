@@ -19,6 +19,7 @@ import (
 type Account struct {
 	ID           int    `json:"id"`
 	UID          string `json:"uid"`
+	Username     string `json:"username,omitempty"` // Instagram username (vd "eagle.1000041")
 	FullData     string `json:"fullData"` // Dữ liệu gốc (dòng import nguyên bản)
 	Password     string `json:"password"`
 	Twofa        string `json:"twofa"`

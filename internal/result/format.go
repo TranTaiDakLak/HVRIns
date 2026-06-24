@@ -1,11 +1,12 @@
 // format.go — format chuỗi data theo pipe-delimited của C# FMain.GetSaveData().
 //
 // C# 2 format chính:
-//   isFromReg=true  → uid|pass|cookie|token|time|country
-//   isFromReg=false → uid|pass|2fa|cookie|token|email|fullname|time|country
+//
+//	isFromReg=true  → uid|pass|cookie|token|time|country
+//	isFromReg=false → uid|pass|2fa|cookie|token|email|fullname|time|country
 //
 // Thêm format cho TKQC:
-//   + |Tạo TKQC OK - Kích Tut Lưỡng Tính Ok - Live Ads|{currencyCode}
+//   - |Tạo TKQC OK - Kích Tut Lưỡng Tính Ok - Live Ads|{currencyCode}
 package result
 
 import (
@@ -17,7 +18,10 @@ import (
 // RegData chứa field cần thiết cho Reg output.
 // UID, Password, Cookie, Token phải có; Country có thể rỗng.
 type RegData struct {
-	UID      string
+	UID string
+	// Username: nếu có → dùng làm field ĐẦU thay cho UID (account IG identify bằng @handle;
+	// UID số vẫn còn trong Cookie qua ds_user_id nên không mất). Rỗng → fallback UID.
+	Username string
 	Password string
 	Cookie   string
 	Token    string
@@ -44,8 +48,13 @@ func FormatReg(d RegData, now *time.Time) string {
 	if now != nil {
 		t = *now
 	}
+	// Field đầu: ưu tiên Username (@handle IG), fallback UID nếu không có.
+	lead := d.UID
+	if d.Username != "" {
+		lead = d.Username
+	}
 	parts := []string{
-		d.UID,
+		lead,
 		d.Password,
 		d.Cookie,
 		d.Token,
@@ -104,7 +113,9 @@ type VerifyData struct {
 }
 
 // FormatVerify build chuỗi:
-//   "uid|pass|2fa|cookie|token|email|fullname|time|country"
+//
+//	"uid|pass|2fa|cookie|token|email|fullname|time|country"
+//
 // + "|Tạo TKQC OK - Kích Tut Lưỡng Tính Ok - Live Ads|currency" nếu HasCalledOpenAds.
 func FormatVerify(d VerifyData, now *time.Time) string {
 	t := time.Now()

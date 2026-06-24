@@ -4,6 +4,7 @@ package igcore
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/url"
@@ -15,6 +16,24 @@ import (
 
 // ErrThrottled is the exported throttle sentinel.
 var ErrThrottled = errThrottled
+
+// EncryptPassword wraps encryptPasswordInstagram for external callers.
+func EncryptPassword(password, pubKeyB64, keyIDStr string) (string, error) {
+	return encryptPasswordInstagram(password, pubKeyB64, keyIDStr)
+}
+
+// ParseRegContext extracts the reg_context blob from a Bloks response.
+func ParseRegContext(resp string) string { return parseRegContext(resp) }
+
+// ParseIGSession extracts cookies from a create.account response.
+func ParseIGSession(resp string) IGSession { return parseIGSession(resp) }
+
+// ParseConfirmationCode extracts the 8-char confirmation token from a Bloks response.
+func ParseConfirmationCode(resp string) string { return parseConfirmationCode(resp) }
+
+// SharedDevicePool — aged device pool (mid/datr/ig_did) inject trước reg IG iOS.
+// Set từ app_register.go trước khi batch bắt đầu, nil sau khi batch xong.
+var SharedDevicePool *DevicePool
 
 // InjectAgedDevice set cookie datr/mid/ig_did aged vào cookie jar của session
 // TRƯỚC khi reg → IG thấy "thiết bị có lịch sử". Mid cũng được set vào profile
@@ -189,64 +208,289 @@ func (e *Engine) Session() IGSession {
 	return e.inner.Session
 }
 
-// CheckLive calls IG API to determine account status after registration.
-// Returns: "live" | "suspended" | "checkpoint" | "unknown"
-//
-// Detection logic based on IG response patterns:
-//   - {"status":"ok", "user":{...}}                               → live
-//   - challenge_required + url contains "accounts/suspended"      → suspended (hard ban)
-//   - challenge_required + lock:true + url has other path         → suspended (ban variant)
-//   - challenge_required + lock:false                             → checkpoint (verify needed)
-//   - login_required / not_authorized                             → session invalid → unknown
-func (e *Engine) CheckLive(ctx context.Context) string {
-	if e.inner.Session.SessionID == "" {
+// ClassifyLiveResponse phân loại response của accounts/current_user theo
+// taxonomy của instagrapi. Trả: live | suspended | checkpoint | die | unknown.
+// Exported để các package khác (igandroid, ...) tái dùng cùng logic.
+func ClassifyLiveResponse(statusCode int, body string) string {
+	return classifyLiveResponse(statusCode, body)
+}
+
+// BuildFullCookieStr rebuilds the FullCookie string from all populated fields
+// of an IGSession. Useful after enriching a session with jar-sourced cookies.
+func BuildFullCookieStr(s IGSession) string {
+	var parts []string
+	if s.CSRFToken != "" {
+		parts = append(parts, "csrftoken="+s.CSRFToken)
+	}
+	if s.Datr != "" {
+		parts = append(parts, "datr="+s.Datr)
+	}
+	if s.IgDID != "" {
+		parts = append(parts, "ig_did="+s.IgDID)
+	}
+	if s.Mid != "" {
+		parts = append(parts, "mid="+s.Mid)
+	}
+	if s.Rur != "" {
+		parts = append(parts, "rur="+s.Rur)
+	}
+	if s.DSUserID != "" {
+		parts = append(parts, "ds_user_id="+s.DSUserID)
+	}
+	if s.SessionID != "" {
+		parts = append(parts, "sessionid="+s.SessionID)
+	}
+	return strings.Join(parts, ";")
+}
+
+// CheckLiveByCookie kiểm tra trạng thái account bằng cookie của chính account đó.
+// Gọi GET i.instagram.com/api/v1/accounts/current_user/?edit=true với Safari iOS TLS.
+// Chính xác hơn CheckLiveByCheckerCookie vì test trực tiếp session cookie.
+// Trả: "live" | "checkpoint" | "suspended" | "die" | "unknown".
+func CheckLiveByCookie(ctx context.Context, cookie, userAgent, proxyStr string) string {
+	if cookie == "" {
 		return "unknown"
 	}
-
-	ua := igUserAgent
-	if e.inner.p != nil && e.inner.p.UserAgent != "" {
-		ua = e.inner.p.UserAgent // dùng UA khớp device đã reg
+	csrf := cookieField(decodeCookieValues(cookie), "csrftoken")
+	if userAgent == "" {
+		userAgent = "Instagram 319.0.0.34.109 (iPhone14,3; iOS 15_8_3; en_US; en-US; scale=3.00; 1284x2778; 545155814)"
 	}
-
-	// Build cookie string from captured session
-	var cookieParts []string
-	if e.inner.Session.FullCookie != "" {
-		cookieParts = append(cookieParts, e.inner.Session.FullCookie)
-	} else {
-		if e.inner.Session.SessionID != "" {
-			cookieParts = append(cookieParts, "sessionid="+e.inner.Session.SessionID)
-		}
-		if e.inner.Session.CSRFToken != "" {
-			cookieParts = append(cookieParts, "csrftoken="+e.inner.Session.CSRFToken)
-		}
-		if e.inner.Session.DSUserID != "" {
-			cookieParts = append(cookieParts, "ds_user_id="+e.inner.Session.DSUserID)
-		}
-	}
-	cookieStr := strings.Join(cookieParts, "; ")
-
-	req, err := fhttp.NewRequestWithContext(ctx, "GET",
-		"https://i.instagram.com/api/v1/accounts/current_user/?edit=true", nil)
+	sess, err := newIGSession(proxyStr)
 	if err != nil {
 		return "unknown"
 	}
-	req.Header.Set("Cookie", cookieStr)
-	req.Header.Set("X-CSRFToken", e.inner.Session.CSRFToken)
-	req.Header.Set("X-IG-App-ID", igAppID)
-	req.Header.Set("User-Agent", ua)
-	req.Header.Set("Accept", "*/*")
+	req, err := fhttp.NewRequestWithContext(ctx, "GET",
+		igHost+"/api/v1/accounts/current_user/?edit=true", nil)
+	if err != nil {
+		return "unknown"
+	}
+	req.Header[fhttp.HeaderOrderKey] = []string{
+		"cookie", "user-agent", "x-ig-app-id", "x-csrftoken", "accept", "accept-encoding",
+	}
+	req.Header.Set("cookie", cookie)
+	req.Header.Set("user-agent", userAgent)
+	req.Header.Set("x-ig-app-id", igAppID)
+	req.Header.Set("x-csrftoken", csrf)
+	req.Header.Set("accept", "*/*")
+	req.Header.Set("accept-encoding", "zstd")
 
-	resp, err := e.inner.sess.client.Do(req)
+	resp, err := sess.client.Do(req)
 	if err != nil {
 		return "unknown"
 	}
 	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
-	s := string(body)
-	code := resp.StatusCode
+	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	body := sess.decode(resp.Header.Get("Content-Encoding"), raw)
+	return classifyLiveResponse(resp.StatusCode, body)
+}
 
-	// classifyLiveResponse tách logic để test được.
-	return classifyLiveResponse(code, s)
+// CheckLiveByCheckerCookie kiểm tra username có tồn tại không bằng cách dùng
+// cookie của 1 account checker (không phải cookie của nick cần check).
+// Gọi GET /api/v1/users/web_profile_info/?username=X với Chrome TLS fingerprint.
+// Trả: "live" | "die" | "unknown".
+func CheckLiveByCheckerCookie(ctx context.Context, checkerCookie, username, proxyStr string) string {
+	if checkerCookie == "" || username == "" {
+		return "unknown"
+	}
+	decoded := decodeCookieValues(checkerCookie)
+	csrf := cookieField(decoded, "csrftoken")
+
+	sess, err := newChromeCheckSession(proxyStr)
+	if err != nil {
+		return "unknown"
+	}
+
+	endpoint := "https://www.instagram.com/api/v1/users/web_profile_info/?username=" + username
+	req, err := fhttp.NewRequestWithContext(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return "unknown"
+	}
+	req.Header[fhttp.HeaderOrderKey] = []string{
+		"accept", "accept-language", "cookie", "dpr", "referer",
+		"sec-ch-prefers-color-scheme", "sec-ch-ua", "sec-ch-ua-mobile",
+		"sec-ch-ua-platform", "sec-fetch-dest", "sec-fetch-mode",
+		"sec-fetch-site", "user-agent", "viewport-width",
+		"x-asbd-id", "x-csrftoken", "x-ig-app-id", "x-requested-with",
+	}
+	req.Header.Set("accept", "*/*")
+	req.Header.Set("accept-language", "vi-VN,vi;q=0.9,en-US;q=0.6,en;q=0.5")
+	req.Header.Set("cookie", decoded)
+	req.Header.Set("dpr", "1")
+	req.Header.Set("referer", "https://www.instagram.com/"+username+"/")
+	req.Header.Set("sec-ch-prefers-color-scheme", "light")
+	req.Header.Set("sec-ch-ua", `"Google Chrome";v="133", "Chromium";v="133", "Not(A:Brand";v="99"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
+	req.Header.Set("sec-fetch-dest", "empty")
+	req.Header.Set("sec-fetch-mode", "cors")
+	req.Header.Set("sec-fetch-site", "same-origin")
+	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+	req.Header.Set("viewport-width", "887")
+	req.Header.Set("x-asbd-id", "359341")
+	req.Header.Set("x-csrftoken", csrf)
+	req.Header.Set("x-ig-app-id", "936619743392459")
+	req.Header.Set("x-requested-with", "XMLHttpRequest")
+
+	resp, err := sess.client.Do(req)
+	if err != nil {
+		return "unknown"
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	body := sess.decode(resp.Header.Get("Content-Encoding"), raw)
+
+	if resp.StatusCode == 429 {
+		return "unknown"
+	}
+	if resp.StatusCode == 404 {
+		return "die"
+	}
+
+	// {"data":{"user":null},...}  → die
+	// {"data":{"user":{"id":...}} → live
+	var result struct {
+		Data struct {
+			User *json.RawMessage `json:"user"`
+		} `json:"data"`
+		Status string `json:"status"`
+	}
+	if err := json.Unmarshal([]byte(body), &result); err == nil {
+		if result.Data.User == nil || string(*result.Data.User) == "null" {
+			return "die"
+		}
+		return "live"
+	}
+	return "unknown"
+}
+
+// CheckLiveByUsername kiểm tra tài khoản IG còn live bằng cách đọc HTML title
+// của trang profile công khai. Không cần cookie — dùng anonymous Chrome request.
+// Chuẩn nhất cho check sau reg vì kiểm tra profile thực tế, không phải session.
+// Trả: "live" | "die" | "unknown".
+func CheckLiveByUsername(ctx context.Context, username, proxyStr string) string {
+	if username == "" {
+		return "unknown"
+	}
+	sess, err := newChromeCheckSession(proxyStr)
+	if err != nil {
+		return "unknown"
+	}
+	req, err := fhttp.NewRequestWithContext(ctx, "GET",
+		"https://www.instagram.com/"+username+"/", nil)
+	if err != nil {
+		return "unknown"
+	}
+	req.Header[fhttp.HeaderOrderKey] = []string{
+		"user-agent", "accept", "accept-language", "accept-encoding",
+		"sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-user",
+	}
+	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+	req.Header.Set("accept-language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
+	req.Header.Set("accept-encoding", "gzip, deflate, br")
+	req.Header.Set("sec-fetch-dest", "document")
+	req.Header.Set("sec-fetch-mode", "navigate")
+	req.Header.Set("sec-fetch-site", "none")
+	req.Header.Set("sec-fetch-user", "?1")
+
+	resp, err := sess.client.Do(req)
+	if err != nil {
+		return "unknown"
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 110*1024))
+	html := sess.decode(resp.Header.Get("Content-Encoding"), raw)
+
+	start := strings.Index(html, "<title>")
+	if start == -1 {
+		return "unknown"
+	}
+	ts := start + len("<title>")
+	end := strings.Index(html[ts:], "</title>")
+	if end == -1 {
+		return "unknown"
+	}
+	title := strings.TrimSpace(html[ts : ts+end])
+	if title == "" || title == "Instagram" {
+		return "die"
+	}
+	// Catch "Sorry, this page isn't available." và "Page Not Found" dạng die
+	lower := strings.ToLower(title)
+	if strings.Contains(lower, "isn't available") || strings.Contains(lower, "page not found") {
+		return "die"
+	}
+	return "live"
+}
+
+// prefetchCSRFToken lấy csrftoken từ www.instagram.com/accounts/login/
+// bằng cách đọc Set-Cookie header — không cần login.
+func prefetchCSRFToken(ctx context.Context, sess *igSession) string {
+	req, err := fhttp.NewRequestWithContext(ctx, "GET",
+		"https://www.instagram.com/accounts/login/", nil)
+	if err != nil {
+		return ""
+	}
+	req.Header.Set("Cookie", "ig_cb=1")
+	req.Header.Set("User-Agent", igUserAgent)
+	req.Header.Set("Accept", "text/html,application/xhtml+xml")
+
+	resp, err := sess.client.Do(req)
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+	io.Copy(io.Discard, io.LimitReader(resp.Body, 1024))
+
+	for _, cookie := range resp.Cookies() {
+		if cookie.Name == "csrftoken" && cookie.Value != "" {
+			return cookie.Value
+		}
+	}
+	// fallback: parse Set-Cookie header thủ công
+	for _, h := range resp.Header["Set-Cookie"] {
+		for _, part := range strings.Split(h, ";") {
+			part = strings.TrimSpace(part)
+			if strings.HasPrefix(part, "csrftoken=") {
+				return strings.TrimPrefix(part, "csrftoken=")
+			}
+		}
+	}
+	return ""
+}
+
+// decodeCookieValues decode URL-encoded cookie values (sessionid có %3A → :).
+func decodeCookieValues(cookieStr string) string {
+	parts := strings.Split(cookieStr, ";")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		idx := strings.IndexByte(p, '=')
+		if idx < 0 {
+			out = append(out, p)
+			continue
+		}
+		key, val := p[:idx], p[idx+1:]
+		if dec, err := url.QueryUnescape(val); err == nil {
+			val = dec
+		}
+		out = append(out, key+"="+val)
+	}
+	return strings.Join(out, "; ")
+}
+
+// cookieField lấy value của field trong cookie string.
+func cookieField(cookieStr, field string) string {
+	prefix := field + "="
+	for _, p := range strings.Split(cookieStr, ";") {
+		p = strings.TrimSpace(p)
+		if strings.HasPrefix(p, prefix) {
+			return strings.TrimPrefix(p, prefix)
+		}
+	}
+	return ""
 }
 
 // classifyLiveResponse phân loại response của accounts/current_user theo

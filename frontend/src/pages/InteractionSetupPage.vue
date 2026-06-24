@@ -1157,236 +1157,11 @@ ios430: 'iOS App (FBIOS 430)',  ios420: 'iOS App (FBIOS 420)',
 }
 
 const REG_PLATFORMS_STD = [
-  { key: 'android', label: 'Android' }, { key: 'webandroid', label: 'Web Android' },
-  { key: 'ios', label: 'iOS' }, { key: 's22', label: 'S22' }, { key: 's23', label: 'S23' },
-  { key: 's24', label: 'S24' }, { key: 's25', label: 'S25' }, { key: 's26', label: 'S26' },
+  { key: 'ig_ios_bloks', label: 'iOS Bloks ✓' },
+  { key: 'ig_android', label: 'Android' },
 ]
-const REG_PLATFORMS_VER = [
-  { key: 's399', label: 'Fb_399' },
-  { key: 's415', label: 'Fb_415' }, { key: 's416', label: 'Fb_416' },
-  { key: 's417', label: 'Fb_417' }, { key: 's418', label: 'Fb_418' },
-  { key: 's419', label: 'Fb_419' }, { key: 's420', label: 'Fb_420' },
-  { key: 's421', label: 'Fb_421' }, { key: 's422', label: 'Fb_422' },
-  { key: 's423', label: 'Fb_423' }, { key: 's424', label: 'Fb_424' },
-  { key: 's425', label: 'Fb_425' }, { key: 's426', label: 'Fb_426' },
-  { key: 's427', label: 'Fb_427' }, { key: 's428', label: 'Fb_428' },
-  { key: 's429', label: 'Fb_429' }, { key: 's430', label: 'Fb_430' },
-  { key: 's431', label: 'Fb_431' }, { key: 's432', label: 'Fb_432' },
-  { key: 's433', label: 'Fb_433' }, { key: 's434', label: 'Fb_434' },
-  { key: 's435', label: 'Fb_435' }, { key: 's436', label: 'Fb_436' },
-  { key: 's437', label: 'Fb_437' }, { key: 's438', label: 'Fb_438' },
-  { key: 's439', label: 'Fb_439' }, { key: 's440', label: 'Fb_440' },
-  { key: 's441', label: 'Fb_441' }, { key: 's442', label: 'Fb_442' },
-  { key: 's443', label: 'Fb_443' }, { key: 's444', label: 'Fb_444' },
-  { key: 's445', label: 'Fb_445' }, { key: 's446', label: 'Fb_446' },
-  { key: 's447', label: 'Fb_447' }, { key: 's448', label: 'Fb_448' },
-  { key: 's449', label: 'Fb_449' }, { key: 's450', label: 'Fb_450' },
-  { key: 's451', label: 'Fb_451' }, { key: 's452', label: 'Fb_452' },
-  { key: 's453', label: 'Fb_453' }, { key: 's454', label: 'Fb_454' },
-  { key: 's455', label: 'Fb_455' },
-  { key: 's456', label: 'Fb_456' }, { key: 's457', label: 'Fb_457' },
-  { key: 's458', label: 'Fb_458' }, { key: 's459', label: 'Fb_459' }, { key: 's460', label: 'Fb_460' },
-  { key: 's461', label: 'Fb_461' }, { key: 's462', label: 'Fb_462' },
-  { key: 's463', label: 'Fb_463' }, { key: 's464', label: 'Fb_464' }, { key: 's465', label: 'Fb_465' },
-  { key: 's466', label: 'Fb_466' }, { key: 's467', label: 'Fb_467' },
-  { key: 's468', label: 'Fb_468' }, { key: 's469', label: 'Fb_469' }, { key: 's470', label: 'Fb_470' },
-  { key: 's471', label: 'Fb_471' }, { key: 's472', label: 'Fb_472' },
-  { key: 's473', label: 'Fb_473' }, { key: 's474', label: 'Fb_474' }, { key: 's475', label: 'Fb_475' },
-  { key: 's476', label: 'Fb_476' }, { key: 's477', label: 'Fb_477' },
-  { key: 's478', label: 'Fb_478' }, { key: 's479', label: 'Fb_479' }, { key: 's480', label: 'Fb_480' },
-  { key: 's481', label: 'Fb_481' }, { key: 's482', label: 'Fb_482' },
-  { key: 's483', label: 'Fb_483' }, { key: 's484', label: 'Fb_484' }, { key: 's485', label: 'Fb_485' },
-  { key: 's486', label: 'Fb_486' }, { key: 's487', label: 'Fb_487' },
-  { key: 's488', label: 'Fb_488' }, { key: 's489', label: 'Fb_489' }, { key: 's490', label: 'Fb_490' },
-  { key: 's491', label: 'Fb_491' }, { key: 's492', label: 'Fb_492' },
-  { key: 's493', label: 'Fb_493' }, { key: 's494', label: 'Fb_494' }, { key: 's495', label: 'Fb_495' },
-  { key: 's496', label: 'Fb_496' }, { key: 's497', label: 'Fb_497' },
-  { key: 's498', label: 'Fb_498' }, { key: 's499', label: 'Fb_499' },
-  { key: 's500', label: 'Fb_500' }, { key: 's501', label: 'Fb_501' },
-  { key: 's502', label: 'Fb_502' }, { key: 's503', label: 'Fb_503' },
-  { key: 's504', label: 'Fb_504' }, { key: 's505', label: 'Fb_505' },
-  { key: 's506', label: 'Fb_506' }, { key: 's507', label: 'Fb_507' },
-  { key: 's508', label: 'Fb_508' }, { key: 's509', label: 'Fb_509' },
-  { key: 's510', label: 'Fb_510' }, { key: 's511', label: 'Fb_511' },
-  { key: 's512', label: 'Fb_512' }, { key: 's513', label: 'Fb_513' },
-  { key: 's514', label: 'Fb_514' }, { key: 's515', label: 'Fb_515' },
-  { key: 's516', label: 'Fb_516' }, { key: 's517', label: 'Fb_517' },
-  { key: 's518', label: 'Fb_518' }, { key: 's519', label: 'Fb_519' },
-  { key: 's520', label: 'Fb_520' }, { key: 's521', label: 'Fb_521' },
-  { key: 's522', label: 'Fb_522' }, { key: 's523', label: 'Fb_523' },
-  { key: 's524', label: 'Fb_524' }, { key: 's525', label: 'Fb_525' },
-  { key: 's526', label: 'Fb_526' }, { key: 's527', label: 'Fb_527' },
-  { key: 's528', label: 'Fb_528' }, { key: 's529', label: 'Fb_529' },
-  { key: 's530', label: 'Fb_530' }, { key: 's531', label: 'Fb_531' },
-  { key: 's532', label: 'Fb_532' }, { key: 's533', label: 'Fb_533' }, { key: 's534', label: 'Fb_534' },
-  { key: 's535', label: 'Fb_535' }, { key: 's536', label: 'Fb_536' },
-  { key: 's537', label: 'Fb_537' }, { key: 's538', label: 'Fb_538' },
-  { key: 's539', label: 'Fb_539' }, { key: 's540', label: 'Fb_540' },
-  { key: 's541', label: 'Fb_541' }, { key: 's542', label: 'Fb_542' },
-  { key: 's543', label: 'Fb_543' }, { key: 's544', label: 'Fb_544' },
-  { key: 's545', label: 'Fb_545' }, { key: 's546', label: 'Fb_546' },
-  { key: 's547', label: 'Fb_547' }, { key: 's548', label: 'Fb_548' },
-  { key: 's549', label: 'Fb_549' }, { key: 's550', label: 'Fb_550' },
-  { key: 's551', label: 'Fb_551' }, { key: 's552', label: 'Fb_552' },
-  { key: 's553', label: 'Fb_553' }, { key: 's554', label: 'Fb_554' },
-  { key: 's555', label: 'Fb_555' }, { key: 's555v2', label: 'Fb_555v2' }, { key: 's556', label: 'Fb_556' },
-  { key: 's557', label: 'Fb_557' }, { key: 's558', label: 'Fb_558' }, { key: 's558v2', label: 'Fb_558v2' },
-  { key: 's559', label: 'Fb_559' }, { key: 's559v2', label: 'Fb_559v2' },
-  { key: 's560', label: 'Fb_560' }, { key: 's560v2', label: 'Fb_560v2' },
-  { key: 's561', label: 'Fb_561' }, { key: 's561v2', label: 'Fb_561v2' }, { key: 's561v3', label: 'Fb_561v3' },{ key: 's561v99', label: 'Fb_561v99' },  { key: 's561v4s21', label: 'Fb_561v4_S21' }, { key: 's561v4s23', label: 'Fb_561v4_S23' },  { key: 's562', label: 'Fb_562' }, { key: 's562v3', label: 'Fb_562v3' }, { key: 's562v4s21', label: 'Fb_562v4_S21' }, { key: 's562v4s23', label: 'Fb_562v4_S23' }, { key: 's563', label: 'Fb_563' }, { key: 's563s21', label: 'Fb_563_S21' }, { key: 's563v3s21', label: 'Fb_563v3_S21' }, { key: 's563v4s21', label: 'Fb_563v4_S21' }, { key: 's563v4s23', label: 'Fb_563v4_S23' }, { key: 's563v5s21', label: 'Fb_563v5_S21' }, { key: 's563v5s23', label: 'Fb_563v5_S23' }, { key: 's563v6s21', label: 'Fb_563v6_S21' }, { key: 's563v6s23', label: 'Fb_563v6_S23' }, { key: 's564v1s21', label: 'Fb_564v1_S21' }, { key: 's564v1s23', label: 'Fb_564v1_S23' }, { key: 's564v2s21', label: 'Fb_564v2_S21' }, { key: 's564v2s23', label: 'Fb_564v2_S23' }, { key: 's564v3s21', label: 'Fb_564v3_S21' }, { key: 's564v3s23', label: 'Fb_564v3_S23' }, { key: 's565s21', label: 'Fb_565_S21' }, { key: 's565s23', label: 'Fb_565_S23' }, { key: 's565v2s21', label: 'Fb_565v2_S21' }, { key: 's565v2s23', label: 'Fb_565v2_S23' },
-]
-
-// iOS Native App (FBIOS) — KHÁC Android, dùng graph.facebook.com + OAuth 6628568379.
-// Sẽ mở rộng khi có capture iOS versions mới (iosapp563, iosapp564, ...).
-const REG_PLATFORMS_IOS = [
-  { key: 'ios562', label: 'iOS_562' },
-{ key: 'ios563', label: 'iOS_563' },
-{ key: 'ios564', label: 'iOS_564' },
-{ key: 'ios563', label: 'iOS_563' },
-{ key: 'ios562', label: 'iOS_562' },
-{ key: 'ios561', label: 'iOS_561' },
-{ key: 'ios560', label: 'iOS_560' },
-{ key: 'ios559', label: 'iOS_559' },
-{ key: 'ios558', label: 'iOS_558' },
-{ key: 'ios557', label: 'iOS_557' },
-{ key: 'ios556', label: 'iOS_556' },
-{ key: 'ios555', label: 'iOS_555' },
-{ key: 'ios554', label: 'iOS_554' },
-{ key: 'ios553', label: 'iOS_553' },
-{ key: 'ios552', label: 'iOS_552' },
-{ key: 'ios551', label: 'iOS_551' },
-{ key: 'ios550', label: 'iOS_550' },
-{ key: 'ios549', label: 'iOS_549' },
-{ key: 'ios548', label: 'iOS_548' },
-{ key: 'ios547', label: 'iOS_547' },
-{ key: 'ios546', label: 'iOS_546' },
-{ key: 'ios545', label: 'iOS_545' },
-{ key: 'ios544', label: 'iOS_544' },
-{ key: 'ios543', label: 'iOS_543' },
-{ key: 'ios542', label: 'iOS_542' },
-{ key: 'ios541', label: 'iOS_541' },
-{ key: 'ios540', label: 'iOS_540' },
-{ key: 'ios539', label: 'iOS_539' },
-{ key: 'ios538', label: 'iOS_538' },
-{ key: 'ios537', label: 'iOS_537' },
-{ key: 'ios536', label: 'iOS_536' },
-{ key: 'ios535', label: 'iOS_535' },
-{ key: 'ios534', label: 'iOS_534' },
-{ key: 'ios533', label: 'iOS_533' },
-{ key: 'ios532', label: 'iOS_532' },
-{ key: 'ios531', label: 'iOS_531' },
-{ key: 'ios530', label: 'iOS_530' },
-{ key: 'ios529', label: 'iOS_529' },
-{ key: 'ios528', label: 'iOS_528' },
-{ key: 'ios527', label: 'iOS_527' },
-{ key: 'ios526', label: 'iOS_526' },
-{ key: 'ios525', label: 'iOS_525' },
-{ key: 'ios524', label: 'iOS_524' },
-{ key: 'ios523', label: 'iOS_523' },
-{ key: 'ios522', label: 'iOS_522' },
-{ key: 'ios521', label: 'iOS_521' },
-{ key: 'ios520', label: 'iOS_520' },
-{ key: 'ios519', label: 'iOS_519' },
-{ key: 'ios518', label: 'iOS_518' },
-{ key: 'ios517', label: 'iOS_517' },
-{ key: 'ios516', label: 'iOS_516' },
-{ key: 'ios515', label: 'iOS_515' },
-{ key: 'ios514', label: 'iOS_514' },
-{ key: 'ios513', label: 'iOS_513' },
-{ key: 'ios512', label: 'iOS_512' },
-{ key: 'ios511', label: 'iOS_511' },
-{ key: 'ios510', label: 'iOS_510' },
-{ key: 'ios509', label: 'iOS_509' },
-{ key: 'ios508', label: 'iOS_508' },
-{ key: 'ios507', label: 'iOS_507' },
-{ key: 'ios506', label: 'iOS_506' },
-{ key: 'ios505', label: 'iOS_505' },
-{ key: 'ios504', label: 'iOS_504' },
-{ key: 'ios503', label: 'iOS_503' },
-{ key: 'ios502', label: 'iOS_502' },
-{ key: 'ios501', label: 'iOS_501' },
-{ key: 'ios500', label: 'iOS_500' },
-{ key: 'ios499', label: 'iOS_499' },
-{ key: 'ios498', label: 'iOS_498' },
-{ key: 'ios497', label: 'iOS_497' },
-{ key: 'ios496', label: 'iOS_496' },
-{ key: 'ios495', label: 'iOS_495' },
-{ key: 'ios494', label: 'iOS_494' },
-{ key: 'ios493', label: 'iOS_493' },
-{ key: 'ios492', label: 'iOS_492' },
-{ key: 'ios491', label: 'iOS_491' },
-{ key: 'ios490', label: 'iOS_490' },
-{ key: 'ios489', label: 'iOS_489' },
-{ key: 'ios488', label: 'iOS_488' },
-{ key: 'ios487', label: 'iOS_487' },
-{ key: 'ios486', label: 'iOS_486' },
-{ key: 'ios485', label: 'iOS_485' },
-{ key: 'ios484', label: 'iOS_484' },
-{ key: 'ios483', label: 'iOS_483' },
-{ key: 'ios482', label: 'iOS_482' },
-{ key: 'ios481', label: 'iOS_481' },
-{ key: 'ios480', label: 'iOS_480' },
-{ key: 'ios479', label: 'iOS_479' },
-{ key: 'ios478', label: 'iOS_478' },
-{ key: 'ios477', label: 'iOS_477' },
-{ key: 'ios476', label: 'iOS_476' },
-{ key: 'ios475', label: 'iOS_475' },
-{ key: 'ios474', label: 'iOS_474' },
-{ key: 'ios473', label: 'iOS_473' },
-{ key: 'ios472', label: 'iOS_472' },
-{ key: 'ios471', label: 'iOS_471' },
-{ key: 'ios470', label: 'iOS_470' },
-{ key: 'ios469', label: 'iOS_469' },
-{ key: 'ios468', label: 'iOS_468' },
-{ key: 'ios467', label: 'iOS_467' },
-{ key: 'ios466', label: 'iOS_466' },
-{ key: 'ios465', label: 'iOS_465' },
-{ key: 'ios464', label: 'iOS_464' },
-{ key: 'ios463', label: 'iOS_463' },
-{ key: 'ios462', label: 'iOS_462' },
-{ key: 'ios461', label: 'iOS_461' },
-{ key: 'ios460', label: 'iOS_460' },
-{ key: 'ios459', label: 'iOS_459' },
-{ key: 'ios458', label: 'iOS_458' },
-{ key: 'ios457', label: 'iOS_457' },
-{ key: 'ios456', label: 'iOS_456' },
-{ key: 'ios455', label: 'iOS_455' },
-{ key: 'ios454', label: 'iOS_454' },
-{ key: 'ios453', label: 'iOS_453' },
-{ key: 'ios452', label: 'iOS_452' },
-{ key: 'ios451', label: 'iOS_451' },
-{ key: 'ios450', label: 'iOS_450' },
-{ key: 'ios449', label: 'iOS_449' },
-{ key: 'ios448', label: 'iOS_448' },
-{ key: 'ios447', label: 'iOS_447' },
-{ key: 'ios446', label: 'iOS_446' },
-{ key: 'ios445', label: 'iOS_445' },
-{ key: 'ios444', label: 'iOS_444' },
-{ key: 'ios443', label: 'iOS_443' },
-{ key: 'ios442', label: 'iOS_442' },
-{ key: 'ios441', label: 'iOS_441' },
-{ key: 'ios440', label: 'iOS_440' },
-{ key: 'ios439', label: 'iOS_439' },
-{ key: 'ios438', label: 'iOS_438' },
-{ key: 'ios437', label: 'iOS_437' },
-{ key: 'ios436', label: 'iOS_436' },
-{ key: 'ios435', label: 'iOS_435' },
-{ key: 'ios434', label: 'iOS_434' },
-{ key: 'ios433', label: 'iOS_433' },
-{ key: 'ios432', label: 'iOS_432' },
-{ key: 'ios431', label: 'iOS_431' },
-{ key: 'ios430', label: 'iOS_430' },
-{ key: 'ios429', label: 'iOS_429' },
-{ key: 'ios428', label: 'iOS_428' },
-{ key: 'ios427', label: 'iOS_427' },
-{ key: 'ios426', label: 'iOS_426' },
-{ key: 'ios425', label: 'iOS_425' },
-{ key: 'ios424', label: 'iOS_424' },
-{ key: 'ios423', label: 'iOS_423' },
-{ key: 'ios422', label: 'iOS_422' },
-{ key: 'ios421', label: 'iOS_421' },
-{ key: 'ios420', label: 'iOS_420' },
-]
+const REG_PLATFORMS_VER: PlatformOption[] = []
+const REG_PLATFORMS_IOS: PlatformOption[] = []
 
 const VER_PLATFORMS_ANDR = [
   { key: 'api android', label: 'android' }, { key: 'api token', label: 'token' },
@@ -1411,12 +1186,10 @@ const VER_PLATFORMS_VER = [
 // KHÔNG có nút iOS_563 ở verify: chưa có verifier ios563 riêng (sẽ "verifier not registered").
 // Khi nào có capture verify iOS563 thật + verify/ios563/ thì mới thêm lại.
 const VER_PLATFORMS_IOS = [
+  { key: 'ios564', label: 'iOS_564' },
+  { key: 'ios563', label: 'iOS_563' },
   { key: 'ios562', label: 'iOS_562' },
-{ key: 'ios563', label: 'iOS_563' },
-{ key: 'ios564', label: 'iOS_564' },
-{ key: 'ios563', label: 'iOS_563' },
-{ key: 'ios562', label: 'iOS_562' },
-{ key: 'ios561', label: 'iOS_561' },
+  { key: 'ios561', label: 'iOS_561' },
 { key: 'ios560', label: 'iOS_560' },
 { key: 'ios559', label: 'iOS_559' },
 { key: 'ios558', label: 'iOS_558' },
@@ -1563,22 +1336,8 @@ const VER_PLATFORMS_IOS = [
 type PlatformOption = { key: string; label: string }
 const DISABLED_PLATFORM_KEYS = new Set(['s399'])
 
-// Messenger groups — tách riêng khỏi lưới version để không lẫn vào các bản version.
-// Android Mess (Reg Mess / AppMess V3) đứng cạnh cụm Version; iOS Mess (Reg/Ver Mess iOS) đứng trong cụm iOS.
-const REG_PLATFORMS_MESS_ANDR: PlatformOption[] = [
-  { key: 'appmv3reg', label: 'Reg Mess' },
-  { key: 'appmv3reg535', label: 'Reg Mess 535' },
-  { key: 'appmv3reg545', label: 'Reg Mess 545' },
-  { key: 'appmv3reg555', label: 'Reg Mess 555' },
-  { key: 'appmv3reg563', label: 'Reg Mess 563' },
-  { key: 'appmv3reg564', label: 'Reg Mess 564' },
-  { key: 'appmv3reg565', label: 'Reg Mess 565' },
-  { key: 'appmv3reg525', label: 'Reg Mess 525' },
-  { key: 'appmv3reg515', label: 'Reg Mess 515' },
-  { key: 'appmv3reg505', label: 'Reg Mess 505' },
-  { key: 'appmv3reg490', label: 'Reg Mess 490' },
-]
-const REG_PLATFORMS_MESS_IOS: PlatformOption[] = [{ key: 'iosmessreg', label: 'Reg Mess iOS' }]
+const REG_PLATFORMS_MESS_ANDR: PlatformOption[] = []
+const REG_PLATFORMS_MESS_IOS: PlatformOption[] = []
 const VER_PLATFORMS_MESS_ANDR: PlatformOption[] = [
   { key: 'appmessv3', label: 'AppMess V3' },
   { key: 'appmessv3_535', label: 'AppMess 535' },
@@ -1639,7 +1398,6 @@ function platformRangeLabel(items: PlatformOption[]): string {
   return first === last ? first : `${first} - ${last}`
 }
 
-const regVersionBatches = computed(() => chunkPlatformOptions(REG_PLATFORMS_VER))
 const verifyVersionBatches = computed(() => chunkPlatformOptions(VER_PLATFORMS_VER))
 const regIosBatches = computed(() => chunkPlatformOptions(REG_PLATFORMS_IOS, 20))
 const verifyIosBatches = computed(() => chunkPlatformOptions(VER_PLATFORMS_IOS, 20))
@@ -1703,14 +1461,11 @@ watch(visibleVerifyPlatformKeys, (v) => {
 // Platform trong DISABLED_PLATFORM_KEYS bị ẨN HOÀN TOÀN — không hiển thị button, không
 // trong popup config visibility. Để kích hoạt lại 1 platform: xoá khỏi DISABLED_PLATFORM_KEYS.
 const visibleRegPlatformsStd = computed(() => REG_PLATFORMS_STD.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
-const visibleRegPlatformsVer = computed(() => REG_PLATFORMS_VER.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
-const visibleRegPlatformsIos = computed(() => REG_PLATFORMS_IOS.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
+const visibleRegPlatformsIos = computed(() => REG_PLATFORMS_IOS.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 const visibleVerifyPlatformsAndr = computed(() => VER_PLATFORMS_ANDR.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 const visibleVerifyPlatformsMfb = computed(() => VER_PLATFORMS_MFB.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 const visibleVerifyPlatformsVer = computed(() => VER_PLATFORMS_VER.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
 const visibleVerifyPlatformsIos = computed(() => VER_PLATFORMS_IOS.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
-const visibleRegPlatformsMessAndr = computed(() => REG_PLATFORMS_MESS_ANDR.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
-const visibleRegPlatformsMessIos = computed(() => REG_PLATFORMS_MESS_IOS.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
 const visibleVerifyPlatformsMessAndr = computed(() => VER_PLATFORMS_MESS_ANDR.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
 const visibleVerifyPlatformsMessIos = computed(() => VER_PLATFORMS_MESS_IOS.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
 
@@ -1975,7 +1730,10 @@ function addRegPlatforms(platforms: string[]) {
   selectRegPlatforms([...(form.value.apiRegPlatforms ?? []), ...platforms.filter(isPlatformSelectable)])
 }
 function selectAllRegPlatforms() {
-  selectRegPlatforms([...visibleRegPlatformsStd.value, ...visibleRegPlatformsVer.value, ...visibleRegPlatformsMessAndr.value, ...visibleRegPlatformsIos.value, ...visibleRegPlatformsMessIos.value].map(p => p.key))
+  selectRegPlatforms([
+    ...visibleRegPlatformsStd.value.map(p => p.key),
+    ...visibleRegPlatformsIos.value.map(p => p.key),
+  ])
 }
 function selectRegVersionBatch(batch: PlatformOption[]) {
   addRegPlatforms(batch.map(p => p.key))
@@ -2201,12 +1959,12 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   //{ value: '@i2b.vn',       label: 'Mail1sec' },          // ẩn
   { value: 'mohmal',        label: 'Mohmal' },
   { value: 'tempmail-lol',  label: 'TempMail LOL' },
-  //{ value: 'mailtm',        label: 'Mail.tm' },            // ẩn — không đọc được code
+  { value: 'mailtm',         label: 'Mail.tm (IG)' },       // dùng cho IG reg (ig_ios_bloks / ig_android)
   { value: 'tempmail-plus', label: 'TempMail.plus' },
-  { value: 'dropmail',      label: 'Dropmail' },
+  //{ value: 'dropmail',      label: 'Dropmail' },           // BỎ — API disabled (legacy_token_disabled)
   { value: 'guerrillamail', label: 'GuerrillaMail' },
   { value: 'spam4me',       label: 'Spam4.me' },
-  { value: 'temp-mail.org', label: 'Temp-Mail.org' },
+  //{ value: 'temp-mail.org', label: 'Temp-Mail.org' },      // BỎ — Cloudflare chặn
   //{ value: 'mail.cx',       label: 'Mail.cx' },   // ẩn
   { value: 'mailtd',        label: 'Mail.cx' },
   //{ value: 'inboxes',       label: 'Inboxes.com' },        // ẩn
@@ -2214,7 +1972,10 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'mailymg',       label: 'Mailymg.com' },
   { value: 'altmails',      label: 'AltMails.com' },
   //{ value: 'onesecmail',   label: '1secmail.com' },        // ẩn
-  { value: 'firetempmail', label: 'FireTempMail.com' },
+  { value: 'firetempmail',       label: 'FireTempMail.com' },
+  { value: 'firetempmail-ctm',   label: 'FireTempMail (@ctm.edu.pl)' },
+  { value: 'firetempmail-jd',    label: 'FireTempMail (@jobsdeforyou.sa.com)' },
+  { value: 'firetempmail-offre', label: 'FireTempMail (@offredaily.sa.com)' },
   //{ value: 'fviainboxes',  label: 'FviaInboxes.com' },     // ẩn
   { value: 'byomde',       label: 'Byom.de' },
   { value: 'dinlaan',      label: 'Dinlaan.com' },
@@ -2226,16 +1987,36 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'tempomintraccoon', label: 'Tempo.Mintraccoon.com' },
   { value: 'tempemail',    label: 'TempEmail.co' },
   { value: 'tmpinbox',     label: 'TmpInbox.com' },
-  { value: 'tenminutemail', label: '10MinuteMail.com' },
+  //{ value: 'tenminutemail', label: '10MinuteMail.com' },   // BỎ — API trả HTML (hỏng)
   { value: 'tempmailto',   label: 'TempMailTo.com' },
   { value: 'onesecemail',  label: '1secemail.com' },
   { value: 'tempmail100',  label: 'TempMail100.com' },
-  { value: 'tempmailso',   label: 'TempMail.so' },
+  //{ value: 'tempmailso',   label: 'TempMail.so' },         // BỎ — Cloudflare chặn (cần residential proxy)
   { value: 'priyoemail',   label: 'Priyo.email (cần API key)' },
-  { value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' },
+  //{ value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' }, // BỎ — payment token hết hạn (4030)
   { value: 'mailtempcom',  label: 'Mail-Temp.com' },
   //{ value: 'wemakemail',   label: 'WeMakeMail (cần API key)' }, // ẩn
   { value: 'mailhv',       label: 'MailHV (cần API key)' },
+  // ── Port từ NullCoreSummer (đã test CreateEmail OK) ──
+  { value: 'tempmailio',      label: 'Temp-Mail.io' },
+  { value: 'anonymmail',      label: 'AnonymMail.net' },
+  { value: 'tempmailnow',     label: 'TempMail.now' },
+  { value: 'tempmailworld',   label: 'TempMail.world' },
+  { value: 'expressmail',     label: 'ExpressMail.app' },
+  { value: 'tempmail100free', label: 'TempMail100 Free' },
+  { value: 'fakelegal',       label: 'Fake.legal' },
+  { value: 'tempmailbee',     label: 'TempMailBee' },
+  { value: 'tempmailapp',     label: 'Temp-Mail.app' },
+  { value: 'tempamail',       label: 'TempaMail.com' },
+  { value: 'tempmailai',      label: 'Temp-Mail.ai' },
+  { value: 'tempemailcc',     label: 'TempEmail.cc' },
+  { value: 'tempmailerme',    label: 'Temp-Mailer.me' },
+  { value: 'mailwave',        label: 'MailWave.dev' },
+  { value: 'tempmail10',      label: 'TempMail10.com' },
+  { value: 'tempmailpro',     label: 'TempMailPro.io' },
+  { value: 'tempmaildigital', label: 'TempMail.digital' },
+  { value: 'tempmailx',       label: 'TempMailX.xyz' },
+  { value: 'tempmailid',      label: 'Temp-Mail.id' },
 ]
 const RENT_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'zeus-x',        label: 'ZeusX' },
@@ -2622,53 +2403,6 @@ function resetForms() {
                 </label>
               </div>
             </section>
-            <section class="rp-display-group">
-              <div class="rp-display-group__head">
-                <strong>Version</strong>
-                <span>
-                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_VER, true)">Chọn</button>
-                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_VER, false)">Bỏ</button>
-                </span>
-              </div>
-              <div class="rp-display-grid">
-                <template v-for="p in REG_PLATFORMS_VER" :key="p.key">
-                  <label v-if="!DISABLED_PLATFORM_KEYS.has(p.key)" class="rp-display-card">
-                    <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
-                    <span>{{ p.label }}</span>
-                  </label>
-                </template>
-              </div>
-            </section>
-            <section class="rp-display-group rp-display-group--ios">
-              <div class="rp-display-group__head">
-                <strong>iOS Native</strong>
-                <span>
-                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_IOS, true)">Chọn</button>
-                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_IOS, false)">Bỏ</button>
-                </span>
-              </div>
-              <div class="rp-display-grid">
-                <label v-for="p in REG_PLATFORMS_IOS" :key="p.key" class="rp-display-card rp-display-card--ios">
-                  <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
-                  <span>{{ p.label }}</span>
-                </label>
-              </div>
-            </section>
-            <section class="rp-display-group">
-              <div class="rp-display-group__head">
-                <strong>Messenger</strong>
-                <span>
-                  <button type="button" @click="toggleVisiblePlatforms('reg', [...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_MESS_IOS], true)">Chọn</button>
-                  <button type="button" @click="toggleVisiblePlatforms('reg', [...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_MESS_IOS], false)">Bỏ</button>
-                </span>
-              </div>
-              <div class="rp-display-grid">
-                <label v-for="p in [...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_MESS_IOS]" :key="p.key" class="rp-display-card">
-                  <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
-                  <span>{{ p.label }}</span>
-                </label>
-              </div>
-            </section>
           </div>
         </section>
       </div>
@@ -3004,33 +2738,10 @@ function resetForms() {
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
               </div>
-              <div v-if="visibleRegPlatformsVer.length" class="rp-platform-btns__group">
-                <button v-for="p in visibleRegPlatformsVer" :key="p.key" type="button" :data-pkey="p.key"
-                  :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
-                  :disabled="!isPlatformSelectable(p.key)"
-                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
-              </div>
-              <!-- Messenger (Android) — tách riêng khỏi lưới version -->
-              <div v-if="visibleRegPlatformsMessAndr.length" class="rp-platform-btns__group rp-platform-btns__group--mess">
-                <span class="rp-pbtn-grouplbl">Mess</span>
-                <button v-for="p in visibleRegPlatformsMessAndr" :key="p.key" type="button" :data-pkey="p.key"
-                  :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
-                  :disabled="!isPlatformSelectable(p.key)"
-                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
-              </div>
-              <!-- iOS Native App group — màu cyan để phân biệt với Android orange -->
               <div v-if="visibleRegPlatformsIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
                 <span class="rp-pbtn-grouplbl">iOS</span>
                 <button v-for="p in visibleRegPlatformsIos" :key="p.key" type="button" :data-pkey="p.key"
-                  :class="['rp-pbtn rp-pbtn--ios rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
-                  :disabled="!isPlatformSelectable(p.key)"
-                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
-              </div>
-              <!-- Messenger (iOS) — trong cụm iOS nhưng tách khỏi các version iOS -->
-              <div v-if="visibleRegPlatformsMessIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
-                <span class="rp-pbtn-grouplbl">Mess iOS</span>
-                <button v-for="p in visibleRegPlatformsMessIos" :key="p.key" type="button" :data-pkey="p.key"
-                  :class="['rp-pbtn rp-pbtn--ios rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
+                  :class="['rp-pbtn rp-pbtn--ios', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
               </div>
@@ -3056,16 +2767,6 @@ function resetForms() {
                   <button type="button" class="rp-ctxmenu__item rp-ctxmenu__item--submenu">Chọn <span>›</span></button>
                   <div class="rp-ctxmenu__flyout">
                     <button type="button" class="rp-ctxmenu__item" @click="selectAllRegPlatforms">Tất cả</button>
-                    <div class="rp-ctxmenu__sep">── Android ──</div>
-                    <button
-                      v-for="batch in regVersionBatches"
-                      :key="batch.map(p => p.key).join('-')"
-                      type="button"
-                      class="rp-ctxmenu__item"
-                      @click="selectRegVersionBatch(batch)"
-                    >
-                      {{ platformRangeLabel(batch) }}
-                    </button>
                     <div class="rp-ctxmenu__sep">── iOS ──</div>
                     <button
                       v-for="batch in regIosBatches"

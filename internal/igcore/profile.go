@@ -16,6 +16,10 @@ const (
 	docIDApp = "38523300859713187485104132294"
 	// User-Agent IG iOS — iPhone9,1 / iOS 15.8.4 (khớp capture).
 	igUserAgent = "Instagram 410.1.0.36.70 (iPhone9,1; iOS 15_8_4; vi_VN; vi; scale=2.00; 750x1334; 849447290) AppleWebKit/420+"
+
+	// igAndroidAppID và UA dự phòng — Android fingerprint cho i.instagram.com nếu cần sau này.
+	igAndroidAppID = "567067343352427"
+	igAndroidUA    = "Instagram 309.0.0.40.113 Android (30/11; 420dpi; 1080x2201; Google; Pixel 5; redfin; google; en_US; 536920689)"
 )
 
 // igProfile — định danh thiết bị cho 1 phiên reg.

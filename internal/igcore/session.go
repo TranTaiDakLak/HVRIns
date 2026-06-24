@@ -138,4 +138,27 @@ func (s *igSession) qeSync(ctx context.Context, p *igProfile) (string, string, s
 	return keyID, pubKey, xmid, nil
 }
 
+// newChromeCheckSession tạo TLS session với Chrome 133 fingerprint.
+// Dùng cho CheckLiveByCheckerCookie vì web_profile_info yêu cầu Chrome TLS.
+func newChromeCheckSession(proxyStr string) (*igSession, error) {
+	opts := []tls_client.HttpClientOption{
+		tls_client.WithTimeoutSeconds(30),
+		tls_client.WithClientProfile(profiles.Chrome_133),
+		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+		tls_client.WithInsecureSkipVerify(),
+		tls_client.WithNotFollowRedirects(),
+	}
+	if proxyStr != "" {
+		if f := proxy.FormatProxyURL(proxyStr); f != "" {
+			opts = append(opts, tls_client.WithProxyUrl(f))
+		}
+	}
+	c, err := tls_client.NewHttpClient(tls_client.NewNoopLogger(), opts...)
+	if err != nil {
+		return nil, fmt.Errorf("create chrome tls client: %w", err)
+	}
+	zr, _ := zstd.NewReader(nil)
+	return &igSession{client: c, zr: zr}, nil
+}
+
 var _ = bytes.MinRead

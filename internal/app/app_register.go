@@ -5,160 +5,12 @@ package app
 import (
 	"HVRIns/internal/cookie"
 	emailrent "HVRIns/internal/email/rent"
+	"HVRIns/internal/igcore"
 	"HVRIns/internal/instagram"
 	"HVRIns/internal/instagram/fakeinfo"
 	uploadavatar "HVRIns/internal/instagram/interaction/android"
-	androidreg "HVRIns/internal/instagram/register/android"
-	s23reg "HVRIns/internal/instagram/register/android/s23"
-	s399reg "HVRIns/internal/instagram/register/android/s399"
-	ios420reg "HVRIns/internal/instagram/register/ios/ios420"
-	ios421reg "HVRIns/internal/instagram/register/ios/ios421"
-	ios422reg "HVRIns/internal/instagram/register/ios/ios422"
-	ios423reg "HVRIns/internal/instagram/register/ios/ios423"
-	ios424reg "HVRIns/internal/instagram/register/ios/ios424"
-	ios425reg "HVRIns/internal/instagram/register/ios/ios425"
-	ios426reg "HVRIns/internal/instagram/register/ios/ios426"
-	ios427reg "HVRIns/internal/instagram/register/ios/ios427"
-	ios428reg "HVRIns/internal/instagram/register/ios/ios428"
-	ios429reg "HVRIns/internal/instagram/register/ios/ios429"
-	ios430reg "HVRIns/internal/instagram/register/ios/ios430"
-	ios431reg "HVRIns/internal/instagram/register/ios/ios431"
-	ios432reg "HVRIns/internal/instagram/register/ios/ios432"
-	ios433reg "HVRIns/internal/instagram/register/ios/ios433"
-	ios434reg "HVRIns/internal/instagram/register/ios/ios434"
-	ios435reg "HVRIns/internal/instagram/register/ios/ios435"
-	ios436reg "HVRIns/internal/instagram/register/ios/ios436"
-	ios437reg "HVRIns/internal/instagram/register/ios/ios437"
-	ios438reg "HVRIns/internal/instagram/register/ios/ios438"
-	ios439reg "HVRIns/internal/instagram/register/ios/ios439"
-	ios440reg "HVRIns/internal/instagram/register/ios/ios440"
-	ios441reg "HVRIns/internal/instagram/register/ios/ios441"
-	ios442reg "HVRIns/internal/instagram/register/ios/ios442"
-	ios443reg "HVRIns/internal/instagram/register/ios/ios443"
-	ios444reg "HVRIns/internal/instagram/register/ios/ios444"
-	ios445reg "HVRIns/internal/instagram/register/ios/ios445"
-	ios446reg "HVRIns/internal/instagram/register/ios/ios446"
-	ios447reg "HVRIns/internal/instagram/register/ios/ios447"
-	ios448reg "HVRIns/internal/instagram/register/ios/ios448"
-	ios449reg "HVRIns/internal/instagram/register/ios/ios449"
-	ios450reg "HVRIns/internal/instagram/register/ios/ios450"
-	ios451reg "HVRIns/internal/instagram/register/ios/ios451"
-	ios452reg "HVRIns/internal/instagram/register/ios/ios452"
-	ios453reg "HVRIns/internal/instagram/register/ios/ios453"
-	ios454reg "HVRIns/internal/instagram/register/ios/ios454"
-	ios455reg "HVRIns/internal/instagram/register/ios/ios455"
-	ios456reg "HVRIns/internal/instagram/register/ios/ios456"
-	ios457reg "HVRIns/internal/instagram/register/ios/ios457"
-	ios458reg "HVRIns/internal/instagram/register/ios/ios458"
-	ios459reg "HVRIns/internal/instagram/register/ios/ios459"
-	ios460reg "HVRIns/internal/instagram/register/ios/ios460"
-	ios461reg "HVRIns/internal/instagram/register/ios/ios461"
-	ios462reg "HVRIns/internal/instagram/register/ios/ios462"
-	ios463reg "HVRIns/internal/instagram/register/ios/ios463"
-	ios464reg "HVRIns/internal/instagram/register/ios/ios464"
-	ios465reg "HVRIns/internal/instagram/register/ios/ios465"
-	ios466reg "HVRIns/internal/instagram/register/ios/ios466"
-	ios467reg "HVRIns/internal/instagram/register/ios/ios467"
-	ios468reg "HVRIns/internal/instagram/register/ios/ios468"
-	ios469reg "HVRIns/internal/instagram/register/ios/ios469"
-	ios470reg "HVRIns/internal/instagram/register/ios/ios470"
-	ios471reg "HVRIns/internal/instagram/register/ios/ios471"
-	ios472reg "HVRIns/internal/instagram/register/ios/ios472"
-	ios473reg "HVRIns/internal/instagram/register/ios/ios473"
-	ios474reg "HVRIns/internal/instagram/register/ios/ios474"
-	ios475reg "HVRIns/internal/instagram/register/ios/ios475"
-	ios476reg "HVRIns/internal/instagram/register/ios/ios476"
-	ios477reg "HVRIns/internal/instagram/register/ios/ios477"
-	ios478reg "HVRIns/internal/instagram/register/ios/ios478"
-	ios479reg "HVRIns/internal/instagram/register/ios/ios479"
-	ios480reg "HVRIns/internal/instagram/register/ios/ios480"
-	ios481reg "HVRIns/internal/instagram/register/ios/ios481"
-	ios482reg "HVRIns/internal/instagram/register/ios/ios482"
-	ios483reg "HVRIns/internal/instagram/register/ios/ios483"
-	ios484reg "HVRIns/internal/instagram/register/ios/ios484"
-	ios485reg "HVRIns/internal/instagram/register/ios/ios485"
-	ios486reg "HVRIns/internal/instagram/register/ios/ios486"
-	ios487reg "HVRIns/internal/instagram/register/ios/ios487"
-	ios488reg "HVRIns/internal/instagram/register/ios/ios488"
-	ios489reg "HVRIns/internal/instagram/register/ios/ios489"
-	ios490reg "HVRIns/internal/instagram/register/ios/ios490"
-	ios491reg "HVRIns/internal/instagram/register/ios/ios491"
-	ios492reg "HVRIns/internal/instagram/register/ios/ios492"
-	ios493reg "HVRIns/internal/instagram/register/ios/ios493"
-	ios494reg "HVRIns/internal/instagram/register/ios/ios494"
-	ios495reg "HVRIns/internal/instagram/register/ios/ios495"
-	ios496reg "HVRIns/internal/instagram/register/ios/ios496"
-	ios497reg "HVRIns/internal/instagram/register/ios/ios497"
-	ios498reg "HVRIns/internal/instagram/register/ios/ios498"
-	ios499reg "HVRIns/internal/instagram/register/ios/ios499"
-	ios500reg "HVRIns/internal/instagram/register/ios/ios500"
-	ios501reg "HVRIns/internal/instagram/register/ios/ios501"
-	ios502reg "HVRIns/internal/instagram/register/ios/ios502"
-	ios503reg "HVRIns/internal/instagram/register/ios/ios503"
-	ios504reg "HVRIns/internal/instagram/register/ios/ios504"
-	ios505reg "HVRIns/internal/instagram/register/ios/ios505"
-	ios506reg "HVRIns/internal/instagram/register/ios/ios506"
-	ios507reg "HVRIns/internal/instagram/register/ios/ios507"
-	ios508reg "HVRIns/internal/instagram/register/ios/ios508"
-	ios509reg "HVRIns/internal/instagram/register/ios/ios509"
-	ios510reg "HVRIns/internal/instagram/register/ios/ios510"
-	ios511reg "HVRIns/internal/instagram/register/ios/ios511"
-	ios512reg "HVRIns/internal/instagram/register/ios/ios512"
-	ios513reg "HVRIns/internal/instagram/register/ios/ios513"
-	ios514reg "HVRIns/internal/instagram/register/ios/ios514"
-	ios515reg "HVRIns/internal/instagram/register/ios/ios515"
-	ios516reg "HVRIns/internal/instagram/register/ios/ios516"
-	ios517reg "HVRIns/internal/instagram/register/ios/ios517"
-	ios518reg "HVRIns/internal/instagram/register/ios/ios518"
-	ios519reg "HVRIns/internal/instagram/register/ios/ios519"
-	ios520reg "HVRIns/internal/instagram/register/ios/ios520"
-	ios521reg "HVRIns/internal/instagram/register/ios/ios521"
-	ios522reg "HVRIns/internal/instagram/register/ios/ios522"
-	ios523reg "HVRIns/internal/instagram/register/ios/ios523"
-	ios524reg "HVRIns/internal/instagram/register/ios/ios524"
-	ios525reg "HVRIns/internal/instagram/register/ios/ios525"
-	ios526reg "HVRIns/internal/instagram/register/ios/ios526"
-	ios527reg "HVRIns/internal/instagram/register/ios/ios527"
-	ios528reg "HVRIns/internal/instagram/register/ios/ios528"
-	ios529reg "HVRIns/internal/instagram/register/ios/ios529"
-	ios530reg "HVRIns/internal/instagram/register/ios/ios530"
-	ios531reg "HVRIns/internal/instagram/register/ios/ios531"
-	ios532reg "HVRIns/internal/instagram/register/ios/ios532"
-	ios533reg "HVRIns/internal/instagram/register/ios/ios533"
-	ios534reg "HVRIns/internal/instagram/register/ios/ios534"
-	ios535reg "HVRIns/internal/instagram/register/ios/ios535"
-	ios536reg "HVRIns/internal/instagram/register/ios/ios536"
-	ios537reg "HVRIns/internal/instagram/register/ios/ios537"
-	ios538reg "HVRIns/internal/instagram/register/ios/ios538"
-	ios539reg "HVRIns/internal/instagram/register/ios/ios539"
-	ios540reg "HVRIns/internal/instagram/register/ios/ios540"
-	ios541reg "HVRIns/internal/instagram/register/ios/ios541"
-	ios542reg "HVRIns/internal/instagram/register/ios/ios542"
-	ios543reg "HVRIns/internal/instagram/register/ios/ios543"
-	ios544reg "HVRIns/internal/instagram/register/ios/ios544"
-	ios545reg "HVRIns/internal/instagram/register/ios/ios545"
-	ios546reg "HVRIns/internal/instagram/register/ios/ios546"
-	ios547reg "HVRIns/internal/instagram/register/ios/ios547"
-	ios548reg "HVRIns/internal/instagram/register/ios/ios548"
-	ios549reg "HVRIns/internal/instagram/register/ios/ios549"
-	ios550reg "HVRIns/internal/instagram/register/ios/ios550"
-	ios551reg "HVRIns/internal/instagram/register/ios/ios551"
-	ios552reg "HVRIns/internal/instagram/register/ios/ios552"
-	ios553reg "HVRIns/internal/instagram/register/ios/ios553"
-	ios554reg "HVRIns/internal/instagram/register/ios/ios554"
-	ios555reg "HVRIns/internal/instagram/register/ios/ios555"
-	ios556reg "HVRIns/internal/instagram/register/ios/ios556"
-	ios557reg "HVRIns/internal/instagram/register/ios/ios557"
-	ios558reg "HVRIns/internal/instagram/register/ios/ios558"
-	ios559reg "HVRIns/internal/instagram/register/ios/ios559"
-	ios560reg "HVRIns/internal/instagram/register/ios/ios560"
-	ios561reg "HVRIns/internal/instagram/register/ios/ios561"
-	ios562reg "HVRIns/internal/instagram/register/ios/ios562"
-	ios563reg "HVRIns/internal/instagram/register/ios/ios563"
-	ios564reg "HVRIns/internal/instagram/register/ios/ios564"
-	ioshttpreg "HVRIns/internal/instagram/register/ioshttp"
-	webregister "HVRIns/internal/instagram/register/web"
-	webandroidreg "HVRIns/internal/instagram/register/webandroid"
+	android "HVRIns/internal/instagram/register/android"
+	"HVRIns/internal/instagram/register/igandroid"
 	"HVRIns/internal/proxy"
 	resultpkg "HVRIns/internal/result"
 	"HVRIns/internal/runner"
@@ -348,99 +200,11 @@ func (a *App) RunRegister(maxThreads int) string {
 		runTag := time.Now().Format("20060102_150405")
 		platformTag := "web"
 		switch regPlatform {
-		case instagram.PlatformAndroid:
-			platformTag = "android"
-		case instagram.PlatformWebAndroid:
-			platformTag = "webandroid"
-		case instagram.PlatformIOS:
-			platformTag = "ios"
-		case instagram.PlatformS23:
-			platformTag = "s23"
-		case instagram.PlatformS22:
-			platformTag = "s22"
-		case instagram.PlatformS24:
-			platformTag = "s24"
-		case instagram.PlatformS25:
-			platformTag = "s25"
-		case instagram.PlatformS26:
-			platformTag = "s26"
-		case instagram.PlatformS545, instagram.PlatformS546, instagram.PlatformS547, instagram.PlatformS548, instagram.PlatformS549,
-			instagram.PlatformS550, instagram.PlatformS551, instagram.PlatformS552, instagram.PlatformS553, instagram.PlatformS554:
-			platformTag = regPlatform
-		case instagram.PlatformS557:
-			platformTag = "s557"
-		case instagram.PlatformS558:
-			platformTag = "s558"
-		case instagram.PlatformS555:
-			platformTag = "s555"
-		case instagram.PlatformS556:
-			platformTag = "s556"
-		case instagram.PlatformS559:
-			platformTag = "s559"
-		case instagram.PlatformS559V2:
-			platformTag = "s559v2"
-		case instagram.PlatformS560:
-			platformTag = "s560"
-		case instagram.PlatformS560V2:
-			platformTag = "s560v2"
-		case instagram.PlatformS561:
-			platformTag = "s561"
-		case instagram.PlatformS561V2:
-			platformTag = "s561v2"
-		case instagram.PlatformS561V3:
-			platformTag = "s561v3"
-		case instagram.PlatformS561V99:
-			platformTag = "s561v99"
-		case instagram.PlatformS562:
-			platformTag = "s562"
-		case instagram.PlatformS562V3:
-			platformTag = "s562v3"
-		case instagram.PlatformS563:
-			platformTag = "s563"
-		case instagram.PlatformS563V2:
-			platformTag = "s563v2"
-		case instagram.PlatformS563S21:
-			platformTag = "s563s21"
-		case instagram.PlatformS563V3S21:
-			platformTag = "s563v3s21"
-		case instagram.PlatformS563V4S21:
-			platformTag = "s563v4s21"
-		case instagram.PlatformS563V4S23:
-			platformTag = "s563v4s23"
-		case instagram.PlatformS563V5S21:
-			platformTag = "s563v5s21"
-		case instagram.PlatformS563V5S23:
-			platformTag = "s563v5s23"
-		case instagram.PlatformS563V6S21:
-			platformTag = "s563v6s21"
-		case instagram.PlatformS563V6S23:
-			platformTag = "s563v6s23"
-		case instagram.PlatformS564V1S21:
-			platformTag = "s564v1s21"
-		case instagram.PlatformS564V1S23:
-			platformTag = "s564v1s23"
-		case instagram.PlatformS564V2S21:
-			platformTag = "s564v2s21"
-		case instagram.PlatformS564V2S23:
-			platformTag = "s564v2s23"
-		case instagram.PlatformS564V3S21:
-			platformTag = "s564v3s21"
-		case instagram.PlatformS564V3S23:
-			platformTag = "s564v3s23"
-		case instagram.PlatformS561V4S21:
-			platformTag = "s561v4s21"
-		case instagram.PlatformS561V4S23:
-			platformTag = "s561v4s23"
-		case instagram.PlatformS562V4S21:
-			platformTag = "s562v4s21"
-		case instagram.PlatformS562V4S23:
-			platformTag = "s562v4s23"
-		case instagram.PlatformS399:
-			platformTag = "s399"
-		case instagram.PlatformIOSMessReg:
-			platformTag = "iosmess"
-		}
-		if isRegPlatformSxxx(regPlatform) {
+		case instagram.PlatformIGAndroid:
+			platformTag = "igandroid"
+		case instagram.PlatformIGIOSBloks:
+			platformTag = "ig_ios_bloks"
+		default:
 			platformTag = regPlatform
 		}
 		// Multi-version: ghép tag tất cả version (vd "s560-s561-s562"); quá dài → "multiN".
@@ -508,8 +272,6 @@ func (a *App) RunRegister(maxThreads int) string {
 	// Login/token-fetch phải ở VERIFY, không phải REG: khi sẽ chạy verify, verify tự
 	// lấy token (Android-family qua /auth/login, iOS qua CAA login EAAAAAY) → reg
 	// cookie-only KHÔNG login lúc reg. Chỉ reg-only (không verify) mới giữ login lúc reg.
-	webregister.SkipAuthLoginAtReg = interactionCfg.VerifyEnabled || verifyIsIOS(interactionCfg.ApiVerifyPlatform)
-
 	cookieInitialLimit := 9 // default match C# UI
 	if interactionCfg.LimitCookieInitialCount > 0 {
 		cookieInitialLimit = interactionCfg.LimitCookieInitialCount
@@ -546,162 +308,7 @@ func (a *App) RunRegister(maxThreads int) string {
 
 	// persistNewDatr ghi datr mới thu được từ cookie reg vào Pool file (Pool{YYYYMMDD}_{N}.txt).
 	// Chỉ active khi SaveNewDatr=true — user tích checkbox "Add new pool".
-	allPlatformPools := map[string]**androidreg.PartitionedDatrPool{
-		"Android":    &androidreg.SharedPool,
-		"S23":        &s23reg.SharedPool,
-		"S399":       &s399reg.SharedPool,
-		"WebAndroid": &webandroidreg.SharedPool,
-		"iOS HTTP":   &ioshttpreg.SharedPool,
-		"Web":        &webregister.SharedPool,
-		"iOS562":     &ios562reg.SharedDatrPool,
-		"iOS563":     &ios563reg.SharedDatrPool,
-		"iOS555":     &ios555reg.SharedDatrPool,
-		"iOS564":     &ios564reg.SharedDatrPool,
-		"iOS550":     &ios550reg.SharedDatrPool,
-		"iOS540":     &ios540reg.SharedDatrPool,
-		"iOS530":     &ios530reg.SharedDatrPool,
-		"iOS520":     &ios520reg.SharedDatrPool,
-		"iOS510":     &ios510reg.SharedDatrPool,
-		"iOS500":     &ios500reg.SharedDatrPool,
-		"iOS490":     &ios490reg.SharedDatrPool,
-		"iOS480":     &ios480reg.SharedDatrPool,
-		"iOS470":     &ios470reg.SharedDatrPool,
-		"iOS460":     &ios460reg.SharedDatrPool,
-		"iOS450":     &ios450reg.SharedDatrPool,
-		"iOS440":     &ios440reg.SharedDatrPool,
-		"iOS430":     &ios430reg.SharedDatrPool,
-		"iOS420":     &ios420reg.SharedDatrPool,
-		"iOS421":     &ios421reg.SharedDatrPool,
-		"iOS422":     &ios422reg.SharedDatrPool,
-		"iOS423":     &ios423reg.SharedDatrPool,
-		"iOS424":     &ios424reg.SharedDatrPool,
-		"iOS425":     &ios425reg.SharedDatrPool,
-		"iOS426":     &ios426reg.SharedDatrPool,
-		"iOS427":     &ios427reg.SharedDatrPool,
-		"iOS428":     &ios428reg.SharedDatrPool,
-		"iOS429":     &ios429reg.SharedDatrPool,
-		"iOS431":     &ios431reg.SharedDatrPool,
-		"iOS432":     &ios432reg.SharedDatrPool,
-		"iOS433":     &ios433reg.SharedDatrPool,
-		"iOS434":     &ios434reg.SharedDatrPool,
-		"iOS435":     &ios435reg.SharedDatrPool,
-		"iOS436":     &ios436reg.SharedDatrPool,
-		"iOS437":     &ios437reg.SharedDatrPool,
-		"iOS438":     &ios438reg.SharedDatrPool,
-		"iOS439":     &ios439reg.SharedDatrPool,
-		"iOS441":     &ios441reg.SharedDatrPool,
-		"iOS442":     &ios442reg.SharedDatrPool,
-		"iOS443":     &ios443reg.SharedDatrPool,
-		"iOS444":     &ios444reg.SharedDatrPool,
-		"iOS445":     &ios445reg.SharedDatrPool,
-		"iOS446":     &ios446reg.SharedDatrPool,
-		"iOS447":     &ios447reg.SharedDatrPool,
-		"iOS448":     &ios448reg.SharedDatrPool,
-		"iOS449":     &ios449reg.SharedDatrPool,
-		"iOS451":     &ios451reg.SharedDatrPool,
-		"iOS452":     &ios452reg.SharedDatrPool,
-		"iOS453":     &ios453reg.SharedDatrPool,
-		"iOS454":     &ios454reg.SharedDatrPool,
-		"iOS455":     &ios455reg.SharedDatrPool,
-		"iOS456":     &ios456reg.SharedDatrPool,
-		"iOS457":     &ios457reg.SharedDatrPool,
-		"iOS458":     &ios458reg.SharedDatrPool,
-		"iOS459":     &ios459reg.SharedDatrPool,
-		"iOS461":     &ios461reg.SharedDatrPool,
-		"iOS462":     &ios462reg.SharedDatrPool,
-		"iOS463":     &ios463reg.SharedDatrPool,
-		"iOS464":     &ios464reg.SharedDatrPool,
-		"iOS465":     &ios465reg.SharedDatrPool,
-		"iOS466":     &ios466reg.SharedDatrPool,
-		"iOS467":     &ios467reg.SharedDatrPool,
-		"iOS468":     &ios468reg.SharedDatrPool,
-		"iOS469":     &ios469reg.SharedDatrPool,
-		"iOS471":     &ios471reg.SharedDatrPool,
-		"iOS472":     &ios472reg.SharedDatrPool,
-		"iOS473":     &ios473reg.SharedDatrPool,
-		"iOS474":     &ios474reg.SharedDatrPool,
-		"iOS475":     &ios475reg.SharedDatrPool,
-		"iOS476":     &ios476reg.SharedDatrPool,
-		"iOS477":     &ios477reg.SharedDatrPool,
-		"iOS478":     &ios478reg.SharedDatrPool,
-		"iOS479":     &ios479reg.SharedDatrPool,
-		"iOS481":     &ios481reg.SharedDatrPool,
-		"iOS482":     &ios482reg.SharedDatrPool,
-		"iOS483":     &ios483reg.SharedDatrPool,
-		"iOS484":     &ios484reg.SharedDatrPool,
-		"iOS485":     &ios485reg.SharedDatrPool,
-		"iOS486":     &ios486reg.SharedDatrPool,
-		"iOS487":     &ios487reg.SharedDatrPool,
-		"iOS488":     &ios488reg.SharedDatrPool,
-		"iOS489":     &ios489reg.SharedDatrPool,
-		"iOS491":     &ios491reg.SharedDatrPool,
-		"iOS492":     &ios492reg.SharedDatrPool,
-		"iOS493":     &ios493reg.SharedDatrPool,
-		"iOS494":     &ios494reg.SharedDatrPool,
-		"iOS495":     &ios495reg.SharedDatrPool,
-		"iOS496":     &ios496reg.SharedDatrPool,
-		"iOS497":     &ios497reg.SharedDatrPool,
-		"iOS498":     &ios498reg.SharedDatrPool,
-		"iOS499":     &ios499reg.SharedDatrPool,
-		"iOS501":     &ios501reg.SharedDatrPool,
-		"iOS502":     &ios502reg.SharedDatrPool,
-		"iOS503":     &ios503reg.SharedDatrPool,
-		"iOS504":     &ios504reg.SharedDatrPool,
-		"iOS505":     &ios505reg.SharedDatrPool,
-		"iOS506":     &ios506reg.SharedDatrPool,
-		"iOS507":     &ios507reg.SharedDatrPool,
-		"iOS508":     &ios508reg.SharedDatrPool,
-		"iOS509":     &ios509reg.SharedDatrPool,
-		"iOS511":     &ios511reg.SharedDatrPool,
-		"iOS512":     &ios512reg.SharedDatrPool,
-		"iOS513":     &ios513reg.SharedDatrPool,
-		"iOS514":     &ios514reg.SharedDatrPool,
-		"iOS515":     &ios515reg.SharedDatrPool,
-		"iOS516":     &ios516reg.SharedDatrPool,
-		"iOS517":     &ios517reg.SharedDatrPool,
-		"iOS518":     &ios518reg.SharedDatrPool,
-		"iOS519":     &ios519reg.SharedDatrPool,
-		"iOS521":     &ios521reg.SharedDatrPool,
-		"iOS522":     &ios522reg.SharedDatrPool,
-		"iOS523":     &ios523reg.SharedDatrPool,
-		"iOS524":     &ios524reg.SharedDatrPool,
-		"iOS525":     &ios525reg.SharedDatrPool,
-		"iOS526":     &ios526reg.SharedDatrPool,
-		"iOS527":     &ios527reg.SharedDatrPool,
-		"iOS528":     &ios528reg.SharedDatrPool,
-		"iOS529":     &ios529reg.SharedDatrPool,
-		"iOS531":     &ios531reg.SharedDatrPool,
-		"iOS532":     &ios532reg.SharedDatrPool,
-		"iOS533":     &ios533reg.SharedDatrPool,
-		"iOS534":     &ios534reg.SharedDatrPool,
-		"iOS535":     &ios535reg.SharedDatrPool,
-		"iOS536":     &ios536reg.SharedDatrPool,
-		"iOS537":     &ios537reg.SharedDatrPool,
-		"iOS538":     &ios538reg.SharedDatrPool,
-		"iOS539":     &ios539reg.SharedDatrPool,
-		"iOS541":     &ios541reg.SharedDatrPool,
-		"iOS542":     &ios542reg.SharedDatrPool,
-		"iOS543":     &ios543reg.SharedDatrPool,
-		"iOS544":     &ios544reg.SharedDatrPool,
-		"iOS545":     &ios545reg.SharedDatrPool,
-		"iOS546":     &ios546reg.SharedDatrPool,
-		"iOS547":     &ios547reg.SharedDatrPool,
-		"iOS548":     &ios548reg.SharedDatrPool,
-		"iOS549":     &ios549reg.SharedDatrPool,
-		"iOS551":     &ios551reg.SharedDatrPool,
-		"iOS552":     &ios552reg.SharedDatrPool,
-		"iOS553":     &ios553reg.SharedDatrPool,
-		"iOS554":     &ios554reg.SharedDatrPool,
-		"iOS556":     &ios556reg.SharedDatrPool,
-		"iOS557":     &ios557reg.SharedDatrPool,
-		"iOS558":     &ios558reg.SharedDatrPool,
-		"iOS559":     &ios559reg.SharedDatrPool,
-		"iOS561":     &ios561reg.SharedDatrPool,
-		"iOS560":     &ios560reg.SharedDatrPool,
-	}
-	for name, poolPtr := range regSxxxPoolPointers() {
-		allPlatformPools[name] = poolPtr
-	}
+	allPlatformPools := map[string]**android.PartitionedDatrPool{}
 
 	runPoolPath := cookie.NewRunPoolPath(defaultCookieDir())
 	queuePaths := append([]string{runPoolPath}, cookieInitialFilePaths...)
@@ -710,7 +317,7 @@ func (a *App) RunRegister(maxThreads int) string {
 
 	// cookieInitialPool là con trỏ đến sharedCookiePool, được gán sau khi pool được khởi tạo.
 	// Dùng để persistNewDatr có thể cộng datr mới vào pool hiện tại (cập nhật pool count trên UI).
-	var cookieInitialPool *androidreg.PartitionedDatrPool
+	var cookieInitialPool *android.PartitionedDatrPool
 
 	// persistNewDatr luôn được định nghĩa — đọc config realtime mỗi lần gọi
 	// để user bật/tắt checkbox bất cứ lúc nào có hiệu lực ngay lần reg kế tiếp.
@@ -759,7 +366,7 @@ func (a *App) RunRegister(maxThreads int) string {
 			}
 		}
 	}
-	sharedCookiePool := androidreg.NewPartitionedPool(cookieInitialLimit)
+	sharedCookiePool := android.NewPartitionedPool(cookieInitialLimit)
 	cookieInitialPool = sharedCookiePool // cho persistNewDatr cập nhật pool count trên UI
 	loadedCookieInitialCount := 0
 	cookieMethod := strings.ToLower(strings.TrimSpace(interactionCfg.CookieInitialMethod))
@@ -817,7 +424,7 @@ func (a *App) RunRegister(maxThreads int) string {
 		if interval < 30*time.Second {
 			interval = 30 * time.Second
 		}
-		go func(p *androidreg.PartitionedDatrPool, every time.Duration) {
+		go func(p *android.PartitionedDatrPool, every time.Duration) {
 			t := time.NewTicker(every)
 			defer t.Stop()
 			for {
@@ -845,298 +452,66 @@ func (a *App) RunRegister(maxThreads int) string {
 		})
 	}
 
-	if loadedCookieInitialCount > 0 &&
-		regPlatform != instagram.PlatformAndroid &&
-		regPlatform != instagram.PlatformS23 &&
-		!isRegPlatformSxxx(regPlatform) &&
-		regPlatform != instagram.PlatformWebAndroid &&
-		regPlatform != instagram.PlatformIOS &&
-		regPlatform != instagram.PlatformIOS562 &&
-		regPlatform != instagram.PlatformIOS563 &&
-		regPlatform != instagram.PlatformIOS555 &&
-		regPlatform != instagram.PlatformIOS564 &&
-		regPlatform != instagram.PlatformIOS550 &&
-		regPlatform != instagram.PlatformIOS540 &&
-		regPlatform != instagram.PlatformIOS530 &&
-		regPlatform != instagram.PlatformIOS520 &&
-		regPlatform != instagram.PlatformIOS510 &&
-		regPlatform != instagram.PlatformIOS500 &&
-		regPlatform != instagram.PlatformIOS490 &&
-		regPlatform != instagram.PlatformIOS480 &&
-		regPlatform != instagram.PlatformIOS470 &&
-		regPlatform != instagram.PlatformIOS460 &&
-		regPlatform != instagram.PlatformIOS450 &&
-		regPlatform != instagram.PlatformIOS440 &&
-		regPlatform != instagram.PlatformIOS430 &&
-		regPlatform != instagram.PlatformIOS420 &&
-		regPlatform != instagram.PlatformIOS421 &&
-		regPlatform != instagram.PlatformIOS422 &&
-		regPlatform != instagram.PlatformIOS423 &&
-		regPlatform != instagram.PlatformIOS424 &&
-		regPlatform != instagram.PlatformIOS425 &&
-		regPlatform != instagram.PlatformIOS426 &&
-		regPlatform != instagram.PlatformIOS427 &&
-		regPlatform != instagram.PlatformIOS428 &&
-		regPlatform != instagram.PlatformIOS429 &&
-		regPlatform != instagram.PlatformIOS431 &&
-		regPlatform != instagram.PlatformIOS432 &&
-		regPlatform != instagram.PlatformIOS433 &&
-		regPlatform != instagram.PlatformIOS434 &&
-		regPlatform != instagram.PlatformIOS435 &&
-		regPlatform != instagram.PlatformIOS436 &&
-		regPlatform != instagram.PlatformIOS437 &&
-		regPlatform != instagram.PlatformIOS438 &&
-		regPlatform != instagram.PlatformIOS439 &&
-		regPlatform != instagram.PlatformIOS441 &&
-		regPlatform != instagram.PlatformIOS442 &&
-		regPlatform != instagram.PlatformIOS443 &&
-		regPlatform != instagram.PlatformIOS444 &&
-		regPlatform != instagram.PlatformIOS445 &&
-		regPlatform != instagram.PlatformIOS446 &&
-		regPlatform != instagram.PlatformIOS447 &&
-		regPlatform != instagram.PlatformIOS448 &&
-		regPlatform != instagram.PlatformIOS449 &&
-		regPlatform != instagram.PlatformIOS451 &&
-		regPlatform != instagram.PlatformIOS452 &&
-		regPlatform != instagram.PlatformIOS453 &&
-		regPlatform != instagram.PlatformIOS454 &&
-		regPlatform != instagram.PlatformIOS455 &&
-		regPlatform != instagram.PlatformIOS456 &&
-		regPlatform != instagram.PlatformIOS457 &&
-		regPlatform != instagram.PlatformIOS458 &&
-		regPlatform != instagram.PlatformIOS459 &&
-		regPlatform != instagram.PlatformIOS461 &&
-		regPlatform != instagram.PlatformIOS462 &&
-		regPlatform != instagram.PlatformIOS463 &&
-		regPlatform != instagram.PlatformIOS464 &&
-		regPlatform != instagram.PlatformIOS465 &&
-		regPlatform != instagram.PlatformIOS466 &&
-		regPlatform != instagram.PlatformIOS467 &&
-		regPlatform != instagram.PlatformIOS468 &&
-		regPlatform != instagram.PlatformIOS469 &&
-		regPlatform != instagram.PlatformIOS471 &&
-		regPlatform != instagram.PlatformIOS472 &&
-		regPlatform != instagram.PlatformIOS473 &&
-		regPlatform != instagram.PlatformIOS474 &&
-		regPlatform != instagram.PlatformIOS475 &&
-		regPlatform != instagram.PlatformIOS476 &&
-		regPlatform != instagram.PlatformIOS477 &&
-		regPlatform != instagram.PlatformIOS478 &&
-		regPlatform != instagram.PlatformIOS479 &&
-		regPlatform != instagram.PlatformIOS481 &&
-		regPlatform != instagram.PlatformIOS482 &&
-		regPlatform != instagram.PlatformIOS483 &&
-		regPlatform != instagram.PlatformIOS484 &&
-		regPlatform != instagram.PlatformIOS485 &&
-		regPlatform != instagram.PlatformIOS486 &&
-		regPlatform != instagram.PlatformIOS487 &&
-		regPlatform != instagram.PlatformIOS488 &&
-		regPlatform != instagram.PlatformIOS489 &&
-		regPlatform != instagram.PlatformIOS491 &&
-		regPlatform != instagram.PlatformIOS492 &&
-		regPlatform != instagram.PlatformIOS493 &&
-		regPlatform != instagram.PlatformIOS494 &&
-		regPlatform != instagram.PlatformIOS495 &&
-		regPlatform != instagram.PlatformIOS496 &&
-		regPlatform != instagram.PlatformIOS497 &&
-		regPlatform != instagram.PlatformIOS498 &&
-		regPlatform != instagram.PlatformIOS499 &&
-		regPlatform != instagram.PlatformIOS501 &&
-		regPlatform != instagram.PlatformIOS502 &&
-		regPlatform != instagram.PlatformIOS503 &&
-		regPlatform != instagram.PlatformIOS504 &&
-		regPlatform != instagram.PlatformIOS505 &&
-		regPlatform != instagram.PlatformIOS506 &&
-		regPlatform != instagram.PlatformIOS507 &&
-		regPlatform != instagram.PlatformIOS508 &&
-		regPlatform != instagram.PlatformIOS509 &&
-		regPlatform != instagram.PlatformIOS511 &&
-		regPlatform != instagram.PlatformIOS512 &&
-		regPlatform != instagram.PlatformIOS513 &&
-		regPlatform != instagram.PlatformIOS514 &&
-		regPlatform != instagram.PlatformIOS515 &&
-		regPlatform != instagram.PlatformIOS516 &&
-		regPlatform != instagram.PlatformIOS517 &&
-		regPlatform != instagram.PlatformIOS518 &&
-		regPlatform != instagram.PlatformIOS519 &&
-		regPlatform != instagram.PlatformIOS521 &&
-		regPlatform != instagram.PlatformIOS522 &&
-		regPlatform != instagram.PlatformIOS523 &&
-		regPlatform != instagram.PlatformIOS524 &&
-		regPlatform != instagram.PlatformIOS525 &&
-		regPlatform != instagram.PlatformIOS526 &&
-		regPlatform != instagram.PlatformIOS527 &&
-		regPlatform != instagram.PlatformIOS528 &&
-		regPlatform != instagram.PlatformIOS529 &&
-		regPlatform != instagram.PlatformIOS531 &&
-		regPlatform != instagram.PlatformIOS532 &&
-		regPlatform != instagram.PlatformIOS533 &&
-		regPlatform != instagram.PlatformIOS534 &&
-		regPlatform != instagram.PlatformIOS535 &&
-		regPlatform != instagram.PlatformIOS536 &&
-		regPlatform != instagram.PlatformIOS537 &&
-		regPlatform != instagram.PlatformIOS538 &&
-		regPlatform != instagram.PlatformIOS539 &&
-		regPlatform != instagram.PlatformIOS541 &&
-		regPlatform != instagram.PlatformIOS542 &&
-		regPlatform != instagram.PlatformIOS543 &&
-		regPlatform != instagram.PlatformIOS544 &&
-		regPlatform != instagram.PlatformIOS545 &&
-		regPlatform != instagram.PlatformIOS546 &&
-		regPlatform != instagram.PlatformIOS547 &&
-		regPlatform != instagram.PlatformIOS548 &&
-		regPlatform != instagram.PlatformIOS549 &&
-		regPlatform != instagram.PlatformIOS551 &&
-		regPlatform != instagram.PlatformIOS552 &&
-		regPlatform != instagram.PlatformIOS553 &&
-		regPlatform != instagram.PlatformIOS554 &&
-		regPlatform != instagram.PlatformIOS556 &&
-		regPlatform != instagram.PlatformIOS557 &&
-		regPlatform != instagram.PlatformIOS558 &&
-		regPlatform != instagram.PlatformIOS559 &&
-		regPlatform != instagram.PlatformIOS561 &&
-		regPlatform != instagram.PlatformIOS560 &&
-		regPlatform != instagram.PlatformWeb {
+	if loadedCookieInitialCount > 0 {
 		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 			"index": 0, "phone": "system", "proxy": "",
 			"msg": fmt.Sprintf("[CookieInitial] Loaded %d cookie initial (limit %d/mỗi)", loadedCookieInitialCount, cookieInitialLimit),
 		})
 	}
 
-	// ── iOS562 device profile pool ────────────────────────────────────────────
-	// Load DeviceID/FamilyDeviceID/MachineID từ file reg thành công trước đó.
-	// Sau mỗi reg thành công, register.go tự Add() vào pool và trigger persistHook.
-	ios562DeviceFile := defaultCookieDir() + "/ios562_devices.txt"
-	ios562Pool := ios562reg.NewDevicePool(5)
-	if n, err := ios562Pool.LoadFromFile(ios562DeviceFile); err == nil && n > 0 {
+	// ── IG iOS device pool (mid/datr/ig_did) ─────────────────────────────────
+	// Tương tự datr-pool bên FB: harvest mid/ig_did từ account live → inject
+	// trước reg mới → IG thấy "thiết bị có lịch sử" → trust score cao hơn.
+	igDeviceFile := defaultCookieDir() + "/ig_devices.txt"
+	igDevicePool := igcore.NewDevicePool(igDeviceFile, 3)
+	if sz := igDevicePool.Size(); sz > 0 {
 		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS562Pool] %d device profiles sẵn sàng", n),
+			"msg": fmt.Sprintf("[IGDevicePool] %d device aged sẵn sàng (mid/ig_did)", sz),
 		})
 	}
-	ios562Pool.SetPersistHook(func(dp ios562reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios562DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
-		}
-	})
-	ios562reg.SharedDevicePool = ios562Pool
-	defer func() { ios562reg.SharedDevicePool = nil }()
+	igcore.SharedDevicePool = igDevicePool
+	defer func() { igcore.SharedDevicePool = nil }()
 
-	// ── iOS555 device profile pool (parity với iOS562) ────────────────────────
-	ios555DeviceFile := defaultCookieDir() + "/ios555_devices.txt"
-	ios555Pool := ios555reg.NewDevicePool(5)
-	if n, err := ios555Pool.LoadFromFile(ios555DeviceFile); err == nil && n > 0 {
+	// ── IG Android device pool (datr/mid/ig_did) ──────────────────────────────
+	igAndroidDeviceFile := defaultCookieDir() + "/ig_android_devices.txt"
+	igAndroidDevicePool := igcore.NewDevicePool(igAndroidDeviceFile, 3)
+	if sz := igAndroidDevicePool.Size(); sz > 0 {
 		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS555Pool] %d device profiles sẵn sàng", n),
+			"msg": fmt.Sprintf("[IGAndroidPool] %d device aged sẵn sàng", sz),
 		})
 	}
-	ios555Pool.SetPersistHook(func(dp ios555reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios555DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
-		}
-	})
-	ios555reg.SharedDevicePool = ios555Pool
-	defer func() { ios555reg.SharedDevicePool = nil }()
+	igandroid.SharedAndroidDevicePool = igAndroidDevicePool
+	defer func() { igandroid.SharedAndroidDevicePool = nil }()
 
-	// ── iOS564 device profile pool (parity với iOS562) ────────────────────────
-	ios564DeviceFile := defaultCookieDir() + "/ios564_devices.txt"
-	ios564Pool := ios564reg.NewDevicePool(5)
-	if n, err := ios564Pool.LoadFromFile(ios564DeviceFile); err == nil && n > 0 {
+	// Pre-harvest mid nếu pool rỗng — chạy qe/sync để lấy mid thật trước batch.
+	// Số mid harvest = max(threads*2, 20), tối đa 10 workers song song.
+	if igAndroidDevicePool.Size() == 0 && interactionCfg.RegThreads > 0 {
+		harvestN := interactionCfg.RegThreads * 2
+		if harvestN < 20 {
+			harvestN = 20
+		}
 		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS564Pool] %d device profiles sẵn sàng", n),
+			"msg": fmt.Sprintf("[IGAndroidPool] Pool rỗng — pre-harvest %d mid qua qe/sync...", harvestN),
 		})
-	}
-	ios564Pool.SetPersistHook(func(dp ios564reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios564DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
+		harvestProxy := ""
+		if len(proxyPool) > 0 {
+			harvestProxy = proxyPool[0]
 		}
-	})
-	ios564reg.SharedDevicePool = ios564Pool
-	defer func() { ios564reg.SharedDevicePool = nil }()
-
-	// ── iOS550 device profile pool (parity với iOS562) ────────────────────────
-	ios550DeviceFile := defaultCookieDir() + "/ios550_devices.txt"
-	ios550Pool := ios550reg.NewDevicePool(5)
-	if n, err := ios550Pool.LoadFromFile(ios550DeviceFile); err == nil && n > 0 {
-		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
-			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS550Pool] %d device profiles sẵn sàng", n),
-		})
+		go func(n int, proxy string, pool *igcore.DevicePool) {
+			added := igandroid.PreHarvestPool(a.ctx, proxy, n, pool, func(msg string) {
+				runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
+					"index": 0, "phone": "system", "proxy": "", "msg": msg,
+				})
+			})
+			runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
+				"index": 0, "phone": "system", "proxy": "",
+				"msg": fmt.Sprintf("[IGAndroidPool] Pre-harvest xong: %d mid đã lưu vào pool", added),
+			})
+		}(harvestN, harvestProxy, igAndroidDevicePool)
 	}
-	ios550Pool.SetPersistHook(func(dp ios550reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios550DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
-		}
-	})
-	ios550reg.SharedDevicePool = ios550Pool
-	defer func() { ios550reg.SharedDevicePool = nil }()
-
-	// ── iOS540 device profile pool (parity với iOS562) ────────────────────────
-	ios540DeviceFile := defaultCookieDir() + "/ios540_devices.txt"
-	ios540Pool := ios540reg.NewDevicePool(5)
-	if n, err := ios540Pool.LoadFromFile(ios540DeviceFile); err == nil && n > 0 {
-		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
-			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS540Pool] %d device profiles sẵn sàng", n),
-		})
-	}
-	ios540Pool.SetPersistHook(func(dp ios540reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios540DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
-		}
-	})
-	ios540reg.SharedDevicePool = ios540Pool
-	defer func() { ios540reg.SharedDevicePool = nil }()
-
-	// ── iOS530 device profile pool (parity với iOS562) ────────────────────────
-	ios530DeviceFile := defaultCookieDir() + "/ios530_devices.txt"
-	ios530Pool := ios530reg.NewDevicePool(5)
-	if n, err := ios530Pool.LoadFromFile(ios530DeviceFile); err == nil && n > 0 {
-		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
-			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS530Pool] %d device profiles sẵn sàng", n),
-		})
-	}
-	ios530Pool.SetPersistHook(func(dp ios530reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios530DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
-		}
-	})
-	ios530reg.SharedDevicePool = ios530Pool
-	defer func() { ios530reg.SharedDevicePool = nil }()
-
-	// ── iOS520 device profile pool (parity với iOS562) ────────────────────────
-	ios520DeviceFile := defaultCookieDir() + "/ios520_devices.txt"
-	ios520Pool := ios520reg.NewDevicePool(5)
-	if n, err := ios520Pool.LoadFromFile(ios520DeviceFile); err == nil && n > 0 {
-		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
-			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[iOS520Pool] %d device profiles sẵn sàng", n),
-		})
-	}
-	ios520Pool.SetPersistHook(func(dp ios520reg.DeviceProfile) {
-		line := dp.DeviceID + "|" + dp.FamilyDeviceID + "|" + dp.MachineID + "\n"
-		if f, err := os.OpenFile(ios520DeviceFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(line)
-			f.Close()
-		}
-	})
-	ios520reg.SharedDevicePool = ios520Pool
-	defer func() { ios520reg.SharedDevicePool = nil }()
 
 	// User yêu cầu: nếu CookieInitialMethod="file" mà không có datr nào → DỪNG HOÀN TOÀN.
 	// Tránh reg fake không có datr → kết quả tệ. "Tạo mới"/"Ck" thì không cần check.
@@ -1164,18 +539,6 @@ func (a *App) RunRegister(maxThreads int) string {
 	runIDLog := fmt.Sprintf("run#%d", myGen)
 	runRes := newRunResources(runIDLog, regPlatforms...)
 	runRes.publishGlobals() // assign global ref để workers thấy được pool của run này
-	if runRes.iosPool != nil {
-		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
-			"index": 0, "phone": "system", "proxy": "",
-			"msg": "[SessionPool] iOS HTTP — keep session enabled",
-		})
-	}
-	if runRes.andrPool != nil {
-		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
-			"index": 0, "phone": "system", "proxy": "",
-			"msg": "[SessionPool] WebAndroid — keep session enabled",
-		})
-	}
 
 	// dateFolder dùng chung cho tất cả auto-verify trong run này
 	// Verify results lưu CÙNG thư mục reg (không tạo folder riêng)
@@ -1354,9 +717,9 @@ func (a *App) RunRegister(maxThreads int) string {
 	// CHỈ active khi SplitMode && VerifyEnabled. Path SplitMode==false giữ NGUYÊN
 	// verify inline cũ (không đổi).
 	type splitVerifyJob struct {
-		acc          runner.AccountInput // account đã reg (UID, Token, Cookie, Password, Proxy, UA, DeviceID, Email...)
+		acc          runner.AccountInput  // account đã reg (UID, Token, Cookie, Password, Proxy, UA, DeviceID, Email...)
 		prof         instagram.RegInput   // profile gốc reg (lấy thêm field nếu cần)
-		displayProxy string              // IP CHẠY hiển thị (đã CheckIP)
+		displayProxy string               // IP CHẠY hiển thị (đã CheckIP)
 		regResult    *instagram.RegResult // result reg (token, password fallback)
 	}
 
@@ -1862,6 +1225,14 @@ func (a *App) RunRegister(maxThreads int) string {
 	var regUABySlot sync.Map
 	// Per-slot datr cache cho KeepDatrSuccess — success: pin datr mới, fail: lấy datr khác từ pool.
 	var regDatrBySlot sync.Map
+	// Per-slot session cache — MỖI LUỒNG DÙNG CHUNG 1 IP SESSION xuyên suốt các account.
+	// Lý do: nếu render session MỚI mỗi account, proxy phải cấp exit IP + TCP connection
+	// mới mỗi lần → khi 20+ luồng burst CheckIP đồng thời, gateway proxy quá tải → CheckIP
+	// rớt (đo thực tế: session-mới ~50% hit @20 luồng, session-chung 100% hit, nhanh gấp 3).
+	// Reuse session per slot → proxy giữ 1 upstream/luồng, transport keep-alive reuse.
+	// Cache theo base proxy: nếu base đổi (pool rotate) → render session mới.
+	type regSlotSession struct{ base, rendered string }
+	var regSessionBySlot sync.Map // slotIdx → regSlotSession
 
 	// regToVerCh: DEPRECATED — channel để forward acc sang split-verify pool riêng.
 	// 2026-05-15: Split Mode đã đổi thành PURE UI option (chỉ hiển thị 2 panel REG/VER
@@ -1902,6 +1273,7 @@ func (a *App) RunRegister(maxThreads int) string {
 			// Giải phóng per-slot UA cache (KeepUASuccess)
 			regUABySlot.Range(func(k, _ any) bool { regUABySlot.Delete(k); return true })
 			regDatrBySlot.Range(func(k, _ any) bool { regDatrBySlot.Delete(k); return true })
+			regSessionBySlot.Range(func(k, _ any) bool { regSessionBySlot.Delete(k); return true })
 			if regCounters != nil {
 				regCounters.Stop()
 			}
@@ -1979,12 +1351,16 @@ func (a *App) RunRegister(maxThreads int) string {
 			// UA ở đây CHỈ để hiện UI — UA thực gửi lên FB được regenerate trong worker
 			// (s23reg.RegisterAccount, android.RegisterAccount, v.v.) → dùng builder rẻ
 			// tránh double-build profile (SIM + device + UUID x3) tốn thời gian init.
-			profile := webregister.RandomRegInput("", "", proxyStr)
+			fpForProfile := fakeinfo.RandomFakeProfile()
+			profile := instagram.RegInput{
+				Proxy:     proxyStr,
+				FirstName: fpForProfile.FirstName,
+				LastName:  fpForProfile.LastName,
+				Birthday:  fpForProfile.Birthday,
+			}
 			switch regPlatform {
 			case instagram.PlatformWebAndroid:
 				profile.UserAgent = fakeinfo.RandomChromeAndroidProfile().UserAgent
-			case instagram.PlatformIOS:
-				profile.UserAgent = fakeinfo.RandomIPhoneProfile().UserAgent
 			case instagram.PlatformIOS562, instagram.PlatformIOS563, instagram.PlatformIOS555, instagram.PlatformIOS550, instagram.PlatformIOS540, instagram.PlatformIOS530, instagram.PlatformIOS520, instagram.PlatformIOS564,
 				instagram.PlatformIOS510, instagram.PlatformIOS500, instagram.PlatformIOS490, instagram.PlatformIOS480, instagram.PlatformIOS470, instagram.PlatformIOS460, instagram.PlatformIOS450,
 				instagram.PlatformIOS440, instagram.PlatformIOS430, instagram.PlatformIOS420, instagram.PlatformIOS560,
@@ -2037,6 +1413,11 @@ func (a *App) RunRegister(maxThreads int) string {
 					profile.UserAgent = ua
 				}
 			}
+			// IG rebrand: igcore tự sinh iOS UA sau khi biết country code của proxy.
+			// Xóa pre-gen Android UA để UI không hiện sai UA trong lúc reg chạy;
+			// result.UserAgent sẽ được gán vào prof sau khi Register() trả về.
+			profile.UserAgent = ""
+
 			// Cookie Initial: bình thường lấy từ SharedPool theo slot để tránh trùng giữa luồng.
 			// KeepDatrSuccess: nếu slot vừa reg thành công và có datr mới, ưu tiên dùng lại datr đó.
 			if interactionCfg.KeepDatrSuccess {
@@ -2152,616 +1533,6 @@ func (a *App) RunRegister(maxThreads int) string {
 					}
 				}()
 
-				// Đăng ký slot vào PartitionedDatrPool — nhận partition riêng
-				if regPlatform == instagram.PlatformAndroid && androidreg.SharedPool != nil {
-					androidreg.SharedPool.Register(prof.SlotIdx)
-					defer androidreg.SharedPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformS23 && s23reg.SharedPool != nil {
-					s23reg.SharedPool.Register(prof.SlotIdx)
-					defer s23reg.SharedPool.Unregister(prof.SlotIdx)
-				}
-				if pool := regPoolForSxxx(regPlatform); pool != nil {
-					pool.Register(prof.SlotIdx)
-					defer pool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformS399 && s399reg.SharedPool != nil {
-					s399reg.SharedPool.Register(prof.SlotIdx)
-					defer s399reg.SharedPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS562 && ios562reg.SharedDatrPool != nil {
-					ios562reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios562reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS563 && ios563reg.SharedDatrPool != nil {
-					ios563reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios563reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS555 && ios555reg.SharedDatrPool != nil {
-					ios555reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios555reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS564 && ios564reg.SharedDatrPool != nil {
-					ios564reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios564reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS550 && ios550reg.SharedDatrPool != nil {
-					ios550reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios550reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS540 && ios540reg.SharedDatrPool != nil {
-					ios540reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios540reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS530 && ios530reg.SharedDatrPool != nil {
-					ios530reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios530reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS520 && ios520reg.SharedDatrPool != nil {
-					ios520reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios520reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS510 && ios510reg.SharedDatrPool != nil {
-					ios510reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios510reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS500 && ios500reg.SharedDatrPool != nil {
-					ios500reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios500reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS490 && ios490reg.SharedDatrPool != nil {
-					ios490reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios490reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS480 && ios480reg.SharedDatrPool != nil {
-					ios480reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios480reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS470 && ios470reg.SharedDatrPool != nil {
-					ios470reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios470reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS460 && ios460reg.SharedDatrPool != nil {
-					ios460reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios460reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS450 && ios450reg.SharedDatrPool != nil {
-					ios450reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios450reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS440 && ios440reg.SharedDatrPool != nil {
-					ios440reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios440reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS430 && ios430reg.SharedDatrPool != nil {
-					ios430reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios430reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS420 && ios420reg.SharedDatrPool != nil {
-					ios420reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios420reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS421 && ios421reg.SharedDatrPool != nil {
-					ios421reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios421reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS422 && ios422reg.SharedDatrPool != nil {
-					ios422reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios422reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS423 && ios423reg.SharedDatrPool != nil {
-					ios423reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios423reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS424 && ios424reg.SharedDatrPool != nil {
-					ios424reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios424reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS425 && ios425reg.SharedDatrPool != nil {
-					ios425reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios425reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS426 && ios426reg.SharedDatrPool != nil {
-					ios426reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios426reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS427 && ios427reg.SharedDatrPool != nil {
-					ios427reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios427reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS428 && ios428reg.SharedDatrPool != nil {
-					ios428reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios428reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS429 && ios429reg.SharedDatrPool != nil {
-					ios429reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios429reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS431 && ios431reg.SharedDatrPool != nil {
-					ios431reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios431reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS432 && ios432reg.SharedDatrPool != nil {
-					ios432reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios432reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS433 && ios433reg.SharedDatrPool != nil {
-					ios433reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios433reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS434 && ios434reg.SharedDatrPool != nil {
-					ios434reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios434reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS435 && ios435reg.SharedDatrPool != nil {
-					ios435reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios435reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS436 && ios436reg.SharedDatrPool != nil {
-					ios436reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios436reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS437 && ios437reg.SharedDatrPool != nil {
-					ios437reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios437reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS438 && ios438reg.SharedDatrPool != nil {
-					ios438reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios438reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS439 && ios439reg.SharedDatrPool != nil {
-					ios439reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios439reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS441 && ios441reg.SharedDatrPool != nil {
-					ios441reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios441reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS442 && ios442reg.SharedDatrPool != nil {
-					ios442reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios442reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS443 && ios443reg.SharedDatrPool != nil {
-					ios443reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios443reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS444 && ios444reg.SharedDatrPool != nil {
-					ios444reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios444reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS445 && ios445reg.SharedDatrPool != nil {
-					ios445reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios445reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS446 && ios446reg.SharedDatrPool != nil {
-					ios446reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios446reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS447 && ios447reg.SharedDatrPool != nil {
-					ios447reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios447reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS448 && ios448reg.SharedDatrPool != nil {
-					ios448reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios448reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS449 && ios449reg.SharedDatrPool != nil {
-					ios449reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios449reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS451 && ios451reg.SharedDatrPool != nil {
-					ios451reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios451reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS452 && ios452reg.SharedDatrPool != nil {
-					ios452reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios452reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS453 && ios453reg.SharedDatrPool != nil {
-					ios453reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios453reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS454 && ios454reg.SharedDatrPool != nil {
-					ios454reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios454reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS455 && ios455reg.SharedDatrPool != nil {
-					ios455reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios455reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS456 && ios456reg.SharedDatrPool != nil {
-					ios456reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios456reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS457 && ios457reg.SharedDatrPool != nil {
-					ios457reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios457reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS458 && ios458reg.SharedDatrPool != nil {
-					ios458reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios458reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS459 && ios459reg.SharedDatrPool != nil {
-					ios459reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios459reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS461 && ios461reg.SharedDatrPool != nil {
-					ios461reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios461reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS462 && ios462reg.SharedDatrPool != nil {
-					ios462reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios462reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS463 && ios463reg.SharedDatrPool != nil {
-					ios463reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios463reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS464 && ios464reg.SharedDatrPool != nil {
-					ios464reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios464reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS465 && ios465reg.SharedDatrPool != nil {
-					ios465reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios465reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS466 && ios466reg.SharedDatrPool != nil {
-					ios466reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios466reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS467 && ios467reg.SharedDatrPool != nil {
-					ios467reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios467reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS468 && ios468reg.SharedDatrPool != nil {
-					ios468reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios468reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS469 && ios469reg.SharedDatrPool != nil {
-					ios469reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios469reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS471 && ios471reg.SharedDatrPool != nil {
-					ios471reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios471reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS472 && ios472reg.SharedDatrPool != nil {
-					ios472reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios472reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS473 && ios473reg.SharedDatrPool != nil {
-					ios473reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios473reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS474 && ios474reg.SharedDatrPool != nil {
-					ios474reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios474reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS475 && ios475reg.SharedDatrPool != nil {
-					ios475reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios475reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS476 && ios476reg.SharedDatrPool != nil {
-					ios476reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios476reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS477 && ios477reg.SharedDatrPool != nil {
-					ios477reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios477reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS478 && ios478reg.SharedDatrPool != nil {
-					ios478reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios478reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS479 && ios479reg.SharedDatrPool != nil {
-					ios479reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios479reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS481 && ios481reg.SharedDatrPool != nil {
-					ios481reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios481reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS482 && ios482reg.SharedDatrPool != nil {
-					ios482reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios482reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS483 && ios483reg.SharedDatrPool != nil {
-					ios483reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios483reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS484 && ios484reg.SharedDatrPool != nil {
-					ios484reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios484reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS485 && ios485reg.SharedDatrPool != nil {
-					ios485reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios485reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS486 && ios486reg.SharedDatrPool != nil {
-					ios486reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios486reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS487 && ios487reg.SharedDatrPool != nil {
-					ios487reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios487reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS488 && ios488reg.SharedDatrPool != nil {
-					ios488reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios488reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS489 && ios489reg.SharedDatrPool != nil {
-					ios489reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios489reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS491 && ios491reg.SharedDatrPool != nil {
-					ios491reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios491reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS492 && ios492reg.SharedDatrPool != nil {
-					ios492reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios492reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS493 && ios493reg.SharedDatrPool != nil {
-					ios493reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios493reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS494 && ios494reg.SharedDatrPool != nil {
-					ios494reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios494reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS495 && ios495reg.SharedDatrPool != nil {
-					ios495reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios495reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS496 && ios496reg.SharedDatrPool != nil {
-					ios496reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios496reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS497 && ios497reg.SharedDatrPool != nil {
-					ios497reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios497reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS498 && ios498reg.SharedDatrPool != nil {
-					ios498reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios498reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS499 && ios499reg.SharedDatrPool != nil {
-					ios499reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios499reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS501 && ios501reg.SharedDatrPool != nil {
-					ios501reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios501reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS502 && ios502reg.SharedDatrPool != nil {
-					ios502reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios502reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS503 && ios503reg.SharedDatrPool != nil {
-					ios503reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios503reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS504 && ios504reg.SharedDatrPool != nil {
-					ios504reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios504reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS505 && ios505reg.SharedDatrPool != nil {
-					ios505reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios505reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS506 && ios506reg.SharedDatrPool != nil {
-					ios506reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios506reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS507 && ios507reg.SharedDatrPool != nil {
-					ios507reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios507reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS508 && ios508reg.SharedDatrPool != nil {
-					ios508reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios508reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS509 && ios509reg.SharedDatrPool != nil {
-					ios509reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios509reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS511 && ios511reg.SharedDatrPool != nil {
-					ios511reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios511reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS512 && ios512reg.SharedDatrPool != nil {
-					ios512reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios512reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS513 && ios513reg.SharedDatrPool != nil {
-					ios513reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios513reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS514 && ios514reg.SharedDatrPool != nil {
-					ios514reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios514reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS515 && ios515reg.SharedDatrPool != nil {
-					ios515reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios515reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS516 && ios516reg.SharedDatrPool != nil {
-					ios516reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios516reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS517 && ios517reg.SharedDatrPool != nil {
-					ios517reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios517reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS518 && ios518reg.SharedDatrPool != nil {
-					ios518reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios518reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS519 && ios519reg.SharedDatrPool != nil {
-					ios519reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios519reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS521 && ios521reg.SharedDatrPool != nil {
-					ios521reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios521reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS522 && ios522reg.SharedDatrPool != nil {
-					ios522reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios522reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS523 && ios523reg.SharedDatrPool != nil {
-					ios523reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios523reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS524 && ios524reg.SharedDatrPool != nil {
-					ios524reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios524reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS525 && ios525reg.SharedDatrPool != nil {
-					ios525reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios525reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS526 && ios526reg.SharedDatrPool != nil {
-					ios526reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios526reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS527 && ios527reg.SharedDatrPool != nil {
-					ios527reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios527reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS528 && ios528reg.SharedDatrPool != nil {
-					ios528reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios528reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS529 && ios529reg.SharedDatrPool != nil {
-					ios529reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios529reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS531 && ios531reg.SharedDatrPool != nil {
-					ios531reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios531reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS532 && ios532reg.SharedDatrPool != nil {
-					ios532reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios532reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS533 && ios533reg.SharedDatrPool != nil {
-					ios533reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios533reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS534 && ios534reg.SharedDatrPool != nil {
-					ios534reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios534reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS535 && ios535reg.SharedDatrPool != nil {
-					ios535reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios535reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS536 && ios536reg.SharedDatrPool != nil {
-					ios536reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios536reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS537 && ios537reg.SharedDatrPool != nil {
-					ios537reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios537reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS538 && ios538reg.SharedDatrPool != nil {
-					ios538reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios538reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS539 && ios539reg.SharedDatrPool != nil {
-					ios539reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios539reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS541 && ios541reg.SharedDatrPool != nil {
-					ios541reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios541reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS542 && ios542reg.SharedDatrPool != nil {
-					ios542reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios542reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS543 && ios543reg.SharedDatrPool != nil {
-					ios543reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios543reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS544 && ios544reg.SharedDatrPool != nil {
-					ios544reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios544reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS545 && ios545reg.SharedDatrPool != nil {
-					ios545reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios545reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS546 && ios546reg.SharedDatrPool != nil {
-					ios546reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios546reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS547 && ios547reg.SharedDatrPool != nil {
-					ios547reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios547reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS548 && ios548reg.SharedDatrPool != nil {
-					ios548reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios548reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS549 && ios549reg.SharedDatrPool != nil {
-					ios549reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios549reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS551 && ios551reg.SharedDatrPool != nil {
-					ios551reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios551reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS552 && ios552reg.SharedDatrPool != nil {
-					ios552reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios552reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS553 && ios553reg.SharedDatrPool != nil {
-					ios553reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios553reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS554 && ios554reg.SharedDatrPool != nil {
-					ios554reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios554reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS556 && ios556reg.SharedDatrPool != nil {
-					ios556reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios556reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS557 && ios557reg.SharedDatrPool != nil {
-					ios557reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios557reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS558 && ios558reg.SharedDatrPool != nil {
-					ios558reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios558reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS559 && ios559reg.SharedDatrPool != nil {
-					ios559reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios559reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS561 && ios561reg.SharedDatrPool != nil {
-					ios561reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios561reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS560 && ios560reg.SharedDatrPool != nil {
-					ios560reg.SharedDatrPool.Register(prof.SlotIdx)
-					defer ios560reg.SharedDatrPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformWebAndroid && webandroidreg.SharedPool != nil {
-					webandroidreg.SharedPool.Register(prof.SlotIdx)
-					defer webandroidreg.SharedPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformIOS && ioshttpreg.SharedPool != nil {
-					ioshttpreg.SharedPool.Register(prof.SlotIdx)
-					defer ioshttpreg.SharedPool.Unregister(prof.SlotIdx)
-				}
-				if regPlatform == instagram.PlatformWeb && webregister.SharedPool != nil {
-					webregister.SharedPool.Register(prof.SlotIdx)
-					defer webregister.SharedPool.Unregister(prof.SlotIdx)
-				}
-
 				// Acquire proxy từ dynamic provider (ShopLike, Tinsoft...) bên trong goroutine
 				// Sticky proxy per slot — success giữ proxy, fail thả về pool.
 				// Release callback lưu để gọi sau khi reg xong (biết success/fail).
@@ -2784,9 +1555,25 @@ func (a *App) RunRegister(maxThreads int) string {
 				// Dùng slotIdx thay vì proxy → tránh session poisoning khi nhiều thread share proxy
 				prof.ProxyKey = fmt.Sprintf("slot_%d", slotIdx)
 
-				// Render session proxy TRƯỚC mọi thứ (C#: RenderSessionIfIsProxyServer)
-				// Mỗi goroutine tạo session ID riêng → IP mới mỗi lần reg
-				prof.Proxy = proxy.RenderSessionIfIsProxyServer(prof.Proxy)
+				// Render session proxy — REUSE per slot: 1 luồng dùng chung 1 IP session
+				// xuyên suốt các account. Tránh tạo session mới mỗi account → proxy phải cấp
+				// exit IP + TCP mới mỗi lần → CheckIP rớt khi nhiều luồng burst (xem regSlotSession).
+				// Cache theo base proxy: base đổi (pool rotate) → render session mới.
+				{
+					base := prof.Proxy
+					reuse := ""
+					if v, ok := regSessionBySlot.Load(slotIdx); ok {
+						if e := v.(regSlotSession); e.base == base {
+							reuse = e.rendered
+						}
+					}
+					if reuse != "" {
+						prof.Proxy = reuse
+					} else {
+						prof.Proxy = proxy.RenderSessionIfIsProxyServer(base)
+						regSessionBySlot.Store(slotIdx, regSlotSession{base: base, rendered: prof.Proxy})
+					}
+				}
 
 				// Emit PLACEHOLDER ngay — user thấy "Khởi chạy..." trước khi CheckIP (có thể chậm 0-6s).
 				// IP CHẠY = "" tạm thời (chưa có IP thật) — KHÔNG đẩy raw proxy lên cột này.
@@ -2802,23 +1589,36 @@ func (a *App) RunRegister(maxThreads int) string {
 					"reset":       true,
 				})
 
-				// Kiểm tra IP thực (timeout 6s), dùng làm display IP + country.
+				// Kiểm tra IP thực (timeout 6s hard), dùng làm display IP + country.
 				// Nếu CheckIP fail → displayProxy = "" (cột IP CHẠY để trống, KHÔNG show raw proxy).
+				// Goroutine+select đảm bảo hard 6s timeout bất kể http.Client.Timeout per-request:
+				// fallback chain (ip-api→adspower→luna→ipify) có thể treo 4×6=24s nếu chỉ dùng context.
 				generalCfg := a.LoadSettings().General
 				displayProxy := ""
 				countryCode := ""
 				{
-					// Parent = ctx (run-scoped) → Stop register cancel CheckIP đang chờ;
-					// trước đây dùng a.ctx → CheckIP treo đến hết 6s ngay cả khi user Stop.
-					ipCtx, ipCancel := context.WithTimeout(ctx, 6*time.Second)
-					if realIP, err := proxy.CheckIP(ipCtx, prof.Proxy, generalCfg.ApiCheckIp); err == nil && realIP != "" {
-						displayProxy = realIP
-						// Extract country code từ "89.200.217.100/cl" → "cl"
-						if idx := strings.LastIndex(realIP, "/"); idx >= 0 {
-							countryCode = strings.ToLower(realIP[idx+1:])
+					type ipRes struct{ ip string }
+					ipCh := make(chan ipRes, 1)
+					checkCtx, checkCancel := context.WithTimeout(ctx, 6*time.Second)
+					go func() {
+						ip, err := proxy.CheckIP(checkCtx, prof.Proxy, generalCfg.ApiCheckIp)
+						if err != nil {
+							ip = ""
 						}
+						ipCh <- ipRes{ip}
+					}()
+					select {
+					case res := <-ipCh:
+						if res.ip != "" {
+							displayProxy = res.ip
+							if idx := strings.LastIndex(res.ip, "/"); idx >= 0 {
+								countryCode = strings.ToLower(res.ip[idx+1:])
+							}
+						}
+					case <-time.After(6 * time.Second):
+					case <-ctx.Done():
 					}
-					ipCancel()
+					checkCancel()
 				}
 				// Sinh số điện thoại theo quốc gia của IP.
 				// BỎ QUA khi Mode=Mail HOẶC Mode=TempMail: contactpoint là email, không cần phone.
@@ -2845,23 +1645,10 @@ func (a *App) RunRegister(maxThreads int) string {
 				}
 				if countryCode != "" && !isMailMode && !isTempMailMode {
 					phone, _ := fakeinfo.PhoneFromDatabase(countryCode, defaultPhoneDatabaseDir())
-					if phone == "" {
-						phone = webregister.GeneratePhoneByCountry(countryCode)
-					}
-					if phone != "" { // chỉ override khi có kết quả — giữ VN default nếu cả 2 trả ""
+					if phone != "" {
 						prof.Phone = phone
 					} else {
-						// Cả 2 nguồn đều thiếu pattern cho country này → log để user bổ sung.
 						logMissingPhoneCountryCode(countryCode)
-					}
-				}
-				// FALLBACK 2026-05-15: nếu phone vẫn rỗng sau mọi attempt (do phone clear
-				// block + country không có phone generator + phone_database trống), force
-				// generate VN phone để tránh "Thiếu contactpoint" fail toàn slot.
-				// Không ảnh hưởng nếu Mail/TempMail mode (đã có Email làm contactpoint).
-				if prof.Phone == "" && prof.Email == "" && !isMailMode && !isTempMailMode {
-					if vnPhone := webregister.GeneratePhoneByCountry("VN"); vnPhone != "" {
-						prof.Phone = vnPhone
 					}
 				}
 				// C# SimNetworkOptions: 1=random (any country), 2=match by IP.
@@ -2892,6 +1679,11 @@ func (a *App) RunRegister(maxThreads int) string {
 				})
 
 				onStatus := func(msg string) {
+					// igcore emit "ua:<iOS UA>" ngay sau khi build profile → cập nhật sớm
+					if strings.HasPrefix(msg, "ua:") {
+						prof.UserAgent = strings.TrimPrefix(msg, "ua:")
+						return
+					}
 					// Ghi vào batch cache — batch goroutine flush lên frontend mỗi 500ms
 					regBatchCache.Store(threadIdx, regEntry{
 						index: threadIdx, phone: pickContact(), proxy: displayProxy, userAgent: prof.UserAgent, msg: msg,
@@ -2899,71 +1691,6 @@ func (a *App) RunRegister(maxThreads int) string {
 				}
 
 				threadReg, threadRegErr := instagram.NewRegisterer(regPlatform)
-
-				// Keep-session context: pin device/UA/session cho cả lifetime goroutine.
-				// Port C# pattern: 1 `FacebookAccountModel` + 1 `IHttpRequestClient` shared
-				// cho tất cả regs trong thread → giảm device rotation, FB trust hơn.
-				var s23WCtx *s23reg.WorkerContext
-				var sxxxWCtx regSxxxWorkerContext
-				var s399WCtx *s399reg.WorkerContext
-				var androidWCtx *androidreg.WorkerContext
-				var webandroidWCtx *webandroidreg.WorkerContext
-				// C# LocaleFake: "random" → override locale bằng RandomLocale() (từ locales.txt).
-				// "match-ip" → giữ locale đã build từ country proxy.
-				overrideLocale := ""
-				if strings.EqualFold(strings.TrimSpace(generalCfg.LocaleFake), "random") {
-					overrideLocale = fakeinfo.RandomLocale()
-				}
-				// C# SimNetworkType: WIFI/mobile.LTE/cell.CTRadioAccessTechnologyHSDPA/unknown
-				// Port map GUI value → Xfb_connection_type (case-insensitive).
-				overrideConnType := mapSimNetworkType(generalCfg.SimNetworkType)
-
-				if isRegPlatformSxxx(regPlatform) {
-					if wctx, err := newRegSxxxWorkerContext(regPlatform, prof.Proxy, effectiveCountryCode); err == nil {
-						sxxxWCtx = wctx
-						defer sxxxWCtx.Close()
-						sxxxWCtx.SetLocale(overrideLocale)
-						sxxxWCtx.SetConnectionType(overrideConnType)
-						sxxxWCtx.SetUAOptions(interactionCfg.AddVirtualSpecAndroid)
-						prof.UserAgent = sxxxWCtx.UserAgent()
-					}
-				}
-
-				switch regPlatform {
-				case instagram.PlatformS23:
-					if wctx, err := s23reg.NewWorkerContext(prof.Proxy, effectiveCountryCode); err == nil {
-						s23WCtx = wctx
-						defer s23WCtx.Close()
-						s23WCtx.SetLocale(overrideLocale)
-						s23WCtx.SetConnectionType(overrideConnType)
-						s23WCtx.SetUAOptions(interactionCfg.AddVirtualSpecAndroid)
-						prof.UserAgent = s23WCtx.Profile().S23UA
-					}
-				case instagram.PlatformAndroid:
-					if wctx, err := androidreg.NewWorkerContext(prof.Proxy, effectiveCountryCode); err == nil {
-						androidWCtx = wctx
-						defer androidWCtx.Close()
-						androidWCtx.SetLocale(overrideLocale)
-						androidWCtx.SetConnectionType(overrideConnType)
-						androidWCtx.SetUAOptions(interactionCfg.AddVirtualSpecAndroid)
-						prof.UserAgent = androidWCtx.Profile().UserAgent
-					}
-				case instagram.PlatformWebAndroid:
-					if wctx, err := webandroidreg.NewWorkerContext(prof.Proxy); err == nil {
-						webandroidWCtx = wctx
-						defer webandroidWCtx.Close()
-						prof.UserAgent = webandroidWCtx.Profile().UserAgent
-					}
-				case instagram.PlatformS399:
-					if wctx, err := s399reg.NewWorkerContext(prof.Proxy, effectiveCountryCode); err == nil {
-						s399WCtx = wctx
-						defer s399WCtx.Close()
-						s399WCtx.SetLocale(overrideLocale)
-						s399WCtx.SetConnectionType(overrideConnType)
-						s399WCtx.SetUAOptions(interactionCfg.AddVirtualSpecAndroid)
-						prof.UserAgent = s399WCtx.Profile().S399UA
-					}
-				}
 
 				// UA selection — 5 trạng thái:
 				//   UseOriginalUA=true               → UA gốc cố định theo platform (s555-s559)
@@ -2984,18 +1711,6 @@ func (a *App) RunRegister(maxThreads int) string {
 						// và profile.Locale = "en_GB" (khớp FBLC trong OriginalUA).
 						prof.UseOriginalUA = true
 						prof.OriginalSim = origSim
-						if s23WCtx != nil {
-							s23WCtx.SetUA(origUA)
-						}
-						if sxxxWCtx != nil {
-							sxxxWCtx.SetUA(origUA)
-						}
-						if s399WCtx != nil {
-							s399WCtx.SetUA(origUA)
-						}
-						if androidWCtx != nil {
-							androidWCtx.SetUA(origUA)
-						}
 					}
 				} else if !interactionCfg.BuildUA {
 					kind := uaKindFromPoolKey(interactionCfg.UaPoolKey)
@@ -3006,21 +1721,6 @@ func (a *App) RunRegister(maxThreads int) string {
 							finalUA = fakeinfo.WrapWithDalvikPrefix(rawUA)
 						}
 						prof.UserAgent = finalUA
-						if s23WCtx != nil {
-							s23WCtx.SetUA(finalUA)
-						}
-						if sxxxWCtx != nil {
-							sxxxWCtx.SetUA(finalUA)
-						}
-						if s399WCtx != nil {
-							s399WCtx.SetUA(finalUA)
-						}
-						if androidWCtx != nil {
-							androidWCtx.SetUA(finalUA)
-						}
-						if webandroidWCtx != nil {
-							webandroidWCtx.SetUA(finalUA)
-						}
 					} else {
 						// IG rebrand: UA pool rỗng KHÔNG còn là lỗi — adapter IG tự sinh UA.
 						// Chỉ log, không return; prof.UserAgent để trống, igcore tự đặt.
@@ -3038,21 +1738,6 @@ func (a *App) RunRegister(maxThreads int) string {
 						if kept, ok := v.(regSlotUA); ok && kept.Platform == regPlatform && kept.UA != "" {
 							keptUA := kept.UA
 							prof.UserAgent = keptUA
-							if s23WCtx != nil {
-								s23WCtx.SetUA(keptUA)
-							}
-							if sxxxWCtx != nil {
-								sxxxWCtx.SetUA(keptUA)
-							}
-							if s399WCtx != nil {
-								s399WCtx.SetUA(keptUA)
-							}
-							if androidWCtx != nil {
-								androidWCtx.SetUA(keptUA)
-							}
-							if webandroidWCtx != nil {
-								webandroidWCtx.SetUA(keptUA)
-							}
 						} else {
 							regUABySlot.Delete(slotIdx)
 						}
@@ -3062,46 +1747,18 @@ func (a *App) RunRegister(maxThreads int) string {
 				// TrackingID: thêm XID/<random16>; vào UA sau khi mọi override đã xong.
 				if interactionCfg.TrackingIDReg && prof.UserAgent != "" {
 					prof.UserAgent = appendXIDToUA(prof.UserAgent)
-					if s23WCtx != nil {
-						s23WCtx.SetUA(prof.UserAgent)
-					}
-					if sxxxWCtx != nil {
-						sxxxWCtx.SetUA(prof.UserAgent)
-					}
-					if s399WCtx != nil {
-						s399WCtx.SetUA(prof.UserAgent)
-					}
-					if androidWCtx != nil {
-						androidWCtx.SetUA(prof.UserAgent)
-					}
-					if webandroidWCtx != nil {
-						webandroidWCtx.SetUA(prof.UserAgent)
-					}
 				}
+
+				// IG rebrand: igcore tự sinh iOS UA nội bộ → xóa Android UA từ pool/selection
+				// NGAY TẠI ĐÂY để mọi event tiếp theo (TempMail, onStatus, result) đều
+				// không carry Android FB UA ra UI. result.UserAgent sẽ set iOS UA sau reg.
+				prof.UserAgent = ""
 
 				// C# MFB: RegisterWithKeepHttpSession runs in a LOOP per thread:
 				//   Success + CookieInitial → keep session → delay → reg again (same proxy/IP)
 				//   Fail/Blocked → break → thread ends → new session
 				// This "warm session" pattern gives higher success rate for subsequent regs.
 				maxKeepSessionRegs := 1 // default: 1 reg per goroutine (no loop)
-				if regPlatform == instagram.PlatformIOS && loadedCookieInitialCount > 0 {
-					maxKeepSessionRegs = 10 // iOS HTTP + CookieInitial: up to 10 regs per session
-				}
-				if regPlatform == instagram.PlatformS23 && s23reg.SharedPool != nil && s23reg.SharedPool.Size() > 0 {
-					maxKeepSessionRegs = 5 // S23 + CookiePool: warm session → higher success rate
-				}
-				if pool := regPoolForSxxx(regPlatform); pool != nil && pool.Size() > 0 {
-					maxKeepSessionRegs = 5 // Sxxx + CookiePool: warm session
-				}
-				if regPlatform == instagram.PlatformS399 && s399reg.SharedPool != nil && s399reg.SharedPool.Size() > 0 {
-					maxKeepSessionRegs = 5 // S399 + CookiePool: warm session → higher success rate
-				}
-				if regPlatform == instagram.PlatformAndroid && androidreg.SharedPool != nil && androidreg.SharedPool.Size() > 0 {
-					maxKeepSessionRegs = 5 // Android V3 + CookiePool: reuse session + device pin
-				}
-				if regPlatform == instagram.PlatformWebAndroid && loadedCookieInitialCount > 0 {
-					maxKeepSessionRegs = 5 // WebAndroid + CookiePool: reuse ChromeAndroid device pin
-				}
 
 				var result *instagram.RegResult
 				for regAttempt := 0; regAttempt < maxKeepSessionRegs; regAttempt++ {
@@ -3137,19 +1794,10 @@ func (a *App) RunRegister(maxThreads int) string {
 							prof.Phone = ""
 						default:
 							phone, _ := fakeinfo.PhoneFromDatabase(countryCode, defaultPhoneDatabaseDir())
-							if phone == "" {
-								phone = webregister.GeneratePhoneByCountry(countryCode)
-							}
 							if phone != "" {
 								prof.Phone = phone
 							} else if countryCode != "" {
 								logMissingPhoneCountryCode(countryCode)
-							}
-							// FALLBACK 2026-05-15: cùng logic ở first attempt — không để prof.Phone rỗng.
-							if prof.Phone == "" && prof.Email == "" {
-								if vnPhone := webregister.GeneratePhoneByCountry("VN"); vnPhone != "" {
-									prof.Phone = vnPhone
-								}
 							}
 						}
 						newFake := fakeinfo.RandomFakeProfile()
@@ -3229,9 +1877,23 @@ func (a *App) RunRegister(maxThreads int) string {
 					if tempMailHandle != nil && tempMailHandle.Service != nil {
 						mailSvc := tempMailHandle.Service
 						prof.GetOTP = func(c context.Context) (string, error) {
-							return mailSvc.WaitForCode(c, 30, 4000)
+							return mailSvc.WaitForCode(c, 90, 2000)
 						}
 						onStatus("[IG] GetOTP wired — reg sẽ tự đọc OTP + confirm")
+
+						// ig_ios_gql: cấp GetNewEmail để Register() tự retry với email mới khi SESSION_FLAGGED.
+						if regPlatform == "ig_ios_gql" {
+							prof.GetNewEmail = func(c context.Context) (string, func(context.Context) (string, error), error) {
+								newAddr, err := mailSvc.CreateEmail(c)
+								if err != nil {
+									return "", nil, err
+								}
+								return newAddr, func(inner context.Context) (string, error) {
+									return mailSvc.WaitForCode(inner, 90, 2000)
+								}, nil
+							}
+							onStatus("[ig_ios_gql] GetNewEmail wired — auto-retry khi SESSION_FLAGGED")
+						}
 					}
 
 					// Cookie initial guard — handle pool cạn theo method:
@@ -3286,23 +1948,16 @@ func (a *App) RunRegister(maxThreads int) string {
 					// regWorkerCtx (không bị cancel khi Stop) → HTTP request đang chạy hoàn thành
 					// thay vì bị abort giữa chừng. ctx chỉ dùng để gating retry delay + dispatch.
 					debugRegBreakpoint(string(regPlatform), slotIdx, threadIdx, regAttempt+1, pickContact(), prof.Proxy, prof.UserAgent)
-					// IG rebrand: toàn bộ platform register dùng IG adapter (threadReg).
-					// WorkerContext (s23/android/webandroid/s399/sxxx) chỉ còn dùng để set
-					// UA/proxy/session, KHÔNG chạy Register Facebook cũ nữa.
-					_ = s23WCtx
-					_ = sxxxWCtx
-					_ = s399WCtx
-					_ = androidWCtx
-					_ = webandroidWCtx
 					if threadReg == nil {
 						result = &instagram.RegResult{Success: false, Message: fmt.Sprintf("platform %q không có registerer: %v", regPlatform, threadRegErr)}
 					} else {
 						result = threadReg.Register(regWorkerCtx, &prof, onStatus)
 					}
 
-					// Platforms tự build UA nội bộ (ios562) trả UA qua result.UserAgent.
-					// Cập nhật prof để các bước sau (save, verify, emit) thấy đúng UA.
-					if result != nil && result.UserAgent != "" && prof.UserAgent == "" {
+					// igcore tự build iOS UA nội bộ → luôn ghi đè prof.UserAgent bằng
+					// UA thực tế đã dùng cho reg (bỏ điều kiện == "" để không giữ lại
+					// Android pre-gen UA từ giai đoạn khởi tạo).
+					if result != nil && result.UserAgent != "" {
 						prof.UserAgent = result.UserAgent
 					}
 
@@ -3341,27 +1996,9 @@ func (a *App) RunRegister(maxThreads int) string {
 						if regPassword == "" {
 							regPassword = prof.Password
 						}
-						if regPassword != "" && !webregister.SkipAuthLoginAtReg {
+						if regPassword != "" {
 							onStatus("[AutoVerify] Thiếu EAAAAU token → login Android để lấy...")
-							// EAA fetch BẮT BUỘC dùng Android UA (FB4A) — không dùng prof.UserAgent
-							// (có thể là Web/iOS/Chrome khi reg platform khác Android). Dùng UA verify
-							// platform tương ứng (S555/S556/.../Android) → match fingerprint server-side.
-							androidUAForToken := prof.UserAgent
-							if !platformNeedsAndroidLoginToken(string(regPlatform)) {
-								verifyUAConfig := applyVerifyPlatformUAConfig(a.LoadInteractionConfig())
-								androidUAForToken = pickUAForVerifyPlatform(
-									verifyPlatformFromType(verifyUAConfig.ApiVerifyPlatform),
-									prof.UserAgent, verifyUAConfig, phoneToCountryCode(prof.Phone))
-							}
-							if androidUAForToken == "" {
-								androidUAForToken = prof.UserAgent
-							}
-							tokenCtx, tokenCancel := context.WithTimeout(regWorkerCtx, 30*time.Second)
-							// Extract datr từ cookie để pass machineID vào /auth/login.
-							machineIDForLogin := extractDatrFromCookieLine(result.Cookie)
-							// PORT S399 step 2: REST `/auth/login` thay vì Bloks/RSA (đều bị FB rotate schema).
-							tok := webregister.FetchAndroidTokenLegacy(tokenCtx, result.UID, regPassword, machineIDForLogin, "en_US", "", prof.Proxy, androidUAForToken, func(m string) { onStatus(m) })
-							tokenCancel()
+							tok := ""
 							if strings.HasPrefix(tok, "EAAAAU") {
 								result.AccessToken = tok
 								onStatus(fmt.Sprintf("[AutoVerify] ✅ Lấy EAAAAU OK (len=%d)", len(tok)))
@@ -3387,10 +2024,11 @@ func (a *App) RunRegister(maxThreads int) string {
 					// realtime, không phải chờ đến register:account-done (sau khi verify xong).
 					if result != nil && result.Success && result.UID != "" {
 						runtime.EventsEmit(a.ctx, "register:token", map[string]interface{}{
-							"index":  threadIdx,
-							"uid":    result.UID,
-							"token":  result.AccessToken,
-							"cookie": result.Cookie,
+							"index":    threadIdx,
+							"uid":      result.UID,
+							"token":    result.AccessToken,
+							"cookie":   result.Cookie,
+							"username": result.Username,
 						})
 					}
 
@@ -3408,6 +2046,7 @@ func (a *App) RunRegister(maxThreads int) string {
 							// hoặc đọc từ file sau) tự Restore + skip CreateEmail.
 							Email:     prof.Email,
 							EmailMeta: prof.EmailMeta,
+							Username:  result.Username,
 						}
 						status := "unknown"
 						if result.Success {
@@ -3459,7 +2098,35 @@ func (a *App) RunRegister(maxThreads int) string {
 								}
 							}
 						}
-						go saveRegOutcome(regWriter, regCounters, status, result.Message, accForSave, string(regPlatform), login, onRegSuccess)
+						go func(regStatus string, acc Account, msg string, checkProxy string) {
+							// 1. Ghi kết quả reg NGAY: live → SuccessReg.txt | checkpoint/blocked/unknown
+							//    → file tương ứng. User thấy data thành công liền sau khi reg.
+							regLine := saveRegOutcome(regWriter, regCounters, regStatus, msg, acc, string(regPlatform), login, onRegSuccess)
+
+							// 2. Reg live → check-live NGAY bằng CheckLiveByUsername (timeout 20s/acc),
+							//    KHÔNG chờ delay. live → Live.txt, còn lại (die/unknown) → Die.txt.
+							//    Dùng proxy của chính luồng để phân tán request → tránh IG throttle
+							//    (direct IP bị 429 khi 20+ luồng check cùng lúc → unknown hàng loạt).
+							if regStatus != "live" || acc.Username == "" {
+								return
+							}
+							checkCtx, checkCancel := context.WithTimeout(regWorkerCtx, 20*time.Second)
+							result := igcore.CheckLiveByUsername(checkCtx, acc.Username, checkProxy)
+							checkCancel()
+							// Phân loại file: live → Live.txt | die/unknown → Die.txt (upsert theo field đầu).
+							if regWriter != nil && regLine != "" {
+								if result == "live" {
+									_ = regWriter.Append(resultpkg.FileLive, regLine)
+								} else {
+									_ = regWriter.UpsertUID(resultpkg.FileDieAfterVerify, regLine)
+								}
+							}
+							// Emit để UI cập nhật Live counter + activity.
+							runtime.EventsEmit(a.ctx, "register:check-live-result", map[string]interface{}{
+								"username": acc.Username,
+								"result":   result,
+							})
+						}(status, accForSave, result.Message, prof.Proxy)
 					}
 					if result != nil && result.Cookie != "" {
 						if datr := extractDatrFromCookieLine(result.Cookie); datr != "" {
@@ -3507,6 +2174,7 @@ func (a *App) RunRegister(maxThreads int) string {
 						job := splitVerifyJob{
 							acc: runner.AccountInput{
 								UID:                   result.UID,
+								Username:              result.Username,
 								FullName:              prof.FirstName + " " + prof.LastName,
 								Phone:                 prof.Phone,
 								Cookie:                result.Cookie,
@@ -3548,6 +2216,7 @@ func (a *App) RunRegister(maxThreads int) string {
 						acc := runner.AccountInput{
 							ID:                    threadIdx,
 							UID:                   result.UID,
+							Username:              result.Username,
 							FullName:              prof.FirstName + " " + prof.LastName,
 							Phone:                 prof.Phone,
 							Cookie:                result.Cookie,
@@ -4607,7 +3276,7 @@ func (a *App) RunRegister(maxThreads int) string {
 					emailMeta = ""
 				}
 				inp := runner.AccountInput{
-					ID: slotID, UID: acc.UID, FullName: acc.FullName,
+					ID: slotID, UID: acc.UID, Username: acc.Username, FullName: acc.FullName,
 					Phone: acc.Phone, Cookie: acc.Cookie, Token: acc.Token,
 					UserAgent:      verifyUA,
 					Password:       acc.Password,

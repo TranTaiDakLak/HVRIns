@@ -44,47 +44,88 @@ func (m *MailTm) CreateEmail(ctx context.Context) (string, error) {
 	pass := randomMailTmPass(12)
 	addr := user + "@" + domain
 
-	// POST /accounts
+	// POST /accounts — retry on 429 (rate limit from concurrent requests).
 	accPayload, _ := json.Marshal(map[string]string{"address": addr, "password": pass})
-	req, err := http.NewRequestWithContext(ctx, "POST", mailTmBaseURL+"/accounts", bytes.NewReader(accPayload))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
+	var createStatus int
+	for attempt := 0; attempt < 4; attempt++ {
+		if attempt > 0 {
+			delay := time.Duration(attempt*3) * time.Second
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(delay):
+			}
+		}
+		req, err := http.NewRequestWithContext(ctx, "POST", mailTmBaseURL+"/accounts", bytes.NewReader(accPayload))
+		if err != nil {
+			return "", err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
 
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("mailtm create account: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 201 {
+		resp, err := m.client.Do(req)
+		if err != nil {
+			return "", fmt.Errorf("mailtm create account: %w", err)
+		}
+		createStatus = resp.StatusCode
+		if resp.StatusCode == 201 {
+			io.Copy(io.Discard, resp.Body)
+			resp.Body.Close()
+			break
+		}
 		body, _ := httpx.ReadBody(resp.Body, 0)
-		return "", fmt.Errorf("mailtm create account: status %d — %s", resp.StatusCode, string(body))
+		resp.Body.Close()
+		if resp.StatusCode != 429 {
+			return "", fmt.Errorf("mailtm create account: status %d — %s", resp.StatusCode, string(body))
+		}
 	}
-	io.Copy(io.Discard, resp.Body)
+	if createStatus != 201 {
+		return "", fmt.Errorf("mailtm create account: rate limited (429) after retries")
+	}
 
-	// POST /token
+	// Wait for account to propagate before requesting token.
+	// mail.tm eventual consistency can take 5-30s — use aggressive retry.
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	case <-time.After(6 * time.Second):
+	}
+
+	// POST /token — retry on 401/422 with increasing backoff (propagation delay).
 	tokPayload, _ := json.Marshal(map[string]string{"address": addr, "password": pass})
-	req2, err := http.NewRequestWithContext(ctx, "POST", mailTmBaseURL+"/token", bytes.NewReader(tokPayload))
-	if err != nil {
-		return "", err
-	}
-	req2.Header.Set("Content-Type", "application/json")
-	req2.Header.Set("Accept", "application/json")
-
-	resp2, err := m.client.Do(req2)
-	if err != nil {
-		return "", fmt.Errorf("mailtm get token: %w", err)
-	}
-	defer resp2.Body.Close()
-	tokBody, _ := httpx.ReadBody(resp2.Body, 0)
-
 	var tokResult struct {
 		Token string `json:"token"`
 	}
-	if err := json.Unmarshal(tokBody, &tokResult); err != nil || tokResult.Token == "" {
-		return "", fmt.Errorf("mailtm get token: unexpected response: %s", string(tokBody))
+	tokBackoffs := []time.Duration{5 * time.Second, 8 * time.Second, 10 * time.Second, 12 * time.Second}
+	var lastTokBody []byte
+	for attempt := 0; attempt <= len(tokBackoffs); attempt++ {
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(tokBackoffs[attempt-1]):
+			}
+		}
+		req2, err := http.NewRequestWithContext(ctx, "POST", mailTmBaseURL+"/token", bytes.NewReader(tokPayload))
+		if err != nil {
+			return "", err
+		}
+		req2.Header.Set("Content-Type", "application/json")
+		req2.Header.Set("Accept", "application/json")
+
+		resp2, err := m.client.Do(req2)
+		if err != nil {
+			return "", fmt.Errorf("mailtm get token: %w", err)
+		}
+		lastTokBody, _ = httpx.ReadBody(resp2.Body, 0)
+		resp2.Body.Close()
+
+		if err := json.Unmarshal(lastTokBody, &tokResult); err == nil && tokResult.Token != "" {
+			break
+		}
+	}
+	if tokResult.Token == "" {
+		return "", fmt.Errorf("mailtm get token: unexpected response: %s", string(lastTokBody))
 	}
 
 	m.email = addr
@@ -138,21 +179,39 @@ func (m *MailTm) WaitForCode(ctx context.Context, maxRetry int, intervalMs int) 
 	return "", fmt.Errorf("mailtm: không nhận được OTP sau %d lần thử", maxRetry)
 }
 
-// pickDomain lấy domain đầu tiên từ GET /domains.
-// API cũ trả về {"hydra:member":[...]} — API mới trả về array thẳng [...].
+// pickDomain lấy random domain từ GET /domains để phân tán tải giữa các domain.
+// Retry on network errors (DNS fail, timeout) up to 3 times with 5s backoff.
 func (m *MailTm) pickDomain(ctx context.Context) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", mailTmBaseURL+"/domains?page=1", nil)
-	if err != nil {
-		return "", err
+	var body []byte
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(5 * time.Second):
+			}
+		}
+		req, err := http.NewRequestWithContext(ctx, "GET", mailTmBaseURL+"/domains?page=1", nil)
+		if err != nil {
+			return "", err
+		}
+		req.Header.Set("Accept", "application/json")
+		resp, err := m.client.Do(req)
+		if err != nil {
+			if attempt == 2 {
+				return "", fmt.Errorf("mailtm get domains: %w", err)
+			}
+			continue
+		}
+		body, _ = httpx.ReadBody(resp.Body, 0)
+		resp.Body.Close()
+		break
 	}
-	req.Header.Set("Accept", "application/json")
+	if len(body) == 0 {
+		return "", fmt.Errorf("mailtm get domains: empty response")
+	}
 
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	body, _ := httpx.ReadBody(resp.Body, 0)
+	var domains []string
 
 	// Thử parse dạng Hydra (cũ): {"hydra:member":[{"domain":"..."},...]}
 	var hydra struct {
@@ -161,18 +220,27 @@ func (m *MailTm) pickDomain(ctx context.Context) (string, error) {
 		} `json:"hydra:member"`
 	}
 	if err := json.Unmarshal(body, &hydra); err == nil && len(hydra.HydraMember) > 0 {
-		return hydra.HydraMember[0].Domain, nil
+		for _, d := range hydra.HydraMember {
+			domains = append(domains, d.Domain)
+		}
 	}
 
 	// Thử parse dạng array thẳng (mới): [{"domain":"..."}]
-	var arr []struct {
-		Domain string `json:"domain"`
-	}
-	if err := json.Unmarshal(body, &arr); err == nil && len(arr) > 0 {
-		return arr[0].Domain, nil
+	if len(domains) == 0 {
+		var arr []struct {
+			Domain string `json:"domain"`
+		}
+		if err := json.Unmarshal(body, &arr); err == nil {
+			for _, d := range arr {
+				domains = append(domains, d.Domain)
+			}
+		}
 	}
 
-	return "", fmt.Errorf("mailtm domains: unexpected response: %s", string(body))
+	if len(domains) == 0 {
+		return "", fmt.Errorf("mailtm domains: unexpected response: %s", string(body))
+	}
+	return domains[rand.Intn(len(domains))], nil
 }
 
 // mailTmMessage là struct dùng chung cho cả Hydra và array format.

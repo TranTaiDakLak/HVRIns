@@ -202,6 +202,16 @@ const (
 	PlatformIOSMessReg = "iosmessreg" // Messenger Lite iOS (FBAV/563) — REG create.account (create-only, trả crypted_user_id)
 	PlatformIOSMess    = "iosmess"    // Messenger Lite iOS (FBAV/563) — VERIFY add-mail + OTP confirm + live/die (reuse mail từ reg)
 
+	// ─── Instagram Android Native ────────────────────────────────────────────
+	// POST /api/v1/bloks/async_action/{endpoint}/ với profile Okhttp4Android13.
+	// Bloks CAA reg flow: email → OTP → password → birthday → name → username → create.account.
+	PlatformIGAndroid = "ig_android"
+
+	// ─── Instagram iOS Bloks ─────────────────────────────────────────────────
+	// Cùng Bloks flow Android nhưng dùng iOS App ID (124024574287414) + iOS headers.
+	// regulation_jurisdiction:"VN" thay vì "TR" → bypass integrity_block tốt hơn.
+	PlatformIGIOSBloks = "ig_ios_bloks"
+
 	// ─── iOS Native App (FBIOS) ──────────────────────────────────────────────
 	// KHÁC PlatformIOS (= "ios" = iPhone Mobile Safari qua m.facebook.com).
 	// graph.facebook.com/graphql + OAuth 6628568379 + FBAN/FBIOS.
@@ -435,8 +445,16 @@ var ErrUnsupportedPlatform = fmt.Errorf("unsupported platform: Facebook APIs rem
 // Mapping từ C#: InstanceCreateUtils.GetFacebookRegisterInstance()
 // Platform package phải được blank-imported để kích hoạt registration.
 func NewRegisterer(platform string) (Registerer, error) {
-	// IG rebrand: mọi platform register chạy flow Instagram thật (igcore adapter),
-	// thay cho logic Facebook cũ (đã gỡ). platform chỉ còn mang ý nghĩa nhãn/label.
+	// Kiểm tra registry trước — mọi platform đã đăng ký factory qua init() đều ưu tiên.
+	// PlatformIOS (ioshttp), PlatformIGAndroid (igandroid) và các plugin khác dùng path này.
+	mu.RLock()
+	f, ok := registererFactories[platform]
+	mu.RUnlock()
+	if ok {
+		return f(), nil
+	}
+	// IG rebrand: mọi platform chưa đăng ký factory chạy flow Instagram (igcore adapter).
+	// platform chỉ còn mang ý nghĩa nhãn/label cho các platform legacy.
 	return newIGRegisterer(), nil
 }
 

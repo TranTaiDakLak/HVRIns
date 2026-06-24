@@ -85,7 +85,7 @@ func New(opts Options) (Service, error) {
 		return temp.NewTempMailPlus(opts.TempMailDomain, effectiveProxy), nil
 
 	case "dropmail":
-		return temp.NewDropmail(effectiveProxy), nil
+		return nil, fmt.Errorf("email: dropmail — API bị disable (legacy_token_disabled), provider không khả dụng")
 
 	case "guerrillamail":
 		return temp.NewGuerrillaMail(effectiveProxy), nil
@@ -125,6 +125,55 @@ func New(opts Options) (Service, error) {
 
 	case "firetempmail":
 		return temp.NewFireTempMail(effectiveProxy), nil
+
+	// ── Temp mail port từ NullCoreSummer (đã test tạo mail OK) ────────────────
+	case "tempmailio", "temp-mail.io":
+		return temp.NewTempMailIo(effectiveProxy, temp.ParseTempMailIoDomains(opts.TempMailDomain)), nil
+	case "anonymmail", "anonymmail.net":
+		return temp.NewAnonymMail(effectiveProxy, temp.ParseAnonymMailDomains(opts.TempMailDomain)), nil
+	case "tempmailnow", "tempmail.now":
+		return temp.NewTempMailNow(effectiveProxy), nil
+	case "tempmailworld", "tempmail.world":
+		return temp.NewTempMailWorld(effectiveProxy), nil
+	case "expressmail", "expressmail.app":
+		return temp.NewExpressMail(effectiveProxy), nil
+	case "tempmail100free":
+		return temp.NewTempMail100Free(effectiveProxy), nil
+	case "fakelegal", "fake.legal":
+		return temp.NewFakeLegal(effectiveProxy, temp.ParseFakeLegalDomains(opts.TempMailDomain)), nil
+	case "tempmailbee":
+		return temp.NewTempMailBee(effectiveProxy, temp.ParseTempMailBeeDomains(opts.TempMailDomain)), nil
+	case "tempmailapp", "temp-mail.app":
+		return temp.NewTempMailApp(effectiveProxy), nil
+	case "tempamail", "tempamail.com":
+		return temp.NewTempAmail(effectiveProxy), nil
+	case "tempmailai", "temp-mail.ai":
+		return temp.NewTempMailAI(effectiveProxy), nil
+	case "tempemailcc", "tempemail.cc":
+		return temp.NewTempEmailCC(effectiveProxy), nil
+	case "tempmailerme", "temp-mailer.me":
+		return temp.NewTempMailerMe(effectiveProxy), nil
+	case "mailwave", "mailwave.dev":
+		return temp.NewMailWave(effectiveProxy), nil
+	case "tempmail10", "tempmail10.com":
+		return temp.NewTempMail10(effectiveProxy), nil
+	case "tempmailpro", "tempmailpro.io":
+		return temp.NewTempMailPro(effectiveProxy), nil
+	case "tempmaildigital", "tempmail.digital":
+		return temp.NewTempMailDigital(effectiveProxy), nil
+	case "tempmailx", "tempmailx.xyz":
+		return temp.NewTempMailX(effectiveProxy), nil
+	case "tempmailid", "temp-mail.id":
+		return temp.NewTempMailId(effectiveProxy, temp.ParseTempMailIdDomains(opts.TempMailDomain)), nil
+
+	case "firetempmail-ctm": // @ctm.edu.pl — Polish edu domain, test iOS validation
+		return temp.NewFireTempMailWithDomain(effectiveProxy, "ctm.edu.pl"), nil
+
+	case "firetempmail-jd": // @jobsdeforyou.sa.com — alternate firetempmail domain
+		return temp.NewFireTempMailWithDomain(effectiveProxy, "jobsdeforyou.sa.com"), nil
+
+	case "firetempmail-offre": // @offredaily.sa.com — another firetempmail domain, test iOS
+		return temp.NewFireTempMailWithDomain(effectiveProxy, "offredaily.sa.com"), nil
 
 	case "fviainboxes":
 		return temp.NewFviaInboxes(effectiveProxy), nil

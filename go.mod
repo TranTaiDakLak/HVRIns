@@ -8,14 +8,13 @@ require (
 	github.com/bogdanfinn/utls v1.7.7-barnius
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.18.2
-	github.com/wailsapp/wails/v2 v2.12.0
+	github.com/wailsapp/wails/v2 v2.11.0
 	golang.org/x/crypto v0.46.0
 	golang.org/x/image v0.38.0
 	golang.org/x/text v0.35.0
 )
 
 require (
-	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/bdandy/go-errors v1.2.2 // indirect
 	github.com/bdandy/go-socks4 v1.2.3 // indirect

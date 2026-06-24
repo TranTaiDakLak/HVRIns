@@ -126,6 +126,7 @@ interface RegThread {
   proxyServer: string // proxy server string (ip:port:user:pass)
   userAgent: string
   uid: string
+  username: string
   password: string
   cookie: string
   token: string
@@ -169,6 +170,7 @@ const regTotalLive = ref(0)
 const regTotalDie = ref(0)
 const regTotalUnknown = ref(0)
 const regTotalCheckpoint = ref(0)
+const regTotalLiveConfirmed = ref(0)   // live thật — từ check-live-result sau 15s
 const checkpointLimitEnabled = ref(false)
 const checkpointLimitCount = ref(0)
 
@@ -208,6 +210,7 @@ function saveRunStats() {
       regDie: regTotalDie.value,
       regUnknown: regTotalUnknown.value,
       regCheckpoint: regTotalCheckpoint.value,
+      regLiveConfirmed: regTotalLiveConfirmed.value,
       verLive: verifyTotalLive.value,
       verDie: verifyTotalDie.value,
       verUnknown: verifyTotalUnknown.value,
@@ -232,6 +235,7 @@ function restoreRunStats(): boolean {
     regTotalDie.value = s.regDie || 0
     regTotalUnknown.value = s.regUnknown || 0
     regTotalCheckpoint.value = s.regCheckpoint || 0
+    regTotalLiveConfirmed.value = s.regLiveConfirmed || 0
     verifyTotalLive.value = s.verLive || 0
     verifyTotalDie.value = s.verDie || 0
     verifyTotalUnknown.value = s.verUnknown || 0
@@ -251,6 +255,7 @@ function scheduleStatsSave() {
 }
 watch([
   regTotalProcessed, regTotalSuccess, regTotalFail, regTotalLive, regTotalDie, regTotalUnknown, regTotalCheckpoint,
+  regTotalLiveConfirmed,
   verifyTotalLive, verifyTotalDie, verifyTotalUnknown, verifyTotalProcessed,
 ], scheduleStatsSave)
 // Map<accountId, lastStatus> — track status cuối mỗi account để fix double-count khi retry:
@@ -1567,7 +1572,7 @@ async function setupRegisterListeners() {
   // Quan trọng: nếu không batch, 100 goroutine fail nhanh (1-2s) → 100 events/s → JS engine bận → click không được xử lý
   type StatusEvent = { index: number; phone: string; proxy: string; proxyServer?: string; userAgent?: string; msg: string; reset?: boolean }
   type DoneEvent = { index: number; phone: string; proxy: string; proxyServer?: string; userAgent?: string; success: boolean; uid: string; cookie: string; password: string; token?: string; message: string; verifyStatus?: string; verifyMessage?: string; verifyEmail?: string; checkpoint?: boolean }
-  type TokenEvent = { index: number; uid: string; token: string; cookie: string }
+  type TokenEvent = { index: number; uid: string; token: string; cookie: string; username?: string }
 
   let pendingStatus: StatusEvent[] = []
   let pendingDone: DoneEvent[] = []
@@ -1600,7 +1605,7 @@ async function setupRegisterListeners() {
       } else {
         registerThreads.value.set(data.index, {
           index: data.index, phone: data.phone, proxy: data.proxy || '', proxyServer: data.proxyServer || '',
-          userAgent: data.userAgent || '', uid: '', password: '', cookie: '', token: '', activity: data.msg,
+          userAgent: data.userAgent || '', uid: '', username: '', password: '', cookie: '', token: '', activity: data.msg,
           status: 'running', verifyStatus: '', rawVerifyStatus: '', verifyMessage: '', verifyEmail: '', inAddMailRetry: /\[Retry lần \d+\/\d+\]/.test(data.msg),
         })
       }
@@ -1617,7 +1622,7 @@ async function setupRegisterListeners() {
         // Entry chưa có (race với status flush) → tạo placeholder để giữ uid/token
         t = {
           index: data.index, phone: '', proxy: '', proxyServer: '',
-          userAgent: '', uid: '', password: '', cookie: '', token: '',
+          userAgent: '', uid: '', username: '', password: '', cookie: '', token: '',
           activity: '', status: 'running' as const, verifyStatus: '', rawVerifyStatus: '', verifyMessage: '', verifyEmail: '', inAddMailRetry: false,
         }
         registerThreads.value.set(data.index, t)
@@ -1625,6 +1630,7 @@ async function setupRegisterListeners() {
       if (data.uid) t.uid = data.uid
       if (data.token) t.token = data.token
       if (data.cookie) t.cookie = data.cookie
+      if (data.username) t.username = data.username
       // Đếm REG success ngay khi token nhận được — không đợi verify:
       regTotalSuccess.value++
       regTotalProcessed.value++
@@ -1639,7 +1645,7 @@ async function setupRegisterListeners() {
       if (!t) {
         t = {
           index: data.index, phone: data.phone || '', proxy: data.proxy || '', proxyServer: data.proxyServer || '',
-          userAgent: data.userAgent || '', uid: '', password: '', cookie: '', token: '',
+          userAgent: data.userAgent || '', uid: '', username: '', password: '', cookie: '', token: '',
           activity: '', status: 'running' as const, verifyStatus: '', rawVerifyStatus: '', verifyMessage: '', verifyEmail: '', inAddMailRetry: false,
         }
         registerThreads.value.set(data.index, t)
@@ -1711,7 +1717,7 @@ async function setupRegisterListeners() {
         // Không ghi đè nếu thread đã xong (tránh batch ghi đè message lỗi cuối).
         // Task 6 dedup: skip nếu activity giống — tránh ghi reactive state cùng giá trị.
         if (existing.status === 'success' || existing.status === 'failed') continue
-        if (data.userAgent) existing.userAgent = data.userAgent
+        if (data.userAgent !== undefined) existing.userAgent = data.userAgent
         if (data.proxy) existing.proxy = data.proxy
         if (data.proxyServer) existing.proxyServer = data.proxyServer
         if (data.phone) existing.phone = data.phone
@@ -1721,7 +1727,7 @@ async function setupRegisterListeners() {
       } else {
         registerThreads.value.set(data.index, {
           index: data.index, phone: data.phone, proxy: data.proxy || '', proxyServer: data.proxyServer || '',
-          userAgent: data.userAgent || '', uid: '', password: '', cookie: '', token: '', activity: data.msg,
+          userAgent: data.userAgent || '', uid: '', username: '', password: '', cookie: '', token: '', activity: data.msg,
           status: 'running', verifyStatus: '', rawVerifyStatus: '', verifyMessage: '', verifyEmail: '', inAddMailRetry: /\[Retry lần \d+\/\d+\]/.test(data.msg),
         })
       }
@@ -1742,6 +1748,29 @@ async function setupRegisterListeners() {
     // mà register:token đã đến → handler không thấy entry → uid/token bị mất.
     pendingTokens.push(data)
     scheduleFlush()
+  }))
+
+  // register:check-live-result — kết quả check live/die sau reg (background goroutine).
+  // Tìm row theo username và cập nhật activity kể cả khi status đã 'success'.
+  _registerUnsubs.push(bus.on('register:check-live-result', (data: { username: string; result: string }) => {
+    // Chỉ 'live' mới tính live-confirmed; die/unknown đều vào Die.txt.
+    if (data.result === 'live') {
+      regTotalLiveConfirmed.value++
+    }
+    for (const t of registerThreads.value.values()) {
+      if (t.username === data.username) {
+        if (data.result === 'live') {
+          t.activity = '✅ Check live: OK → Live.txt'
+        } else if (data.result === 'die') {
+          t.activity = '⛔ IG kill account → Die.txt'
+          t.status = 'failed'
+        } else {
+          t.activity = '❓ Check live: unknown (20s) → Die.txt'
+          t.status = 'failed'
+        }
+        break
+      }
+    }
   }))
 
   // register:output-path — Go emit ngay sau khi xác định thư mục lưu kết quả
@@ -1820,6 +1849,7 @@ async function setupRegisterListeners() {
     regTotalDie.value = 0
     regTotalUnknown.value = 0
     regTotalCheckpoint.value = 0
+    regTotalLiveConfirmed.value = 0
     verifyTotalLive.value = 0
     verifyTotalDie.value = 0
     verifyTotalUnknown.value = 0
@@ -1851,6 +1881,7 @@ function clearRegisterTable() {
   regTotalDie.value = 0
   regTotalUnknown.value = 0
   regTotalCheckpoint.value = 0
+  regTotalLiveConfirmed.value = 0
   verifyTotalLive.value = 0
   verifyTotalDie.value = 0
   verifyTotalUnknown.value = 0
@@ -1872,6 +1903,7 @@ async function handleRunRegister() {
   regTotalDie.value = 0
   regTotalUnknown.value = 0
   regTotalCheckpoint.value = 0
+  regTotalLiveConfirmed.value = 0
   // Clear stats cũ — run mới đếm lại từ 0
   clearRunStats()
   verifyTotalLive.value = 0
@@ -2185,7 +2217,9 @@ async function handleRunRegister() {
           {{ isRegisterRunning ? '● Đang chạy' : '■ Đã xong' }}
         </span>
         <span class="stats-item stats-item--sep">|</span>
-        <span class="stats-item stats-item--live">Live: {{ regTotalSuccess }}</span>
+        <span class="stats-item stats-item--live">Live: {{ regTotalLiveConfirmed }}</span>
+        <span class="stats-item stats-item--sep">|</span>
+        <span class="stats-item">Reg: {{ regTotalSuccess }}</span>
         <span class="stats-item stats-item--sep">|</span>
         <span class="stats-item stats-item--die">Die: {{ regTotalFail }}</span>
         <template v-if="regTotalCheckpoint > 0">

@@ -61,6 +61,23 @@ func (r *igRegisterer) Register(ctx context.Context, input *RegInput, onStatus f
 		country = "VN"
 	}
 	p := igcore.NewProfileForCountry(country)
+	// Emit iOS UA sớm → app_register.go cập nhật prof.UserAgent ngay, hiển thị cột UA
+	// trong khi reg vẫn đang chạy (không phải đợi Register() return).
+	log("ua:%s", p.UserAgent)
+
+	// ── Inject aged device (mid/datr/ig_did) từ pool nếu có ──────────────────
+	// Tương tự cơ chế datr-pool bên FB: thiết bị "đã từng reg thành công"
+	// có trust score cao hơn thiết bị hoàn toàn mới.
+	if pool := igcore.SharedDevicePool; pool != nil {
+		if dev := pool.Next(); dev != nil {
+			sess.InjectAgedDevice(p, dev)
+			midShort := dev.Mid
+			if len(midShort) > 8 {
+				midShort = midShort[:8] + "..."
+			}
+			log("device Inject aged device mid=%s ig_did=%s", midShort, dev.IgDID[:min(8, len(dev.IgDID))])
+		}
+	}
 
 	// ── qe/sync → encryption key + X-MID (retry rotate IP) ────────────────────
 	log("qesync Lấy encryption key...")
@@ -185,15 +202,39 @@ func (r *igRegisterer) Register(ctx context.Context, input *RegInput, onStatus f
 	s := eng.Session()
 	log("done 🎉 Thành công! UID: %s", s.UID)
 
-	return &RegResult{
-		Success:   true,
-		UID:       s.UID,
-		Cookie:    s.FullCookie,
-		Password:  password,
-		Email:     addr,
-		Message:   "ok",
-		UserAgent: p.UserAgent,
+	// Harvest mid/datr/ig_did vào pool → dùng cho reg tiếp theo
+	if pool := igcore.SharedDevicePool; pool != nil && s.Mid != "" {
+		if pool.Add(s.Mid, s.Datr, s.IgDID) {
+			log("device Harvest vào pool: mid=%s... (pool size tăng)", s.Mid[:min(8, len(s.Mid))])
+		}
 	}
+
+	log("checklive Kiểm tra live/die sau reg...")
+	liveStatus := igcore.CheckLiveByCookie(ctx, s.FullCookie, p.UserAgent, input.Proxy)
+	log("checklive → %s", liveStatus)
+
+	base := &RegResult{
+		UID:        s.UID,
+		Cookie:     s.FullCookie,
+		Password:   password,
+		Email:      addr,
+		UserAgent:  p.UserAgent,
+		Username:   username,
+		LiveStatus: liveStatus,
+	}
+
+	switch liveStatus {
+	case "live":
+		base.Success = true
+		base.Message = "ok"
+	case "die", "suspended":
+		base.Success = false
+		base.Message = "block: tài khoản bị khóa sau reg"
+	default: // "checkpoint" hoặc "unknown" → coi như live, cần verify thêm
+		base.Success = true
+		base.Message = "ok"
+	}
+	return base
 }
 
 // buildIGName tạo tên hiển thị từ input hoặc random.

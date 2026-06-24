@@ -25,6 +25,7 @@ var fireTempMailFallbackDomains = []string{
 type FireTempMail struct {
 	client *http.Client
 	email  string
+	domain string // preferred domain; empty = use index 0
 }
 
 // NewFireTempMail tạo FireTempMail service.
@@ -33,9 +34,18 @@ func NewFireTempMail(proxyStr string) *FireTempMail {
 	return &FireTempMail{client: client}
 }
 
+// NewFireTempMailWithDomain tạo FireTempMail service với domain cụ thể.
+func NewFireTempMailWithDomain(proxyStr, domain string) *FireTempMail {
+	client := proxy.CreateClient(proxyStr, 30*time.Second)
+	return &FireTempMail{client: client, domain: domain}
+}
+
 // CreateEmail sinh địa chỉ email client-side.
 func (m *FireTempMail) CreateEmail(_ context.Context) (string, error) {
-	domain := fireTempMailFallbackDomains[0]
+	domain := m.domain
+	if domain == "" {
+		domain = fireTempMailFallbackDomains[0]
+	}
 	m.email = realisticEmail(domain)
 	return m.email, nil
 }

@@ -39,7 +39,7 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'tempmail-lol',  label: 'TempMail LOL' },
   //{ value: 'mailtm',        label: 'Mail.tm' },            // ẩn — không đọc được code
   { value: 'tempmail-plus', label: 'TempMail.plus' },
-  { value: 'dropmail',      label: 'Dropmail' },
+  //{ value: 'dropmail',      label: 'Dropmail' },           // BỎ — API disabled (legacy_token_disabled)
   { value: 'guerrillamail', label: 'GuerrillaMail' },
   { value: 'spam4me',       label: 'Spam4.me' },
   //{ value: 'temp-mail.org', label: 'Temp-Mail.org' },
@@ -50,7 +50,10 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   //{ value: 'mailymg',       label: 'Mailymg.com' },
   //{ value: 'altmails',      label: 'AltMails.com' },
   //{ value: 'onesecmail',   label: '1secmail.com' },        // ẩn
-  //{ value: 'firetempmail', label: 'FireTempMail.com' },
+  { value: 'firetempmail',       label: 'FireTempMail.com' },
+  { value: 'firetempmail-ctm',   label: 'FireTempMail (@ctm.edu.pl)' },
+  { value: 'firetempmail-jd',    label: 'FireTempMail (@jobsdeforyou.sa.com)' },
+  { value: 'firetempmail-offre', label: 'FireTempMail (@offredaily.sa.com)' },
   //{ value: 'fviainboxes',  label: 'FviaInboxes.com' },     // ẩn
   //{ value: 'byomde',       label: 'Byom.de' },
   //{ value: 'dinlaan',      label: 'Dinlaan.com' },
@@ -66,14 +69,34 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'tempmailto',   label: 'TempMailTo.com' },
   { value: 'onesecemail',  label: '1secemail.com' },
   { value: 'tempmail100',  label: 'TempMail100.com' },
-  { value: 'tempmailso',   label: 'TempMail.so' },
+  //{ value: 'tempmailso',   label: 'TempMail.so' },         // BỎ — Cloudflare chặn (cần residential proxy)
   // { value: 'priyoemail',   label: 'Priyo.email (cần API key)' },
-  { value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' },
+  //{ value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' }, // BỎ — payment token hết hạn (4030)
   { value: 'mailtempcom',  label: 'Mail-Temp.com' },
   //{ value: 'wemakemail',   label: 'WeMakeMail (cần API key)' }, // ẩn
   { value: 'mailhv',       label: 'MailHV (cần API key)' },
   //{ value: 'i2b',          label: 'Mail i2b.vn' },         // ẩn
   //{ value: 'vietxf',       label: 'VietXF' },              // ẩn
+  // ── Port từ NullCoreSummer (đã test CreateEmail OK) ──
+  { value: 'tempmailio',      label: 'Temp-Mail.io' },
+  { value: 'anonymmail',      label: 'AnonymMail.net' },
+  { value: 'tempmailnow',     label: 'TempMail.now' },
+  { value: 'tempmailworld',   label: 'TempMail.world' },
+  { value: 'expressmail',     label: 'ExpressMail.app' },
+  { value: 'tempmail100free', label: 'TempMail100 Free' },
+  { value: 'fakelegal',       label: 'Fake.legal' },
+  { value: 'tempmailbee',     label: 'TempMailBee' },
+  { value: 'tempmailapp',     label: 'Temp-Mail.app' },
+  { value: 'tempamail',       label: 'TempaMail.com' },
+  { value: 'tempmailai',      label: 'Temp-Mail.ai' },
+  { value: 'tempemailcc',     label: 'TempEmail.cc' },
+  { value: 'tempmailerme',    label: 'Temp-Mailer.me' },
+  { value: 'mailwave',        label: 'MailWave.dev' },
+  { value: 'tempmail10',      label: 'TempMail10.com' },
+  { value: 'tempmailpro',     label: 'TempMailPro.io' },
+  { value: 'tempmaildigital', label: 'TempMail.digital' },
+  { value: 'tempmailx',       label: 'TempMailX.xyz' },
+  { value: 'tempmailid',      label: 'Temp-Mail.id' },
 ]
 const RENT_MAIL_PROVIDERS: { value: MailProviderType; label: string; url: string }[] = [
   { value: 'zeus-x',        label: 'ZeusX',            url: 'https://zeus-x.ru' },

@@ -351,8 +351,8 @@ const (
 
 // Account — cấu trúc đầy đủ mapping từ WeBM DataGridView + PlatformItems
 type App struct {
-	ctx     context.Context
-	version string
+	ctx           context.Context
+	version       string
 	accounts      []Account
 	accountsMu    sync.RWMutex // bảo vệ a.accounts — RWMutex cho read-heavy (ListAccounts poll)
 	activityCache sync.Map     // map[int]string — lock-free activity cache cho onStatus hot path
@@ -1482,9 +1482,9 @@ func saveRegOutcome(
 	acc Account,
 	regInstance, login string,
 	onSuccess func(line string),
-) {
+) string {
 	if writer == nil || writer.Root() == "" {
-		return
+		return ""
 	}
 	// Country: từ Location hoặc FBLC trong UA (giống verify flow).
 	country := strings.TrimSpace(acc.Location)
@@ -1495,6 +1495,7 @@ func saveRegOutcome(
 	}
 	line := resultpkg.FormatReg(resultpkg.RegData{
 		UID:       acc.UID,
+		Username:  acc.Username, // field đầu = @handle IG (UID số vẫn còn trong cookie)
 		Password:  acc.Password,
 		Cookie:    acc.Cookie,
 		Token:     acc.Token,
@@ -1543,6 +1544,7 @@ func saveRegOutcome(
 			_ = writer.Append(d.File, d.Content)
 		}
 	}
+	return line
 }
 
 // CloneHVStockResult kết quả kiểm tra tồn kho
