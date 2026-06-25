@@ -29,6 +29,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"HVRIns/internal/httpx"
@@ -62,10 +63,16 @@ func (m *TempMailBee) CreateEmail(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	createURL := tempMailBeeBaseURL + "/mailbox/create/?free_domain=1"
-	// Ghim domain nếu user chọn: tạo địa chỉ cụ thể qua ?email_address=<local>@<domain>.
-	if len(m.configDomains) > 0 {
-		domain := m.configDomains[rand.Intn(len(m.configDomains))]
+	// Chọn domain để tạo địa chỉ tên-giống-thật. Ưu tiên domain user ghim; nếu không,
+	// fetch available_domains (cache) → dùng email_address=<realisticLocalPart>@<domain>
+	// để KHÔNG bị server tự đặt username random (free_domain=1 → "zyjfavdl51@sendhelp.mom").
+	domains := m.configDomains
+	if len(domains) == 0 {
+		domains = cachedTempMailBeeDomains(ctx)
+	}
+	createURL := tempMailBeeBaseURL + "/mailbox/create/?free_domain=1" // fallback nếu không lấy được domain
+	if len(domains) > 0 {
+		domain := domains[rand.Intn(len(domains))]
 		localPart := realisticLocalPart()
 		createURL = tempMailBeeBaseURL + "/mailbox/create/?email_address=" + url.QueryEscape(localPart+"@"+domain)
 	}
@@ -277,6 +284,26 @@ func FetchTempMailBeeDomains(ctx context.Context) (*TempMailBeeDomainsResult, er
 		return nil, fmt.Errorf("tempmailbee: không đọc được domain — %.150s", body)
 	}
 	return &TempMailBeeDomainsResult{Domains: d.AvailableDomains}, nil
+}
+
+var (
+	tmbDomainsMu    sync.Mutex
+	tmbDomainsCache []string
+)
+
+// cachedTempMailBeeDomains lấy available_domains (cache toàn process) để tạo địa chỉ
+// tên-giống-thật mà không phải gọi /domains/ mỗi lần. Fetch fail → trả rỗng (CreateEmail
+// fallback free_domain). Giữ mutex khi fetch lần đầu → các luồng concurrent dùng lại cache.
+func cachedTempMailBeeDomains(ctx context.Context) []string {
+	tmbDomainsMu.Lock()
+	defer tmbDomainsMu.Unlock()
+	if len(tmbDomainsCache) > 0 {
+		return tmbDomainsCache
+	}
+	if r, err := FetchTempMailBeeDomains(ctx); err == nil && len(r.Domains) > 0 {
+		tmbDomainsCache = r.Domains
+	}
+	return tmbDomainsCache
 }
 
 // ParseTempMailBeeDomains tách chuỗi domain cách nhau bằng dấu phẩy/newline.
