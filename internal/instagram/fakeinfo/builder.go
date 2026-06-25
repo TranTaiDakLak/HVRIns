@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	firstNames   []string // US first names — nạp từ Config/Namereg/US/firstname.txt
-	lastNames    []string // US last names — nạp từ Config/Namereg/US/lastname.txt
-	vnFirstNames []string // VN first names — nạp từ Config/Namereg/VN/firstname.txt
-	vnLastNames  []string // VN last names — nạp từ Config/Namereg/VN/lastname.txt
+	firstNames   = defaultUSFirstNames // US first names — mặc định nhúng sẵn (names_default.go); override qua Config/Namereg/US/firstname.txt
+	lastNames    = defaultUSLastNames  // US last names — mặc định nhúng sẵn; override qua Config/Namereg/US/lastname.txt
+	vnFirstNames []string              // VN first names — nạp từ Config/Namereg/VN/firstname.txt
+	vnLastNames  []string              // VN last names — nạp từ Config/Namereg/VN/lastname.txt
 )
 
 // FakeProfile contains generated fake personal info
