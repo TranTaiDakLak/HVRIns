@@ -352,7 +352,7 @@ var errEmailDomainRejected = errors.New("EMAIL_DOMAIN_REJECTED")
 // createAccount — bước cuối tạo account, retry nếu throttle hoặc integrity_block tạm thời.
 // username + name dùng để thay capture values trong create body.
 func (e *engine) createAccount(ctx context.Context, addr, username, name string) error {
-	const maxCreate = 8
+	const maxCreate = 3 // retry createAccount (giảm từ 8 — tránh chờ lâu khi IP fail)
 	for i := 1; i <= maxCreate; i++ {
 
 		resp, err := e.stepCreate(ctx, addr, username, name, i)

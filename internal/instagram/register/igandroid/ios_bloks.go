@@ -735,7 +735,7 @@ func iosSetUsername(ctx context.Context, eng *iosEngine, username string) error 
 func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, error) {
 	eng.state.ScreenVisited = append(eng.state.ScreenVisited, "bk_caa_reg_icon_text_list_tos_screen")
 
-	const maxAttempts = 12
+	const maxAttempts = 3 // retry createAccount (giảm từ 12 — tránh chờ lâu khi IP fail)
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		cip := map[string]any{
 			"aac":                                    buildAACJSON(eng.p),

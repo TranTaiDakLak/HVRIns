@@ -1077,7 +1077,7 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 	// Capture IGRegisterVIP: create.account KHÔNG gửi header x-ig-attest-params,
 	// reg_info.attestation_result = null. Bỏ injection attest params.
 
-	const maxAttempts = 8
+	const maxAttempts = 3 // retry createAccount (giảm từ 8 — tránh chờ lâu khi IP fail)
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		regInfo := buildRegInfoJSON(e.p, e.state)
 		cip := map[string]any{
