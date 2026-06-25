@@ -1129,9 +1129,27 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 		isLOIS := strings.Contains(resp, "LOIS:lois_token") || strings.Contains(resp, "lois_token")
 		if isIntegrity || isSystemErr || isLOIS {
 			if attempt < maxAttempts {
+				if ctx.Err() != nil {
+					return igcore.IGSession{}, ctx.Err()
+				}
+				// Quyết định đổi IP hay giữ IP (port từ iOS Bloks):
+				//   integrity_block / lois → LUÔN đổi IP (IP flag/gate, cần IP sạch).
+				//   system_error → IG báo jurisdiction lệch GeoIP của IP hiện tại. Học
+				//                  jurisdiction IG trả về rồi GIỮ IP retry → khớp GeoIP của
+				//                  chính IP đó → qua được. Đổi IP lúc này làm jurisdiction vừa
+				//                  học thành stale. CHỈ đổi IP khi jurisdiction đã khớp mà vẫn lỗi.
+				rotate := true
 				reason := "integrity_block"
 				if isSystemErr {
 					reason = "system_error"
+					if m := regJurisdictionRe.FindStringSubmatch(resp); len(m) > 1 {
+						igCC := m[1]
+						if e.state.Jurisdiction != igCC {
+							e.logf("createAccount %d/%d: system_error jurisdiction %q→%q", attempt, maxAttempts, e.state.Jurisdiction, igCC)
+							e.state.Jurisdiction = igCC
+							rotate = false // vừa học jurisdiction mới → giữ IP cho khớp
+						}
+					}
 				} else if isLOIS {
 					reason = "lois_gate"
 					if attempt == 1 {
@@ -1140,15 +1158,17 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 						}
 					}
 				}
-				e.logf("createAccount attempt %d/%d: %s → rotate IP + retry", attempt, maxAttempts, reason)
-				if ctx.Err() != nil {
-					return igcore.IGSession{}, ctx.Err()
-				}
-				// Rotate to new proxy IP for next attempt
-				newProxy := igcore.RotateSession(e.proxyStr)
-				if newSess, err := newAndroidSession(newProxy); err == nil {
-					e.sess = newSess
-					e.proxyStr = newProxy
+				if rotate {
+					e.logf("createAccount attempt %d/%d: %s → rotate IP + retry", attempt, maxAttempts, reason)
+					// Đổi IP: tạo session mới (giữ proxy mới). reg_info rebuild ở vòng sau.
+					newProxy := igcore.RotateSession(e.proxyStr)
+					if newSess, err := newAndroidSession(newProxy); err == nil {
+						e.sess = newSess
+						e.proxyStr = newProxy
+					}
+				} else {
+					// Giữ IP + session (cookie jar) — chỉ retry với jurisdiction mới đã học.
+					e.logf("createAccount attempt %d/%d: %s → giữ IP + retry (jurisdiction khớp GeoIP)", attempt, maxAttempts, reason)
 				}
 				continue
 			}
