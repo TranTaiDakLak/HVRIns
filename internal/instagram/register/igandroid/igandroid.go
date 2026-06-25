@@ -27,12 +27,13 @@ import (
 	fhttp "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 	"github.com/bogdanfinn/tls-client/profiles"
-	"sync"
 	"github.com/google/uuid"
 	"github.com/klauspost/compress/zstd"
+	"sync"
 
 	"HVRIns/internal/igcore"
 	"HVRIns/internal/instagram"
+	"HVRIns/internal/instagram/fakeinfo"
 	"HVRIns/internal/proxy"
 )
 
@@ -52,21 +53,21 @@ type igAppVersion struct{ AppVer, BuildNum string }
 
 var igAndroidVersions = []igAppVersion{
 	// ── 2026 (mới nhất) ───────────────────────────────────────────────────────
-	{"434.0.0.0.58",   "384358000"}, // Jun 10 2026
-	{"433.0.0.47.68",  "384207160"}, // Jun 9 2026
-	{"431.0.0.47.82",  "383907160"}, // May 30 2026
-	{"430.0.0.53.80",  "383757160"}, // May 29 2026
+	{"434.0.0.0.58", "384358000"},  // Jun 10 2026
+	{"433.0.0.47.68", "384207160"}, // Jun 9 2026
+	{"431.0.0.47.82", "383907160"}, // May 30 2026
+	{"430.0.0.53.80", "383757160"}, // May 29 2026
 	// ── 2025 ──────────────────────────────────────────────────────────────────
-	{"429.1.0.44.70",  "383507666"}, // real
-	{"428.0.0.34.67",  "383405708"}, // real
-	{"426.0.0.32.68",  "383206897"}, // real
-	{"416.0.0.47.66",  "382206160"}, // real
-	{"410.1.0.63.71",  "381607160"}, // real
+	{"429.1.0.44.70", "383507666"}, // real
+	{"428.0.0.34.67", "383405708"}, // real
+	{"426.0.0.32.68", "383206897"}, // real
+	{"416.0.0.47.66", "382206160"}, // real
+	{"410.1.0.63.71", "381607160"}, // real
 	// ── 2024 ──────────────────────────────────────────────────────────────────
-	{"399.0.0.51.85",  "795513222"}, // confirmed working
-	{"394.0.0.46.89",  "785703393"},
+	{"399.0.0.51.85", "795513222"}, // confirmed working
+	{"394.0.0.46.89", "785703393"},
 	{"387.0.0.43.105", "773337115"},
-	{"380.0.0.38.91",  "758637234"},
+	{"380.0.0.38.91", "758637234"},
 }
 
 // androidDevice định nghĩa device spec dùng để build UA string.
@@ -86,28 +87,28 @@ type androidDevice struct {
 // Đủ lớn để giảm collision khi chạy nhiều luồng song song.
 var igAndroidDevices = []androidDevice{
 	// ── Android 13 (API 33) ───────────────────────────────────────────────────
-	{33, 13, 421, 1080, 2400, "samsung",  "SM-G991B",          "o1q",      "exynos2100"},      // Galaxy S21
-	{33, 13, 405, 1080, 2400, "samsung",  "SM-A536B",          "a53x",     "exynos1280"},      // Galaxy A53
-	{33, 13, 480, 1080, 2400, "xiaomi",   "2312DRAABL",        "fuxi",     "kalama"},           // Xiaomi 13
-	{33, 13, 395, 1080, 2400, "xiaomi",   "22101316UCP",       "sunstone", "snapdragon695"},    // Redmi Note 12 Pro
-	{33, 13, 450, 1080, 2412, "oneplus",  "CPH2449",           "salami",   "taro"},             // OnePlus 11
-	{33, 13, 402, 1080, 2400, "motorola", "motorola edge 40",  "hayes",    "mt6893"},           // Moto Edge 40
+	{33, 13, 421, 1080, 2400, "samsung", "SM-G991B", "o1q", "exynos2100"},           // Galaxy S21
+	{33, 13, 405, 1080, 2400, "samsung", "SM-A536B", "a53x", "exynos1280"},          // Galaxy A53
+	{33, 13, 480, 1080, 2400, "xiaomi", "2312DRAABL", "fuxi", "kalama"},             // Xiaomi 13
+	{33, 13, 395, 1080, 2400, "xiaomi", "22101316UCP", "sunstone", "snapdragon695"}, // Redmi Note 12 Pro
+	{33, 13, 450, 1080, 2412, "oneplus", "CPH2449", "salami", "taro"},               // OnePlus 11
+	{33, 13, 402, 1080, 2400, "motorola", "motorola edge 40", "hayes", "mt6893"},    // Moto Edge 40
 	// ── Android 14 (API 34) ───────────────────────────────────────────────────
-	{34, 14, 393, 1080, 2340, "samsung",  "SM-S911B",          "dm1q",     "snapdragon8gen2"},  // Galaxy S23
-	{34, 14, 390, 1080, 2340, "samsung",  "SM-S916B",          "dm2q",     "snapdragon8gen2"},  // Galaxy S23+
-	{34, 14, 450, 1080, 2340, "samsung",  "SM-S901B",          "r0q",      "exynos2200"},       // Galaxy S22
-	{34, 14, 500, 1080, 2340, "samsung",  "SM-S908B",          "b0q",      "exynos2200"},       // Galaxy S22 Ultra
-	{34, 14, 400, 1080, 2340, "samsung",  "SM-A546B",          "a54x",     "exynos1380"},       // Galaxy A54
-	{34, 14, 420, 1080, 2400, "google",   "Pixel 7",           "panther",  "gs201"},            // Pixel 7
-	{34, 14, 428, 1080, 2400, "google",   "Pixel 8",           "shiba",    "tensor_g3"},        // Pixel 8
-	{34, 14, 429, 1080, 2400, "google",   "Pixel 7a",          "lynx",     "gs201"},            // Pixel 7a
-	{34, 14, 413, 1080, 2400, "xiaomi",   "23049PCD8G",        "thor",     "snapdragon8gen2"},  // Xiaomi 13T
-	{34, 14, 403, 1080, 2400, "motorola", "moto g84 5G",       "bangkk",   "snapdragon695"},    // Moto G84
+	{34, 14, 393, 1080, 2340, "samsung", "SM-S911B", "dm1q", "snapdragon8gen2"},     // Galaxy S23
+	{34, 14, 390, 1080, 2340, "samsung", "SM-S916B", "dm2q", "snapdragon8gen2"},     // Galaxy S23+
+	{34, 14, 450, 1080, 2340, "samsung", "SM-S901B", "r0q", "exynos2200"},           // Galaxy S22
+	{34, 14, 500, 1080, 2340, "samsung", "SM-S908B", "b0q", "exynos2200"},           // Galaxy S22 Ultra
+	{34, 14, 400, 1080, 2340, "samsung", "SM-A546B", "a54x", "exynos1380"},          // Galaxy A54
+	{34, 14, 420, 1080, 2400, "google", "Pixel 7", "panther", "gs201"},              // Pixel 7
+	{34, 14, 428, 1080, 2400, "google", "Pixel 8", "shiba", "tensor_g3"},            // Pixel 8
+	{34, 14, 429, 1080, 2400, "google", "Pixel 7a", "lynx", "gs201"},                // Pixel 7a
+	{34, 14, 413, 1080, 2400, "xiaomi", "23049PCD8G", "thor", "snapdragon8gen2"},    // Xiaomi 13T
+	{34, 14, 403, 1080, 2400, "motorola", "moto g84 5G", "bangkk", "snapdragon695"}, // Moto G84
 	// ── Android 15 (API 35) ───────────────────────────────────────────────────
-	{35, 15, 450, 1080, 2400, "samsung",  "SM-G996B",          "t2s",      "exynos2100"},       // Galaxy S21+
-	{35, 15, 416, 1080, 2340, "samsung",  "SM-S921B",          "e1q",      "exynos2400"},       // Galaxy S24
-	{35, 15, 422, 1080, 2424, "google",   "Pixel 9",           "tokay",    "tensor_g4"},        // Pixel 9
-	{35, 15, 429, 1080, 2088, "google",   "Pixel 8a",          "akita",    "tensor_g3"},        // Pixel 8a
+	{35, 15, 450, 1080, 2400, "samsung", "SM-G996B", "t2s", "exynos2100"}, // Galaxy S21+
+	{35, 15, 416, 1080, 2340, "samsung", "SM-S921B", "e1q", "exynos2400"}, // Galaxy S24
+	{35, 15, 422, 1080, 2424, "google", "Pixel 9", "tokay", "tensor_g4"},  // Pixel 9
+	{35, 15, 429, 1080, 2088, "google", "Pixel 8a", "akita", "tensor_g3"}, // Pixel 8a
 }
 
 // randomAndroidUA chọn ngẫu nhiên 1 device và tạo UA string.
@@ -353,18 +354,18 @@ func injectAgedDevice(sess *androidSession, p *androidProfile, dev *igcore.AgedD
 // ── Registration state ──────────────────────────────────────────────────────────
 
 type regInfoState struct {
-	ContactPoint      string
-	ConfirmationCode  string
-	EncryptedPassword string
-	SafetynetToken    string
-	SafetynetResponse string
-	Birthday          string   // "DD-MM-YYYY"
-	AgeRange          string   // "o18"
-	FullName          string
-	Username          string   // confirmed username (set after setUsername succeeds)
-	UsernamePrefill   string   // suggested/chosen username sent as validation_text in setUsername
-	Jurisdiction      string   // ISO-2 country for youth_regulation_config
-	ScreenVisited     []string
+	ContactPoint       string
+	ConfirmationCode   string
+	EncryptedPassword  string
+	SafetynetToken     string
+	SafetynetResponse  string
+	Birthday           string // "DD-MM-YYYY"
+	AgeRange           string // "o18"
+	FullName           string
+	Username           string // confirmed username (set after setUsername succeeds)
+	UsernamePrefill    string // suggested/chosen username sent as validation_text in setUsername
+	Jurisdiction       string // ISO-2 country for youth_regulation_config
+	ScreenVisited      []string
 	ShouldSavePassword *bool
 	ShouldSkipYouthTOS *bool
 }
@@ -448,20 +449,20 @@ func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
 		// Confirmation
 		"confirmation_code": nilStr(s.ConfirmationCode),
 		// Name
-		"first_name":            nil,
-		"last_name":             nil,
-		"full_name":             nilStr(s.FullName),
-		"suggested_first_name":  nil,
-		"suggested_last_name":   nil,
-		"suggested_full_name":   nil,
+		"first_name":           nil,
+		"last_name":            nil,
+		"full_name":            nilStr(s.FullName),
+		"suggested_first_name": nil,
+		"suggested_last_name":  nil,
+		"suggested_full_name":  nil,
 		// Birthday
-		"birthday":                    nilStr(s.Birthday),
-		"birthday_derived_from_age":   nil,
-		"age_range":                   nilStr(s.AgeRange),
-		"did_use_age":                 didUseAge,
-		"os_shared_age_range":         nil,
-		"spc_birthday_input":          false,
-		"failed_birthday_year_count":  nil,
+		"birthday":                   nilStr(s.Birthday),
+		"birthday_derived_from_age":  nil,
+		"age_range":                  nilStr(s.AgeRange),
+		"did_use_age":                didUseAge,
+		"os_shared_age_range":        nil,
+		"spc_birthday_input":         false,
+		"failed_birthday_year_count": nil,
 		// Gender
 		"gender":            nil,
 		"use_custom_gender": false,
@@ -476,33 +477,33 @@ func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
 		"username_prefill":     nilStr(s.UsernamePrefill),
 		"accounts_list_client": accountsList,
 		// Device
-		"device_id":               p.AndroidID,
-		"ig4a_qe_device_id":       p.DeviceID,
-		"family_device_id":        p.FamilyDeviceID,
-		"machine_id":              p.RegMachineID,
-		"registration_flow_id":    p.RegFlowID,
-		"fdid_available_on_start": true,
+		"device_id":                   p.AndroidID,
+		"ig4a_qe_device_id":           p.DeviceID,
+		"family_device_id":            p.FamilyDeviceID,
+		"machine_id":                  p.RegMachineID,
+		"registration_flow_id":        p.RegFlowID,
+		"fdid_available_on_start":     true,
 		"fdid_rid_available_on_start": true,
 		"asdid_available_on_start":    true,
 		// Screen state
-		"screen_visited":    nilStrSlice(s.ScreenVisited),
+		"screen_visited":      nilStrSlice(s.ScreenVisited),
 		"caa_reg_flow_source": "lid_landing_screen",
 		// TOS / save password
-		"should_save_password":    nilBool(s.ShouldSavePassword),
-		"should_skip_youth_tos":   nilBool(s.ShouldSkipYouthTOS),
+		"should_save_password":  nilBool(s.ShouldSavePassword),
+		"should_skip_youth_tos": nilBool(s.ShouldSkipYouthTOS),
 		// Profile photo
 		"profile_photo":           nil,
 		"profile_photo_id":        nil,
 		"profile_photo_upload_id": nil,
 		"avatar":                  nil,
 		// OAuth
-		"email_oauth_token":              nil,
-		"email_oauth_tokens":             emailOAuth,
+		"email_oauth_token":                 nil,
+		"email_oauth_tokens":                emailOAuth,
 		"email_oauth_token_no_contact_perm": nil,
-		"sign_in_with_google_email":       nil,
-		"should_skip_two_step_conf":       nil,
+		"sign_in_with_google_email":         nil,
+		"should_skip_two_step_conf":         nil,
 		// Facebook / social
-		"fb_access_token":              nil,
+		"fb_access_token":                          nil,
 		"fb_email_login_upsell_skip_suma_post_tos": false,
 		"fb_suma_is_from_email_login_upsell":       false,
 		"fb_suma_is_from_phone_login_upsell":       false,
@@ -510,59 +511,59 @@ func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
 		"fb_device_id":                             nil,
 		"fb_machine_id":                            nil,
 		// Flags
-		"is_preform":                               true,
-		"is_caa_perf_enabled":                      true,
-		"full_sheet_flow":                          false,
-		"should_show_rel_error":                    false,
-		"ignore_suma_check":                        false,
-		"dismissed_login_upsell_with_cna":          false,
-		"ignore_existing_login":                    false,
-		"ignore_existing_login_from_suma":          false,
-		"ignore_existing_login_after_errors":       false,
-		"skip_step_without_errors":                 false,
-		"existing_account_exact_match_checked":     false,
-		"existing_account_fuzzy_match_checked":     false,
-		"email_oauth_exists":                       false,
-		"is_too_young":                             false,
-		"whatsapp_installed_on_client":             false,
-		"email_prefilled":                          false,
-		"cp_confirmed_by_auto_conf":                false,
-		"in_sowa_experiment":                       false,
-		"is_msplit_neutral_choice":                 false,
-		"is_youth_regulation_flow_complete":        false,
-		"is_on_cold_start":                         false,
-		"is_reg_request_from_ig_suma":              false,
-		"is_toa_reg":                               false,
-		"is_threads_public":                        false,
-		"spc_import_flow":                          false,
-		"is_from_registration_reminder":            false,
-		"show_youth_reg_in_ig_spc":                 false,
-		"force_sessionless_nux_experience":         false,
-		"has_seen_suma_landing_page_pre_conf":      false,
-		"has_seen_suma_candidate_page_pre_conf":    false,
-		"has_seen_confirmation_screen":             false,
-		"should_show_error_msg":                    true,
-		"should_show_spi_before_conf":              true,
-		"should_override_back_nav":                 false,
-		"eligible_to_flash_call_in_ig4a":           false,
-		"eligible_to_mo_sms_in_ig4a":               false,
-		"attempted_silent_auth_in_fb":              false,
-		"attempted_silent_auth_in_ig":              false,
+		"is_preform":                            true,
+		"is_caa_perf_enabled":                   true,
+		"full_sheet_flow":                       false,
+		"should_show_rel_error":                 false,
+		"ignore_suma_check":                     false,
+		"dismissed_login_upsell_with_cna":       false,
+		"ignore_existing_login":                 false,
+		"ignore_existing_login_from_suma":       false,
+		"ignore_existing_login_after_errors":    false,
+		"skip_step_without_errors":              false,
+		"existing_account_exact_match_checked":  false,
+		"existing_account_fuzzy_match_checked":  false,
+		"email_oauth_exists":                    false,
+		"is_too_young":                          false,
+		"whatsapp_installed_on_client":          false,
+		"email_prefilled":                       false,
+		"cp_confirmed_by_auto_conf":             false,
+		"in_sowa_experiment":                    false,
+		"is_msplit_neutral_choice":              false,
+		"is_youth_regulation_flow_complete":     false,
+		"is_on_cold_start":                      false,
+		"is_reg_request_from_ig_suma":           false,
+		"is_toa_reg":                            false,
+		"is_threads_public":                     false,
+		"spc_import_flow":                       false,
+		"is_from_registration_reminder":         false,
+		"show_youth_reg_in_ig_spc":              false,
+		"force_sessionless_nux_experience":      false,
+		"has_seen_suma_landing_page_pre_conf":   false,
+		"has_seen_suma_candidate_page_pre_conf": false,
+		"has_seen_confirmation_screen":          false,
+		"should_show_error_msg":                 true,
+		"should_show_spi_before_conf":           true,
+		"should_override_back_nav":              false,
+		"eligible_to_flash_call_in_ig4a":        false,
+		"eligible_to_mo_sms_in_ig4a":            false,
+		"attempted_silent_auth_in_fb":           false,
+		"attempted_silent_auth_in_ig":           false,
 		// Misc
-		"ig_footer_variant":                        "control",
-		"reg_suma_state":                           0,
-		"suma_on_conf_threshold":                   -1,
-		"is_in_nta_single_form":                    false,
-		"is_from_web_lite_reg_controller":          nil,
+		"ig_footer_variant":               "control",
+		"reg_suma_state":                  0,
+		"suma_on_conf_threshold":          -1,
+		"is_in_nta_single_form":           false,
+		"is_from_web_lite_reg_controller": nil,
 		// Nil fields
-		"confirmation_code_send_error":             nil,
-		"consent_jurisdiction_at_gate":             nil,
-		"consent_jurisdiction_at_inflow":           nil,
-		"user_id":                                  nil,
-		"bloks_controller_source":                  nil,
-		"caa_play_integrity_attestation_result":    nil,
-		"client_known_key_hash":                    nil,
-		"youth_regulation_config":                  youthCfg,
+		"confirmation_code_send_error":          nil,
+		"consent_jurisdiction_at_gate":          nil,
+		"consent_jurisdiction_at_inflow":        nil,
+		"user_id":                               nil,
+		"bloks_controller_source":               nil,
+		"caa_play_integrity_attestation_result": nil,
+		"client_known_key_hash":                 nil,
+		"youth_regulation_config":               youthCfg,
 	}
 	b, _ := json.Marshal(m)
 	return string(b)
@@ -687,18 +688,20 @@ func buildAACJSON(p *androidProfile) string {
 // ── Attestation ──────────────────────────────────────────────────────────────────
 
 type attestResult struct {
-	keystoreNonce    string
-	keystoreSigned   string // base64url(ECDSA DER sig)
-	keystoreHash     string // hex SHA-256 of DER pubkey
+	keystoreNonce      string
+	keystoreSigned     string // base64url(ECDSA DER sig)
+	keystoreHash       string // hex SHA-256 of DER pubkey
 	playIntegrityNonce string // from server (not used in signed nonce)
 }
 
 var reNonce = regexp.MustCompile(`"challenge_nonce"\s*:\s*"([^"]+)"`)
 
 // attestKeystore — khớp capture IGRegisterVIP. Đây là bước ĐẦU TIÊN của flow:
-//   POST b.i.instagram.com/api/v1/attestation/create_android_keystore/
-//   body: app_scoped_device_id=<uuid>&key_hash=   (key_hash RỖNG — KHÔNG ký ECDSA)
-//   → response: {"challenge_nonce","key_nonce","status":"ok"} + header ig-set-x-mid
+//
+//	POST b.i.instagram.com/api/v1/attestation/create_android_keystore/
+//	body: app_scoped_device_id=<uuid>&key_hash=   (key_hash RỖNG — KHÔNG ký ECDSA)
+//	→ response: {"challenge_nonce","key_nonce","status":"ok"} + header ig-set-x-mid
+//
 // Mục đích chính: lấy X-MID (machine_id) + đăng ký device. challenge_nonce KHÔNG dùng lại
 // (capture: attestation_result=null trong create.account).
 func (s *androidSession) attestKeystore(ctx context.Context, p *androidProfile) (nonce, xmid string, err error) {
@@ -755,7 +758,7 @@ func buildAttestParams(p *androidProfile, at *attestResult) string {
 		},
 	}
 	m := map[string]any{
-		"keystore_attests":      keystoreAttests,
+		"keystore_attests":       keystoreAttests,
 		"play_integrity_attests": playIntegrityAttests,
 	}
 	b, _ := json.Marshal(m)
@@ -790,23 +793,23 @@ func (e *igAndroidEngine) updateRegContext(resp string) {
 func (e *igAndroidEngine) commonServerParams(step int) map[string]any {
 	flowInfoJSON := `{"flow_name":"new_to_family_ig_default","flow_type":"ntf"}`
 	return map[string]any{
-		"reg_context":   e.regContext,
-		"current_step":  step,
-		"event_request_id": strings.ToLower(uuid.New().String()),
+		"reg_context":                       e.regContext,
+		"current_step":                      step,
+		"event_request_id":                  strings.ToLower(uuid.New().String()),
 		"INTERNAL__latency_qpl_marker_id":   36707139,
 		"INTERNAL__latency_qpl_instance_id": randQplID(),
-		"is_from_logged_out":             0,
-		"is_from_logged_in_switcher":     0,
-		"is_platform_login":              0,
-		"login_surface":                  "unknown",
-		"access_flow_version":            "pre_mt_behavior",
-		"offline_experiment_group":       "caa_iteration_v3_perf_ig_4",
+		"is_from_logged_out":                0,
+		"is_from_logged_in_switcher":        0,
+		"is_platform_login":                 0,
+		"login_surface":                     "unknown",
+		"access_flow_version":               "pre_mt_behavior",
+		"offline_experiment_group":          "caa_iteration_v3_perf_ig_4",
 		"layered_homepage_experiment_group": "Deploy: Not in Experiment",
-		"flow_info":                      flowInfoJSON,
-		"device_id":                      e.p.AndroidID,
-		"family_device_id":               e.p.FamilyDeviceID,
-		"qe_device_id":                   e.p.DeviceID,
-		"waterfall_id":                   e.p.WaterfallID,
+		"flow_info":                         flowInfoJSON,
+		"device_id":                         e.p.AndroidID,
+		"family_device_id":                  e.p.FamilyDeviceID,
+		"qe_device_id":                      e.p.DeviceID,
+		"waterfall_id":                      e.p.WaterfallID,
 	}
 }
 
@@ -844,26 +847,26 @@ func (e *igAndroidEngine) submitEmail(ctx context.Context, addr string) error {
 
 	regInfo := buildRegInfoJSON(e.p, e.state)
 	cip := map[string]any{
-		"aac":                       buildAACJSON(e.p),
-		"email":                     addr,
-		"device_id":                 e.p.AndroidID,
-		"family_device_id":          e.p.FamilyDeviceID,
-		"confirmed_cp_and_code":     map[string]any{},
-		"accounts_list":             []any{},
-		"fb_ig_device_id":           []any{},
-		"lois_settings":             map[string]any{"lois_token": ""},
-		"cloud_trust_token":         nil,
-		"network_bssid":             nil,
-		"zero_balance_state":        "",
-		"msg_previous_cp":           "",
-		"email_token":               "",
-		"block_store_machine_id":    "",
+		"aac":                          buildAACJSON(e.p),
+		"email":                        addr,
+		"device_id":                    e.p.AndroidID,
+		"family_device_id":             e.p.FamilyDeviceID,
+		"confirmed_cp_and_code":        map[string]any{},
+		"accounts_list":                []any{},
+		"fb_ig_device_id":              []any{},
+		"lois_settings":                map[string]any{"lois_token": ""},
+		"cloud_trust_token":            nil,
+		"network_bssid":                nil,
+		"zero_balance_state":           "",
+		"msg_previous_cp":              "",
+		"email_token":                  "",
+		"block_store_machine_id":       "",
 		"switch_cp_first_time_loading": 1,
-		"switch_cp_have_seen_suma":  0,
-		"has_rejected_rel":          0,
-		"seen_login_upsell":         0,
-		"email_prefilled":           0,
-		"is_from_device_emails":     0,
+		"switch_cp_have_seen_suma":     0,
+		"has_rejected_rel":             0,
+		"seen_login_upsell":            0,
+		"email_prefilled":              0,
+		"is_from_device_emails":        0,
 	}
 	sp := e.commonServerParams(0)
 	sp["reg_info"] = regInfo
@@ -886,9 +889,9 @@ func (e *igAndroidEngine) confirmOTP(ctx context.Context, addr, otp string) erro
 	e.state.ScreenVisited = append(e.state.ScreenVisited, "CAA_REG_CONFIRMATION_SCREEN")
 	regInfo := buildRegInfoJSON(e.p, e.state)
 	cip := map[string]any{
-		"code":                 otp,
+		"code":                  otp,
 		"confirmed_cp_and_code": map[string]any{},
-		"aac":                  buildAACJSON(e.p),
+		"aac":                   buildAACJSON(e.p),
 	}
 	sp := e.commonServerParams(3)
 	sp["reg_info"] = regInfo
@@ -924,13 +927,13 @@ func (e *igAndroidEngine) setPassword(ctx context.Context, addr, password string
 
 	regInfo := buildRegInfoJSON(e.p, e.state)
 	cip := map[string]any{
-		"encrypted_password":                  encPwd,
-		"safetynet_token":                     snt,
-		"safetynet_response":                  safetynetErrResp,
-		"machine_id":                          e.p.MachineID, // X-MID (NOT RegMachineID)
-		"spi_action":                          1,
+		"encrypted_password":                    encPwd,
+		"safetynet_token":                       snt,
+		"safetynet_response":                    safetynetErrResp,
+		"machine_id":                            e.p.MachineID, // X-MID (NOT RegMachineID)
+		"spi_action":                            1,
 		"caa_play_integrity_attestation_result": "",
-		"aac":                                 buildAACJSON(e.p),
+		"aac":                                   buildAACJSON(e.p),
 	}
 	sp := e.commonServerParams(4)
 	sp["reg_info"] = regInfo
@@ -962,17 +965,17 @@ func (e *igAndroidEngine) setBirthday(ctx context.Context) error {
 
 	regInfo := buildRegInfoJSON(e.p, e.state)
 	cip := map[string]any{
-		"accounts_list":               []any{},
-		"client_timezone":             "Asia/Ho_Chi_Minh",
-		"aac":                         buildAACJSON(e.p),
-		"birthday_or_current_date_string": bday,
-		"os_age_range":                "",
-		"birthday_timestamp":          bdayTS,
-		"lois_settings":               map[string]any{"lois_token": ""},
-		"cloud_trust_token":           nil,
-		"zero_balance_state":          "",
-		"network_bssid":               nil,
-		"should_skip_youth_tos":       0,
+		"accounts_list":                     []any{},
+		"client_timezone":                   "Asia/Ho_Chi_Minh",
+		"aac":                               buildAACJSON(e.p),
+		"birthday_or_current_date_string":   bday,
+		"os_age_range":                      "",
+		"birthday_timestamp":                bdayTS,
+		"lois_settings":                     map[string]any{"lois_token": ""},
+		"cloud_trust_token":                 nil,
+		"zero_balance_state":                "",
+		"network_bssid":                     nil,
+		"should_skip_youth_tos":             0,
 		"is_youth_regulation_flow_complete": 0,
 	}
 	sp := e.commonServerParams(6)
@@ -1035,15 +1038,15 @@ func (e *igAndroidEngine) setUsername(ctx context.Context, username string) erro
 
 	regInfo := buildRegInfoJSON(e.p, e.state)
 	cip := map[string]any{
-		"validation_text": username,
-		"aac":             buildAACJSON(e.p),
-		"family_device_id": e.p.FamilyDeviceID,
-		"device_id":        e.p.AndroidID,
-		"lois_settings":    map[string]any{"lois_token": ""},
-		"cloud_trust_token": nil,
+		"validation_text":    username,
+		"aac":                buildAACJSON(e.p),
+		"family_device_id":   e.p.FamilyDeviceID,
+		"device_id":          e.p.AndroidID,
+		"lois_settings":      map[string]any{"lois_token": ""},
+		"cloud_trust_token":  nil,
 		"zero_balance_state": "",
-		"network_bssid":     nil,
-		"qe_device_id":      e.p.DeviceID,
+		"network_bssid":      nil,
+		"qe_device_id":       e.p.DeviceID,
 	}
 	sp := e.commonServerParams(8)
 	sp["reg_info"] = regInfo
@@ -1224,23 +1227,86 @@ func buildName(input *instagram.RegInput) string {
 	pool := []string{"Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Avery", "Quinn"}
 	b := make([]byte, 4)
 	_, _ = rand.Read(b)
-	n := int(b[0])%len(pool)
+	n := int(b[0]) % len(pool)
 	suffix := int(b[1])%9000 + 1000
 	return fmt.Sprintf("%s%d", pool[n], suffix)
 }
 
+// buildUsername sinh username giống thật từ pool tên (first+last, ~120x120 US names),
+// nhiều pattern + separator + số kiểu người thật (năm sinh / 2–4 số). Thay kiểu cũ
+// {từ-thiên-nhiên}.{7số} (tiger.1234567) dễ lộ pattern bot khi tạo hàng loạt.
+// Dùng CHUNG cho cả iOS (ig_ios_bloks) lẫn Android (ig_android).
 func buildUsername() string {
-	words := []string{
-		"hamster", "panda", "tiger", "eagle", "dolphin", "falcon", "otter", "koala",
-		"rabbit", "wolf", "fox", "bear", "lion", "hawk", "puma", "lynx",
-		"maple", "willow", "cedar", "aspen", "river", "ocean", "summer", "winter",
-		"comet", "nova", "orbit", "pixel", "echo", "lunar", "solar", "ember",
+	p := fakeinfo.RandomFakeProfile()
+	first := sanitizeUsername(p.FirstName)
+	last := sanitizeUsername(p.LastName)
+	if first == "" {
+		first = "alex"
 	}
+	if last == "" {
+		last = "smith"
+	}
+
 	b := make([]byte, 5)
 	_, _ = rand.Read(b)
-	w := words[int(b[0])%len(words)]
-	n := int(b[1])%9000000 + 1000000
-	return fmt.Sprintf("%s.%d", w, n)
+	// separator nghiêng về không-dấu (giống đa số username thật)
+	sep := []string{"", ".", "_", ""}[int(b[0])%4]
+
+	// số đuôi giống người thật
+	var num string
+	switch int(b[1]) % 3 {
+	case 0:
+		num = strconv.Itoa(1985 + int(b[2])%26) // năm sinh 1985–2010
+	case 1:
+		num = fmt.Sprintf("%02d", int(b[2])%100) // 00–99
+	default:
+		num = strconv.Itoa(10 + int(b[2])%9990) // 10–9999
+	}
+
+	// thân username (nghiêng về first+last)
+	var stem string
+	switch int(b[3]) % 4 {
+	case 1:
+		stem = first[:1] + last // bhamilton
+	case 2:
+		stem = first // brian
+	default:
+		stem = first + sep + last // brian.hamilton / brianhamilton
+	}
+
+	// đôi khi chèn separator trước số: brian.hamilton_1995
+	join := ""
+	if sep != "" && int(b[4])%3 == 0 {
+		join = sep
+	}
+	return clampUsername(stem + join + num)
+}
+
+// sanitizeUsername giữ a-z0-9 (lowercase), bỏ dấu/khoảng trắng — IG username chỉ
+// cho phép chữ thường, số, '.', '_'.
+func sanitizeUsername(s string) string {
+	s = strings.ToLower(strings.TrimSpace(s))
+	var sb strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			sb.WriteRune(r)
+		}
+	}
+	return sb.String()
+}
+
+// clampUsername đảm bảo IG-valid: <=30 ký tự, không bắt đầu/kết thúc bằng '.'/'_'.
+func clampUsername(s string) string {
+	if len(s) > 30 {
+		s = s[:30]
+	}
+	s = strings.Trim(s, "._")
+	if s == "" {
+		b := make([]byte, 3)
+		_, _ = rand.Read(b)
+		s = fmt.Sprintf("user%d", 1000+int(b[0])<<8+int(b[1]))
+	}
+	return s
 }
 
 func buildPassword() string {
