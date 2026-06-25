@@ -171,6 +171,7 @@ const regTotalDie = ref(0)
 const regTotalUnknown = ref(0)
 const regTotalCheckpoint = ref(0)
 const regTotalLiveConfirmed = ref(0)   // live thật — từ check-live-result sau 15s
+const regTotalDieConfirmed = ref(0)    // die thật — reg OK nhưng CheckLiveByUsername ra die
 const checkpointLimitEnabled = ref(false)
 const checkpointLimitCount = ref(0)
 
@@ -211,6 +212,7 @@ function saveRunStats() {
       regUnknown: regTotalUnknown.value,
       regCheckpoint: regTotalCheckpoint.value,
       regLiveConfirmed: regTotalLiveConfirmed.value,
+      regDieConfirmed: regTotalDieConfirmed.value,
       verLive: verifyTotalLive.value,
       verDie: verifyTotalDie.value,
       verUnknown: verifyTotalUnknown.value,
@@ -236,6 +238,7 @@ function restoreRunStats(): boolean {
     regTotalUnknown.value = s.regUnknown || 0
     regTotalCheckpoint.value = s.regCheckpoint || 0
     regTotalLiveConfirmed.value = s.regLiveConfirmed || 0
+    regTotalDieConfirmed.value = s.regDieConfirmed || 0
     verifyTotalLive.value = s.verLive || 0
     verifyTotalDie.value = s.verDie || 0
     verifyTotalUnknown.value = s.verUnknown || 0
@@ -255,7 +258,7 @@ function scheduleStatsSave() {
 }
 watch([
   regTotalProcessed, regTotalSuccess, regTotalFail, regTotalLive, regTotalDie, regTotalUnknown, regTotalCheckpoint,
-  regTotalLiveConfirmed,
+  regTotalLiveConfirmed, regTotalDieConfirmed,
   verifyTotalLive, verifyTotalDie, verifyTotalUnknown, verifyTotalProcessed,
 ], scheduleStatsSave)
 // Map<accountId, lastStatus> — track status cuối mỗi account để fix double-count khi retry:
@@ -586,6 +589,7 @@ onMounted(async () => {
         regTotalProcessed.value = 0
         regTotalLive.value = 0
         regTotalDie.value = 0
+        regTotalDieConfirmed.value = 0
         regTotalUnknown.value = 0
         regTotalCheckpoint.value = 0
         // Clear split mode để full grid hiện accounts file
@@ -1753,9 +1757,12 @@ async function setupRegisterListeners() {
   // register:check-live-result — kết quả check live/die sau reg (background goroutine).
   // Tìm row theo username và cập nhật activity kể cả khi status đã 'success'.
   _registerUnsubs.push(bus.on('register:check-live-result', (data: { username: string; result: string }) => {
-    // Chỉ 'live' mới tính live-confirmed; die/unknown đều vào Die.txt.
+    // 'live' → live-confirmed; 'die' → die-confirmed (reg OK nhưng check ra die).
+    // 'unknown' không tính vào Die (chưa xác định) — vẫn vào Die.txt phía backend.
     if (data.result === 'live') {
       regTotalLiveConfirmed.value++
+    } else if (data.result === 'die') {
+      regTotalDieConfirmed.value++
     }
     for (const t of registerThreads.value.values()) {
       if (t.username === data.username) {
@@ -1850,6 +1857,7 @@ async function setupRegisterListeners() {
     regTotalUnknown.value = 0
     regTotalCheckpoint.value = 0
     regTotalLiveConfirmed.value = 0
+    regTotalDieConfirmed.value = 0
     verifyTotalLive.value = 0
     verifyTotalDie.value = 0
     verifyTotalUnknown.value = 0
@@ -1882,6 +1890,7 @@ function clearRegisterTable() {
   regTotalUnknown.value = 0
   regTotalCheckpoint.value = 0
   regTotalLiveConfirmed.value = 0
+  regTotalDieConfirmed.value = 0
   verifyTotalLive.value = 0
   verifyTotalDie.value = 0
   verifyTotalUnknown.value = 0
@@ -2217,11 +2226,11 @@ async function handleRunRegister() {
           {{ isRegisterRunning ? '● Đang chạy' : '■ Đã xong' }}
         </span>
         <span class="stats-item stats-item--sep">|</span>
+        <span class="stats-item stats-item--reg">Reg thành công: {{ regTotalSuccess }}</span>
+        <span class="stats-item stats-item--sep">|</span>
         <span class="stats-item stats-item--live">Live: {{ regTotalLiveConfirmed }}</span>
         <span class="stats-item stats-item--sep">|</span>
-        <span class="stats-item">Reg: {{ regTotalSuccess }}</span>
-        <span class="stats-item stats-item--sep">|</span>
-        <span class="stats-item stats-item--die">Die: {{ regTotalFail }}</span>
+        <span class="stats-item stats-item--die">Die: {{ regTotalDieConfirmed }}</span>
         <template v-if="regTotalCheckpoint > 0">
           <span class="stats-item stats-item--sep">|</span>
           <span class="stats-item stats-item--checkpoint">Checkpoint: {{ regTotalCheckpoint }}</span>
@@ -2377,6 +2386,7 @@ async function handleRunRegister() {
 .stats-item { display: flex; align-items: center; flex-shrink: 0; font-weight: 500; white-space: nowrap; }
 .stats-item--live { color: var(--success-text); font-weight: 700; font-size: var(--font-size-base); }
 .stats-item--die { color: var(--danger-text); font-weight: 700; font-size: var(--font-size-base); }
+.stats-item--reg { color: #eab308; font-weight: 700; font-size: var(--font-size-base); }
 .stats-item--checkpoint { color: #f59e0b; font-weight: 700; font-size: var(--font-size-base); }
 .stats-item--unknown { color: var(--text-muted); font-weight: 700; font-size: var(--font-size-base); }
 .stats-item--elapsed { color: #f97316; font-variant-numeric: tabular-nums; font-weight: 600; }
