@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"HVRIns/internal/email"
 	"HVRIns/internal/email/temp"
@@ -238,26 +239,64 @@ func acquireTempMailForReg(ctx context.Context, cfg instagram.VerifyConfig, prox
 	if strings.TrimSpace(cfg.MailProvider) == "" {
 		return nil, fmt.Errorf("MailProvider chưa chọn — vào 'Thiết lập chạy' → 'NGUỒN XÁC THỰC' chọn provider")
 	}
-	opts := buildEmailOptionsForReg(cfg, proxyStr, notify)
-	svc, err := email.New(opts)
-	if err != nil {
-		return nil, fmt.Errorf("email.New(%q): %w", cfg.MailProvider, err)
+	// tryProvider: New + CreateEmail 1 lần cho provider chỉ định.
+	tryProvider := func(provider string) (*TempMailHandle, error) {
+		o := buildEmailOptionsForReg(cfg, proxyStr, notify)
+		o.Provider = provider
+		svc, err := email.New(o)
+		if err != nil {
+			return nil, fmt.Errorf("email.New(%q): %w", provider, err)
+		}
+		addr, err := svc.CreateEmail(ctx)
+		if err != nil {
+			svc.Close()
+			return nil, fmt.Errorf("CreateEmail(%q): %w", provider, err)
+		}
+		if strings.TrimSpace(addr) == "" {
+			svc.Close()
+			return nil, fmt.Errorf("CreateEmail(%q) trả address rỗng", provider)
+		}
+		meta, _ := email.SnapshotIfPossible(svc) // empty nếu provider chưa support
+		return &TempMailHandle{Service: svc, Email: addr, Meta: meta}, nil
 	}
-	addr, err := svc.CreateEmail(ctx)
-	if err != nil {
-		svc.Close()
-		return nil, fmt.Errorf("CreateEmail(%q): %w", cfg.MailProvider, err)
+
+	// 1. Thử provider user chọn, retry tối đa 3 lần — server-side hay rate-limit khi nhiều
+	//    luồng burst; retry với backoff giúp vượt qua rate-limit tạm thời.
+	const maxAttempts = 3
+	var lastErr error
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		h, err := tryProvider(cfg.MailProvider)
+		if err == nil {
+			return h, nil
+		}
+		lastErr = err
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+		if attempt < maxAttempts {
+			if notify != nil {
+				notify(fmt.Sprintf("[TempMail] %s tạo lỗi (%d/%d), thử lại...", cfg.MailProvider, attempt, maxAttempts))
+			}
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(time.Duration(attempt) * time.Second):
+			}
+		}
 	}
-	if strings.TrimSpace(addr) == "" {
-		svc.Close()
-		return nil, fmt.Errorf("CreateEmail(%q) trả address rỗng — provider bug?", cfg.MailProvider)
+
+	// 2. Provider chọn fail hết → fallback firetempmail (client-side, không gọi server tạo
+	//    mail nên không bao giờ rate-limit) để luồng vẫn có mail thay vì bỏ.
+	const fallback = "firetempmail"
+	if !strings.EqualFold(strings.TrimSpace(cfg.MailProvider), fallback) {
+		if notify != nil {
+			notify(fmt.Sprintf("[TempMail] %s fail → fallback %s (client-side)", cfg.MailProvider, fallback))
+		}
+		if h, err := tryProvider(fallback); err == nil {
+			return h, nil
+		}
 	}
-	meta, _ := email.SnapshotIfPossible(svc) // empty nếu provider chưa support
-	return &TempMailHandle{
-		Service: svc,
-		Email:   addr,
-		Meta:    meta,
-	}, nil
+	return nil, fmt.Errorf("acquireTempMail: %s fail sau %d lần + fallback fail: %w", cfg.MailProvider, maxAttempts, lastErr)
 }
 
 // acquireMailTempComForReg — tạo email từ mail-temp.com (client-side, không cần API key).
