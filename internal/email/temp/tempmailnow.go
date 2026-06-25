@@ -1,8 +1,8 @@
 // tempmailnow.go — tempmail.now service (Flask backend, cookie session, no domain selection).
 //
 // Flow (xác nhận 2026-06-18):
-//   1. GET /api/temp_email  → {"email":"...","created_at":"..."}  (set session cookie)
-//   2. GET /fetch_emails    → {"emails":[...],"remaining_time":N}  (CÙNG cookie jar)
+//  1. GET /api/temp_email  → {"email":"...","created_at":"..."}  (set session cookie)
+//  2. GET /fetch_emails    → {"emails":[...],"remaining_time":N}  (CÙNG cookie jar)
 //
 // KHÔNG cần key, KHÔNG Cloudflare — http.Client thường qua proxy pool.
 // Session gắn với cookie nên Client phải có cookie jar dùng chung giữa 2 call.

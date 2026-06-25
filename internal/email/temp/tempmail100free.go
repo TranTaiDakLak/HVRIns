@@ -1,7 +1,8 @@
 // tempmail100free.go — tempmail100.com free (anonymous token) service
 // Port từ C# Tempmail100FreeAPI. KHÔNG cần tài khoản/login.
 // Flow: POST /init → anonymous token (server đôi khi trả sẵn address) →
-//       POST /web/generate → GET /web/emails poll → GET /emails/content/{uuid}.
+//
+//	POST /web/generate → GET /web/emails poll → GET /emails/content/{uuid}.
 package temp
 
 import (

@@ -1,10 +1,10 @@
 // vietxf.go — VietXF service (vietxf.com)
 // Dùng query param key= (hoặc X-API-KEY header). Flow:
-//   1. CreateEmail: dùng domain list đã cấu hình hoặc fetch từ API
-//      → ghép username@domain ngẫu nhiên
-//   2. WaitForCode: GET /getmail/{email}?key={api_key}[&latest_id={id}]
-//      → extract OTP từ subject, chỉ xử lý mail từ facebookmail.com
-//      → dùng latest_id để chỉ lấy mail mới hơn lần poll trước
+//  1. CreateEmail: dùng domain list đã cấu hình hoặc fetch từ API
+//     → ghép username@domain ngẫu nhiên
+//  2. WaitForCode: GET /getmail/{email}?key={api_key}[&latest_id={id}]
+//     → extract OTP từ subject, chỉ xử lý mail từ facebookmail.com
+//     → dùng latest_id để chỉ lấy mail mới hơn lần poll trước
 package temp
 
 import (

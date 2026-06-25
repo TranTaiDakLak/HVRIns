@@ -1,9 +1,9 @@
 // tempmailapp.go — temp-mail.app service (Hono RPC JSON API, no auth)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. Generate random 32-char hex "visitor-id" / part
-//   2. GET /api/mail/address?part={id}  (header visitor-id: {id}) → {address}
-//   3. GET /api/mail/list?part={localPart}                          → {message:[{subject,content}]}
+//  1. Generate random 32-char hex "visitor-id" / part
+//  2. GET /api/mail/address?part={id}  (header visitor-id: {id}) → {address}
+//  3. GET /api/mail/list?part={localPart}                          → {message:[{subject,content}]}
 //
 // KHÔNG cần key, KHÔNG login, KHÔNG Cloudflare.
 package temp

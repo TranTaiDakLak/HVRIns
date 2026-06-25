@@ -348,4 +348,3 @@ func randomMailTmPass(n int) string {
 	}
 	return string(b)
 }
-

@@ -1,9 +1,9 @@
 // tempmailerme.go — temp-mailer.me service (token-based REST JSON API)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. GET /api/mail                                    → {email, token}
-//   2. GET /api/messages?email={email}&token={token}   → [{id,from,html,created_at}]
-//   3. GET /api/message?id={id}                        → {html, text}  (fallback nếu inline chưa đủ)
+//  1. GET /api/mail                                    → {email, token}
+//  2. GET /api/messages?email={email}&token={token}   → [{id,from,html,created_at}]
+//  3. GET /api/message?id={id}                        → {html, text}  (fallback nếu inline chưa đủ)
 //
 // KHÔNG cần key, KHÔNG login. Email + token gắn liền nhau theo session.
 package temp

@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	"HVRIns/internal/httpx"
@@ -63,7 +62,7 @@ func (t *TempMail100) CreateEmail(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("tempmail100 domains: %w", err)
 	}
-	username := "u" + strconv.Itoa(100000+rand.Intn(899999))
+	username := realisticLocalPart()
 	if err := t.createMailbox(ctx, username, domain); err != nil {
 		return "", fmt.Errorf("tempmail100 mailbox: %w", err)
 	}

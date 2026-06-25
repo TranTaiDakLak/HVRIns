@@ -1,11 +1,13 @@
 // bench_test.go — Smoke / reachability bench for ALL temp mail providers.
 // For each provider, calls CreateEmail with a 10-second timeout and reports:
-//   OK  — email returned successfully
-//   SKIP — provider is client-side only (email is synthesised locally, no network needed; always OK)
-//   FAIL — network error, unexpected response, or context deadline exceeded
+//
+//	OK  — email returned successfully
+//	SKIP — provider is client-side only (email is synthesised locally, no network needed; always OK)
+//	FAIL — network error, unexpected response, or context deadline exceeded
 //
 // Run:
-//   go test ./internal/email/temp/ -run TestBenchAllProviders -v -timeout=300s
+//
+//	go test ./internal/email/temp/ -run TestBenchAllProviders -v -timeout=300s
 //
 // Skip providers that require API keys (mailcx, wemakemail).
 package temp
@@ -20,9 +22,9 @@ import (
 
 // providerCase describes one provider under test.
 type providerCase struct {
-	name      string
+	name       string
 	clientSide bool // true = CreateEmail never does network; always succeeds locally
-	create    func(ctx context.Context) (string, error)
+	create     func(ctx context.Context) (string, error)
 }
 
 // benchProviders returns the ordered list of all providers to bench.
@@ -213,11 +215,11 @@ func TestBenchAllProviders(t *testing.T) {
 	providers := benchProviders()
 
 	type result struct {
-		name      string
-		status    string // "OK", "FAIL", "CLIENT-SIDE-OK"
-		email     string
-		elapsed   time.Duration
-		errMsg    string
+		name    string
+		status  string // "OK", "FAIL", "CLIENT-SIDE-OK"
+		email   string
+		elapsed time.Duration
+		errMsg  string
 	}
 
 	results := make([]result, 0, len(providers))

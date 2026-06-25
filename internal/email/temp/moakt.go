@@ -121,7 +121,7 @@ func pickDomain(raw string, fallback []string) string {
 // CreateEmail tạo email random qua POST moakt.com/en/inbox
 // Mapping từ WeBM MoaktMail.CreateRandomEmailAsync()
 func (m *Moakt) CreateEmail(ctx context.Context) (string, error) {
-	username := randomString(9) + "_" + fmt.Sprintf("%06d", rand.Intn(1000000))
+	username := realisticLocalPart()
 	// FmUserTmpMail override — dùng login-derived username nếu có.
 	// Thêm suffix ngẫu nhiên để tránh collision nếu cùng login được dùng nhiều lần.
 	if m.customUsername != "" {
@@ -280,17 +280,17 @@ func ExtractCode(content string) string {
 		return ""
 	}
 	patterns := []*regexp.Regexp{
-		codePattern1, // EN HTML <li class="title">
-		codePattern2, // EN "is your confirmation code"
-		codePattern3, // Facebook HTML letter-spacing:5px (universal)
-		codePattern4, // VN "là mã xác nhận"
-		codePattern6, // ES "es tu código de confirmación"
-		codePattern7, // PT "é seu código de confirmação"
-		codePattern8, // ID "adalah kode konfirmasi"
-		codePattern9, // FR "est votre code de confirmation"
+		codePattern1,  // EN HTML <li class="title">
+		codePattern2,  // EN "is your confirmation code"
+		codePattern3,  // Facebook HTML letter-spacing:5px (universal)
+		codePattern4,  // VN "là mã xác nhận"
+		codePattern6,  // ES "es tu código de confirmación"
+		codePattern7,  // PT "é seu código de confirmação"
+		codePattern8,  // ID "adalah kode konfirmasi"
+		codePattern9,  // FR "est votre code de confirmation"
 		codePattern11, // IG "is your Instagram code"
 		codePattern12, // IG VN "là mã Instagram"
-		codePattern5, // subject "code <space>..."
+		codePattern5,  // subject "code <space>..."
 		codePattern10, // Facebook + code anywhere (last resort)
 		codePattern13, // Instagram + code anywhere (last resort)
 	}

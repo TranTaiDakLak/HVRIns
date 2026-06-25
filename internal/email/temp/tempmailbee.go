@@ -66,7 +66,7 @@ func (m *TempMailBee) CreateEmail(ctx context.Context) (string, error) {
 	// Ghim domain nếu user chọn: tạo địa chỉ cụ thể qua ?email_address=<local>@<domain>.
 	if len(m.configDomains) > 0 {
 		domain := m.configDomains[rand.Intn(len(m.configDomains))]
-		localPart := strings.ToLower(randomString(8)) + fmt.Sprintf("%04d", rand.Intn(10000))
+		localPart := realisticLocalPart()
 		createURL = tempMailBeeBaseURL + "/mailbox/create/?email_address=" + url.QueryEscape(localPart+"@"+domain)
 	}
 	req, err := http.NewRequestWithContext(ctx, "POST", createURL, nil)

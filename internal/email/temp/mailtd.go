@@ -1,17 +1,18 @@
 // mailtd.go — mail.td temporary email service (api.mail.td, PoW SHA-256)
 //
 // API (2026-04, port từ C# MailTdAPI — đã test hoạt động):
-//   GET  https://api.mail.td/api/domains
-//        → {"domains":[{"domain":"sugtbt.com","default":true},...]}
-//   POST https://api.mail.td/api/accounts
-//        Body: {"address":"u@dom","auth_key":"<64hex>","pow":{"t":<unix_s>,"n":"<nonce>","d":<diff>}}
-//        PoW: SHA-256(address_lower + timestamp_str + counter_str) có d leading-zero bits (diff=15)
-//        Server có thể trả {"status":"retry","required_difficulty":N,"token":"..."} → tăng diff
-//        → 201 {"id":"...","address":"...","token":"eyJ..."}
-//   GET  https://api.mail.td/api/accounts/{id}/messages?page=1  (Bearer)
-//        → {"messages":[{"id":"...","from":"...","subject":"..."}],"page":1}
-//   GET  https://api.mail.td/api/accounts/{id}/messages/{msgId}  (Bearer)
-//        → {"html_body"|"html":"...","text_body"|"text":"..."}
+//
+//	GET  https://api.mail.td/api/domains
+//	     → {"domains":[{"domain":"sugtbt.com","default":true},...]}
+//	POST https://api.mail.td/api/accounts
+//	     Body: {"address":"u@dom","auth_key":"<64hex>","pow":{"t":<unix_s>,"n":"<nonce>","d":<diff>}}
+//	     PoW: SHA-256(address_lower + timestamp_str + counter_str) có d leading-zero bits (diff=15)
+//	     Server có thể trả {"status":"retry","required_difficulty":N,"token":"..."} → tăng diff
+//	     → 201 {"id":"...","address":"...","token":"eyJ..."}
+//	GET  https://api.mail.td/api/accounts/{id}/messages?page=1  (Bearer)
+//	     → {"messages":[{"id":"...","from":"...","subject":"..."}],"page":1}
+//	GET  https://api.mail.td/api/accounts/{id}/messages/{msgId}  (Bearer)
+//	     → {"html_body"|"html":"...","text_body"|"text":"..."}
 //
 // mail.td KHÔNG bị Cloudflare → dùng net/http qua proxy như mailcx.go.
 package temp
@@ -155,7 +156,7 @@ func randHex64() string {
 // CreateEmail: domain → random user → PoW → POST /accounts.
 func (m *MailTd) CreateEmail(ctx context.Context) (string, error) {
 	domain := m.fetchDomain(ctx)
-	user := randomLocalPart() // dùng helper từ mailcx.go (cùng package)
+	user := realisticLocalPart() // dùng helper từ mailcx.go (cùng package)
 	if len(user) > 20 {
 		user = user[:20]
 	}
@@ -277,7 +278,9 @@ func (m *MailTd) MessageIDs(ctx context.Context) []string {
 	defer resp.Body.Close()
 	body, _ := httpx.ReadBody(resp.Body, 64*1024)
 	var result struct {
-		Messages []struct{ ID string `json:"id"` } `json:"messages"`
+		Messages []struct {
+			ID string `json:"id"`
+		} `json:"messages"`
 	}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil

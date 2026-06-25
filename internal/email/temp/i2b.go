@@ -1,8 +1,8 @@
 // i2b.go — I2bMail service (mail.i2b.vn)
 // API không cần auth — chỉ cần địa chỉ email.
 // Flow:
-//   1. CreateEmail: ghép username ngẫu nhiên + @i2b.vn
-//   2. WaitForCode: GET /api/mail/messages?to={email} → list messages → extract OTP từ subject/body
+//  1. CreateEmail: ghép username ngẫu nhiên + @i2b.vn
+//  2. WaitForCode: GET /api/mail/messages?to={email} → list messages → extract OTP từ subject/body
 package temp
 
 import (
@@ -17,7 +17,7 @@ import (
 	"HVRIns/internal/proxy"
 )
 
-const i2bBase   = "https://mail.i2b.vn"
+const i2bBase = "https://mail.i2b.vn"
 const i2bDomain = "i2b.vn"
 
 // I2bMail implements email.Service cho mail.i2b.vn.

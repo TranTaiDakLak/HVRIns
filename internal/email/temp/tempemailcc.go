@@ -1,14 +1,15 @@
 // tempemailcc.go — tempemail.cc service (mail.tm-compatible JSON API)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. GET  /api/domains                        → ["icmans.com", ...]
-//   2. POST /api/accounts {email, password}     → {code:200, data:{token:JWT}}
-//      Username PHẢI ≥7 chars; Chrome UA bắt buộc (plain UA → 403).
-//   3. GET  /api/messages?limit=10 (Bearer JWT) → [{id,subject,intro,...}]
-//   4. GET  /api/messages/{id}                  → {html:[...], text:"..."}
+//  1. GET  /api/domains                        → ["icmans.com", ...]
+//  2. POST /api/accounts {email, password}     → {code:200, data:{token:JWT}}
+//     Username PHẢI ≥7 chars; Chrome UA bắt buộc (plain UA → 403).
+//  3. GET  /api/messages?limit=10 (Bearer JWT) → [{id,subject,intro,...}]
+//  4. GET  /api/messages/{id}                  → {html:[...], text:"..."}
 //
 // QUAN TRỌNG: dùng www.tempemail.cc (non-www redirect về www).
-//             Phải dùng Chrome User-Agent — UA khác bị 403.
+//
+//	Phải dùng Chrome User-Agent — UA khác bị 403.
 package temp
 
 import (

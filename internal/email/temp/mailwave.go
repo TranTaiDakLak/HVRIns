@@ -1,15 +1,15 @@
 // mailwave.go — MailWave.dev service (Laravel session + XSRF dual-token)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. GET  / (cookie jar)
-//      → lưu XSRF-TOKEN cookie (url-decoded) + csrf-token từ <meta name="csrf-token">
-//      + mail_wave_session cookie
-//   2. POST /get_messages  (Content-Type: application/json)
-//      header: X-XSRF-TOKEN = url-decoded(XSRF-TOKEN cookie)
-//      header: X-Requested-With: XMLHttpRequest
-//      body:   {"_token": "{csrf_meta_value}"}
-//      → {status:true, mailbox:"user@domain.com", messages:[{id,subject}], histories}
-//   3. GET  /view/{id} → HTML page → ExtractCode
+//  1. GET  / (cookie jar)
+//     → lưu XSRF-TOKEN cookie (url-decoded) + csrf-token từ <meta name="csrf-token">
+//     + mail_wave_session cookie
+//  2. POST /get_messages  (Content-Type: application/json)
+//     header: X-XSRF-TOKEN = url-decoded(XSRF-TOKEN cookie)
+//     header: X-Requested-With: XMLHttpRequest
+//     body:   {"_token": "{csrf_meta_value}"}
+//     → {status:true, mailbox:"user@domain.com", messages:[{id,subject}], histories}
+//  3. GET  /view/{id} → HTML page → ExtractCode
 //
 // KHÔNG cần key. Domain tự động gán (random server-side). Đổi domain cần reCAPTCHA.
 package temp

@@ -17,9 +17,9 @@ const dismailBaseURL = "https://dismail.top"
 
 // Dismail implements email.Service cho dismail.top
 type Dismail struct {
-	client  *http.Client
-	mailID  string
-	email   string
+	client *http.Client
+	mailID string
+	email  string
 }
 
 // NewDismail tạo Dismail service.
@@ -122,10 +122,10 @@ func (d *Dismail) pollOnce(ctx context.Context) (string, error) {
 
 	var inbox struct {
 		Messages []struct {
-			ID      string `json:"id"`
-			Subject string `json:"subject"`
+			ID       string `json:"id"`
+			Subject  string `json:"subject"`
 			BodyHTML string `json:"body_html"`
-			Body    string `json:"body"`
+			Body     string `json:"body"`
 		} `json:"messages"`
 	}
 	if err := json.Unmarshal(body, &inbox); err != nil {

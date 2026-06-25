@@ -40,10 +40,10 @@ func TestExtractCode_Subject(t *testing.T) {
 func TestExtractCode_NotMatch(t *testing.T) {
 	// Các subject KHÔNG được match (false positive prevention)
 	cases := []string{
-		"Order 12345 has been confirmed",          // số ở giữa — không phải OTP
-		"Welcome to our newsletter",               // không có số
-		"Your invoice #98765 is ready",            // số sau "#"
-		"Promotion: 50% off today!",               // số % không phải OTP
+		"Order 12345 has been confirmed", // số ở giữa — không phải OTP
+		"Welcome to our newsletter",      // không có số
+		"Your invoice #98765 is ready",   // số sau "#"
+		"Promotion: 50% off today!",      // số % không phải OTP
 	}
 	for _, s := range cases {
 		t.Run(s, func(t *testing.T) {

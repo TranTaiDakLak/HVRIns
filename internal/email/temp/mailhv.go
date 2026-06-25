@@ -1,10 +1,10 @@
 // mailhv.go — MailHV service (dulich360.com REST API)
 // Dùng api_token query param. Flow:
-//   1. CreateEmail: dùng domain list đã cấu hình (hoặc fetch từ API nếu chưa set)
-//      → ghép username@domain ngẫu nhiên
-//   2. WaitForCode: GET /api/inbox/{email}?limit=50&offset=0 → list messages
-//      → extract OTP TRỰC TIẾP từ subject (vd "57603 is your confirmation code")
-//      → KHÔNG fetch body chi tiết → tiết kiệm 1 round-trip per message
+//  1. CreateEmail: dùng domain list đã cấu hình (hoặc fetch từ API nếu chưa set)
+//     → ghép username@domain ngẫu nhiên
+//  2. WaitForCode: GET /api/inbox/{email}?limit=50&offset=0 → list messages
+//     → extract OTP TRỰC TIẾP từ subject (vd "57603 is your confirmation code")
+//     → KHÔNG fetch body chi tiết → tiết kiệm 1 round-trip per message
 package temp
 
 import (

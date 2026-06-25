@@ -1,14 +1,14 @@
 // tempmailxxyz.go — tempmailx.xyz service (Laravel Livewire v2, stateful)
 //
 // Flow (xác nhận live qua agent 2026-06-19, OTP đọc đúng):
-//   1. GET / (cookie jar) → server auto-assign địa chỉ + bind qua cookies. Scrape:
-//        - email:    const email = 'rojtod@imail.sbs';
-//        - csrf:     window.livewire_token = '...';
-//        - wire:initial-data của component "frontend.app" (fingerprint + serverMemo)
-//   2. POST /livewire/message/frontend.app  (JSON, X-CSRF-TOKEN + X-Livewire:true)
-//        body: {fingerprint, serverMemo, updates:[syncEmail, fetchMessages]}
-//        → response.serverMemo.data.messages = [{subject, content, ...}]
-//      Phải lưu serverMemo trả về (đã update checksum) cho lần poll kế.
+//  1. GET / (cookie jar) → server auto-assign địa chỉ + bind qua cookies. Scrape:
+//     - email:    const email = 'rojtod@imail.sbs';
+//     - csrf:     window.livewire_token = '...';
+//     - wire:initial-data của component "frontend.app" (fingerprint + serverMemo)
+//  2. POST /livewire/message/frontend.app  (JSON, X-CSRF-TOKEN + X-Livewire:true)
+//     body: {fingerprint, serverMemo, updates:[syncEmail, fetchMessages]}
+//     → response.serverMemo.data.messages = [{subject, content, ...}]
+//     Phải lưu serverMemo trả về (đã update checksum) cho lần poll kế.
 //
 // KHÔNG cần key. Cloudflare KHÔNG challenge GET/fetchMessages (chỉ custom-username
 // cần Turnstile — ta dùng địa chỉ auto-assign nên bỏ qua).

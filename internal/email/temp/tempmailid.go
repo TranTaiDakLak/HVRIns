@@ -1,12 +1,12 @@
 // tempmailid.go — temp-mail.id service (Laravel Livewire v3, Cloudflare).
 //
 // Flow (reverse-engineer + xác nhận live 2026-06-19):
-//   1. GET / (tls-client Chrome JA3) → csrf-token meta + cookie XSRF/tmail_session
-//      + wire:snapshot của 2 component: frontend.actions (form tạo) + frontend.app (inbox)
-//   2. Tạo email theo domain CHỌN: POST /livewire/update component frontend.actions
-//      updates {user, domain} + calls [{method:"create"}] → snapshot.data.email = user@domain
-//   3. Đọc inbox: POST /livewire/update component frontend.app (refresh) → effects.html
-//      + snapshot.data.messages → ExtractCode
+//  1. GET / (tls-client Chrome JA3) → csrf-token meta + cookie XSRF/tmail_session
+//     + wire:snapshot của 2 component: frontend.actions (form tạo) + frontend.app (inbox)
+//  2. Tạo email theo domain CHỌN: POST /livewire/update component frontend.actions
+//     updates {user, domain} + calls [{method:"create"}] → snapshot.data.email = user@domain
+//  3. Đọc inbox: POST /livewire/update component frontend.app (refresh) → effects.html
+//     + snapshot.data.messages → ExtractCode
 //
 // ⚠️ BẮT BUỘC proxy RESIDENTIAL — Cloudflare chặn IP datacenter (giống tempmail.so).
 // 10 domain công khai cho chọn. Mailbox bind theo cookie tmail_session (giữ trong jar).
@@ -111,10 +111,10 @@ func (t *TempMailId) get(ctx context.Context, url string) (string, int, error) {
 	}
 	req = req.WithContext(ctx)
 	req.Header = fhttp.Header{
-		"user-agent":      {tempMailIdUA},
-		"accept":          {"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
-		"accept-language": {"en-US,en;q=0.9"},
-		"referer":         {tempMailIdBaseURL + "/"},
+		"user-agent":         {tempMailIdUA},
+		"accept":             {"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+		"accept-language":    {"en-US,en;q=0.9"},
+		"referer":            {tempMailIdBaseURL + "/"},
 		fhttp.HeaderOrderKey: {"user-agent", "accept", "accept-language", "referer"},
 	}
 	resp, err := t.client.Do(req)
@@ -147,13 +147,13 @@ func (t *TempMailId) postLivewire(ctx context.Context, snapshot string, updates 
 	}
 	req = req.WithContext(ctx)
 	req.Header = fhttp.Header{
-		"user-agent":   {tempMailIdUA},
-		"content-type": {"application/json"},
-		"accept":       {"text/html, application/xhtml+xml"},
-		"x-livewire":   {""},
-		"x-csrf-token": {t.csrf},
-		"referer":      {tempMailIdBaseURL + "/"},
-		"origin":       {tempMailIdBaseURL},
+		"user-agent":         {tempMailIdUA},
+		"content-type":       {"application/json"},
+		"accept":             {"text/html, application/xhtml+xml"},
+		"x-livewire":         {""},
+		"x-csrf-token":       {t.csrf},
+		"referer":            {tempMailIdBaseURL + "/"},
+		"origin":             {tempMailIdBaseURL},
 		fhttp.HeaderOrderKey: {"user-agent", "content-type", "accept", "x-livewire", "x-csrf-token", "referer", "origin"},
 	}
 	resp, err := t.client.Do(req)
@@ -270,7 +270,7 @@ func (t *TempMailId) CreateEmail(ctx context.Context) (string, error) {
 		domains = tempMailIdKnownDomains
 	}
 	domain := domains[rand.Intn(len(domains))]
-	user := tempMailIdUsername()
+	user := realisticLocalPart()
 
 	// POST create(user, domain) → email = user@domain.
 	newSnap, _, err := t.postLivewire(ctx, actionsSnap,

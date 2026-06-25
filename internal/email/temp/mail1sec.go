@@ -56,7 +56,7 @@ func (m *Mail1sec) notify(msg string) {
 // CreateEmail tạo email random@i2b.vn
 // Mapping từ WeBM Mail1secMail.CreateEmail() + GetEmailRandom()
 func (m *Mail1sec) CreateEmail(ctx context.Context) (string, error) {
-	m.user = randomString(9) + fmt.Sprintf("%06d", rand.Intn(1000000))
+	m.user = realisticLocalPart()
 	// FmUserTmpMail override — dùng login-derived username nếu có, thêm suffix random
 	// để tránh collision khi cùng login dùng nhiều lần.
 	if m.customUsername != "" {

@@ -1,11 +1,11 @@
 // tempmailpro.go — tempmailpro.io service (REST, client-side address gen)
 //
 // Flow (xác nhận live qua agent 2026-06-19):
-//   1. Gen địa chỉ client-side: rand8 + "@tempmailpro.io" (1 domain duy nhất)
-//   2. POST /api/emails/activate-session {"address":addr} → {"success":true}
-//      (phải re-POST mỗi ~10 phút để giữ session sống; gate: chưa activate → inbox 404)
-//   3. GET /api/emails/guest/{address}            → [{_id,from,subject,text,html}]
-//   4. GET /api/emails/guest/{address}/{_id}      → message đầy đủ (fallback)
+//  1. Gen địa chỉ client-side: rand8 + "@tempmailpro.io" (1 domain duy nhất)
+//  2. POST /api/emails/activate-session {"address":addr} → {"success":true}
+//     (phải re-POST mỗi ~10 phút để giữ session sống; gate: chưa activate → inbox 404)
+//  3. GET /api/emails/guest/{address}            → [{_id,from,subject,text,html}]
+//  4. GET /api/emails/guest/{address}/{_id}      → message đầy đủ (fallback)
 //
 // KHÔNG cần key, KHÔNG login, KHÔNG Cloudflare. Rate limit: activate 30/60s, guest 500/900s.
 package temp
@@ -88,7 +88,7 @@ func (t *TempMailPro) activateSession(ctx context.Context) error {
 
 // CreateEmail: gen địa chỉ → activate-session.
 func (t *TempMailPro) CreateEmail(ctx context.Context) (string, error) {
-	t.email = randTempMailProLocal() + "@" + tempMailProDomain
+	t.email = realisticLocalPart() + "@" + tempMailProDomain
 	if err := t.activateSession(ctx); err != nil {
 		return "", fmt.Errorf("tempmailpro create: %w", err)
 	}

@@ -65,10 +65,10 @@ func SetMailTempComDomainCachePath(path string) {
 
 // MailTempCom implements email.Service cho mail-temp.com.
 type MailTempCom struct {
-	client  *http.Client
-	user    string
-	domain  string
-	email   string
+	client *http.Client
+	user   string
+	domain string
+	email  string
 }
 
 // NewMailTempCom tạo MailTempCom service. Email sinh client-side (không call API create).

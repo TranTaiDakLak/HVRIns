@@ -1,13 +1,16 @@
 // wemakemail_test.go — Smoke tests cho WeMakeMail provider.
 //
 // Cần API key thật để chạy. Set biến môi trường trước:
-//   $env:WEMAKEMAIL_API_KEY = "wm_live_..."
+//
+//	$env:WEMAKEMAIL_API_KEY = "wm_live_..."
 //
 // Chạy toàn bộ:
-//   go test ./internal/email/temp/ -run TestWeMakeMail -v -timeout=120s
+//
+//	go test ./internal/email/temp/ -run TestWeMakeMail -v -timeout=120s
 //
 // Chỉ test FetchDomains:
-//   go test ./internal/email/temp/ -run TestWeMakeMail_FetchDomains -v
+//
+//	go test ./internal/email/temp/ -run TestWeMakeMail_FetchDomains -v
 package temp
 
 import (

@@ -1,12 +1,12 @@
 // tempamail.go — tempamail.com service (form-encoded REST API)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. POST https://api.tempamail.com/webapp/client/create
-//      body: app_uuid=a5x-cj6a-ka1q (form-encoded)
-//      → {client:{uuid}, email:{id,address}}
-//   2. POST https://api.tempamail.com/webapp/messages
-//      body: uuid={client_uuid}&selected_email_id={email_id}&known_message_id=
-//      → {messages:[{subject,body,html}]}
+//  1. POST https://api.tempamail.com/webapp/client/create
+//     body: app_uuid=a5x-cj6a-ka1q (form-encoded)
+//     → {client:{uuid}, email:{id,address}}
+//  2. POST https://api.tempamail.com/webapp/messages
+//     body: uuid={client_uuid}&selected_email_id={email_id}&known_message_id=
+//     → {messages:[{subject,body,html}]}
 //
 // KHÔNG cần key. Content-Type: application/x-www-form-urlencoded.
 package temp

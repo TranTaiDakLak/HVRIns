@@ -88,7 +88,7 @@ func (m *MailCx) CreateEmail(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("mail.cx: chưa có API token — vào mail.cx/dashboard lấy token tm_live_...")
 	}
 	m.domain = m.fetchDomain(ctx)
-	m.email = randomLocalPart() + "@" + m.domain
+	m.email = realisticLocalPart() + "@" + m.domain
 	return m.email, nil
 }
 
@@ -187,7 +187,6 @@ func (m *MailCx) longPollOnce(ctx context.Context) (string, error) {
 	}
 	return "", nil
 }
-
 
 // getMessage lấy nội dung email theo id — GET /v1/email/{id}
 func (m *MailCx) getMessage(ctx context.Context, id string) (string, error) {

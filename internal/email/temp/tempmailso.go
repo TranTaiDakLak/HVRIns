@@ -1,10 +1,10 @@
 // tempmailso.go — tempmail.so service (Chrome TLS fingerprint, no-PoW API 2026-05)
 //
 // Flow chuẩn (reverse-engineer từ utilities.js network()):
-//   1. GET /us/ (Chrome TLS) → nhận tm_session cookie
-//   2. GET /us/api/inbox?requestTime={ms}&lang=us  (KHÔNG có PoW/x param)
-//      headers: Accept: application/json, Content-type: application/json, X-Inbox-Lifespan: 600
-//   3. GET /us/api/inbox/messagehtmlbody/{id}?... đọc nội dung OTP
+//  1. GET /us/ (Chrome TLS) → nhận tm_session cookie
+//  2. GET /us/api/inbox?requestTime={ms}&lang=us  (KHÔNG có PoW/x param)
+//     headers: Accept: application/json, Content-type: application/json, X-Inbox-Lifespan: 600
+//  3. GET /us/api/inbox/messagehtmlbody/{id}?... đọc nội dung OTP
 //
 // LƯU Ý: tempmail.so có Cloudflare JS Detection. Từ IP datacenter sẽ bị
 // "Action Not Allowed" (cần cf_clearance). Qua proxy RESIDENTIAL thường pass.
@@ -103,11 +103,11 @@ func (t *TempMailSo) inboxCall(ctx context.Context, c tls_client.HttpClient) ([]
 	req = req.WithContext(ctx)
 	// Headers CHÍNH XÁC theo utilities.js network()
 	req.Header = fhttp.Header{
-		"accept":           {"application/json"},
-		"content-type":     {"application/json"},
-		"x-inbox-lifespan": {fmt.Sprintf("%d", tempMailSoLifespan)},
-		"user-agent":       {tempMailSoUA},
-		"referer":          {tempMailSoBaseURL + "/us/"},
+		"accept":             {"application/json"},
+		"content-type":       {"application/json"},
+		"x-inbox-lifespan":   {fmt.Sprintf("%d", tempMailSoLifespan)},
+		"user-agent":         {tempMailSoUA},
+		"referer":            {tempMailSoBaseURL + "/us/"},
 		fhttp.HeaderOrderKey: {"accept", "content-type", "x-inbox-lifespan", "user-agent", "referer"},
 	}
 	resp, err := c.Do(req)
@@ -254,11 +254,11 @@ func (t *TempMailSo) getMessage(ctx context.Context, c tls_client.HttpClient, id
 	}
 	req = req.WithContext(ctx)
 	req.Header = fhttp.Header{
-		"accept":           {"application/json"},
-		"content-type":     {"application/json"},
-		"x-inbox-lifespan": {fmt.Sprintf("%d", tempMailSoLifespan)},
-		"user-agent":       {tempMailSoUA},
-		"referer":          {tempMailSoBaseURL + "/us/"},
+		"accept":             {"application/json"},
+		"content-type":       {"application/json"},
+		"x-inbox-lifespan":   {fmt.Sprintf("%d", tempMailSoLifespan)},
+		"user-agent":         {tempMailSoUA},
+		"referer":            {tempMailSoBaseURL + "/us/"},
 		fhttp.HeaderOrderKey: {"accept", "content-type", "x-inbox-lifespan", "user-agent", "referer"},
 	}
 	resp, err := c.Do(req)

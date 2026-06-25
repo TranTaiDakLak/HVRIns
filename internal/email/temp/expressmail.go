@@ -1,9 +1,9 @@
 // expressmail.go — expressmail.app service (api2.expressmail.app backend, no domain selection).
 //
 // Flow (xác nhận 2026-06-18):
-//   1. POST https://api2.expressmail.app/v2/anonymous/mailbox  body {} → {"id":"...","address":"..."}
-//   2. GET  https://api2.expressmail.app/v2/anonymous/mailbox/{id}/messages?limit=20&skip=0 → [{...}]
-//   3. GET  https://api2.expressmail.app/v2/anonymous/mailbox/{id}/messages/{msgId} → nội dung
+//  1. POST https://api2.expressmail.app/v2/anonymous/mailbox  body {} → {"id":"...","address":"..."}
+//  2. GET  https://api2.expressmail.app/v2/anonymous/mailbox/{id}/messages?limit=20&skip=0 → [{...}]
+//  3. GET  https://api2.expressmail.app/v2/anonymous/mailbox/{id}/messages/{msgId} → nội dung
 //
 // KHÔNG cần key, KHÔNG Cloudflare — http.Client thường qua proxy pool.
 package temp

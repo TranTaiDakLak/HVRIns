@@ -1,9 +1,9 @@
 // tempmailai.go — temp-mail.ai service (Express REST JSON API)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. POST /api/mailbox/random {}                          → {success, email, id}
-//   2. GET  /api/mailbox/{encoded_email}/messages          → {success, messages:[{id,subject,text,html}]}
-//   3. GET  /api/mailbox/{encoded_email}/message/{id}      → {success, message:{text,html}}
+//  1. POST /api/mailbox/random {}                          → {success, email, id}
+//  2. GET  /api/mailbox/{encoded_email}/messages          → {success, messages:[{id,subject,text,html}]}
+//  3. GET  /api/mailbox/{encoded_email}/message/{id}      → {success, message:{text,html}}
 //
 // QUAN TRỌNG: email trong URL phải dùng url.PathEscape (@ → %40).
 // Rate limit: 50 req/600s per IP. KHÔNG cần key.

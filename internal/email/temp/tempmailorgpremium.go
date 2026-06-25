@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -144,7 +143,7 @@ func (t *TempMailOrgPremium) CreateEmail(ctx context.Context) (string, error) {
 	}
 
 	// Step 4: Create mailbox
-	user := "u" + strconv.Itoa(100000+rand.Intn(899999))
+	user := realisticLocalPart()
 	email := user + "@" + domain
 	createResp, err := t.rpcCall(ctx, "mailbox.new", map[string]interface{}{
 		"sid":   t.sid,

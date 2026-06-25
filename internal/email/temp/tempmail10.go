@@ -1,14 +1,14 @@
 // tempmail10.go — TempMail10.com service (Laravel session + XSRF dual-token)
 //
 // Flow (xác nhận qua research 2026-06-19):
-//   1. GET  /en (cookie jar)
-//      → lưu XSRF-TOKEN cookie + csrf-token meta + tempmail10_session
-//   2. POST /get_messages (Content-Type: application/x-www-form-urlencoded)
-//      header: X-XSRF-TOKEN = url-decoded(XSRF-TOKEN cookie)
-//      header: X-Requested-With: XMLHttpRequest
-//      body:   _token={csrf}&captcha=
-//      → {status:true, mailbox:"user@domain.com", messages:[{id,from,subject}]}
-//   3. GET  /en/view/{id} → HTML page → ExtractCode
+//  1. GET  /en (cookie jar)
+//     → lưu XSRF-TOKEN cookie + csrf-token meta + tempmail10_session
+//  2. POST /get_messages (Content-Type: application/x-www-form-urlencoded)
+//     header: X-XSRF-TOKEN = url-decoded(XSRF-TOKEN cookie)
+//     header: X-Requested-With: XMLHttpRequest
+//     body:   _token={csrf}&captcha=
+//     → {status:true, mailbox:"user@domain.com", messages:[{id,from,subject}]}
+//  3. GET  /en/view/{id} → HTML page → ExtractCode
 //
 // Pattern giống MailWave nhưng body dùng form-encoded thay JSON.
 // KHÔNG cần key. Domain rotate tự động.

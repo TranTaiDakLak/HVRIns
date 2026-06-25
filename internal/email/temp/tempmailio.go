@@ -1,9 +1,9 @@
 // tempmailio.go — temp-mail.io / temp-mail.org service (v3 public API).
 //
 // Flow (reverse-engineer từ api.internal.temp-mail.io, xác nhận 2026-06-18):
-//   1. POST /api/v3/email/new  body {"name","domain"} (hoặc {} = server random)
-//      → {"email":"...","token":"..."}
-//   2. GET  /api/v3/email/{addr}/messages → [{id,subject,body_text,body_html}]
+//  1. POST /api/v3/email/new  body {"name","domain"} (hoặc {} = server random)
+//     → {"email":"...","token":"..."}
+//  2. GET  /api/v3/email/{addr}/messages → [{id,subject,body_text,body_html}]
 //
 // KHÔNG cần API key, KHÔNG Cloudflare — dùng http.Client thường qua proxy pool.
 // Domain list lấy qua GET /api/v3/domains (public).

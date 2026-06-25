@@ -1,11 +1,11 @@
 // tempmaildigital.go — tempmail.digital service (Symfony + PHPSESSID, HTML scrape)
 //
 // Flow (xác nhận live qua agent 2026-06-19, OTP đọc đúng):
-//   1. GET / (cookie jar) → Set-Cookie PHPSESSID + auto-assign địa chỉ trong HTML:
-//      <input id="email-display-input" value="firstname.lastname@mofagrac.online">
-//   2. GET /inbox/has-new?known_count=0 → {"has_new":bool,"count":N,"latest_at":...}
-//   3. Khi có mail: GET / lại (homepage nhúng list) → scrape href="/en/email/{uuid}"
-//   4. GET /en/email/{uuid} → HTML body → ExtractCode
+//  1. GET / (cookie jar) → Set-Cookie PHPSESSID + auto-assign địa chỉ trong HTML:
+//     <input id="email-display-input" value="firstname.lastname@mofagrac.online">
+//  2. GET /inbox/has-new?known_count=0 → {"has_new":bool,"count":N,"latest_at":...}
+//  3. Khi có mail: GET / lại (homepage nhúng list) → scrape href="/en/email/{uuid}"
+//  4. GET /en/email/{uuid} → HTML body → ExtractCode
 //
 // KHÔNG cần key/login/captcha. PHPSESSID gắn inbox với session. 1 domain (mofagrac.online).
 package temp

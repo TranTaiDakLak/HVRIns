@@ -1,9 +1,9 @@
 // anonymmail.go — anonymmail.net service (own JSON API, form-encoded).
 //
 // Flow (reverse-engineer từ bundle, xác nhận 2026-06-18):
-//   1. POST /api/getDomains            → [{"domain":"...","expires":...}]
-//   2. POST /api/create  email=<local>@<domain>  (form) → {"success":true,"email":"..."}
-//   3. POST /api/get     email=<addr>            (form) → {"<addr>":{"emails":[{token,subject,summary,body}]}}
+//  1. POST /api/getDomains            → [{"domain":"...","expires":...}]
+//  2. POST /api/create  email=<local>@<domain>  (form) → {"success":true,"email":"..."}
+//  3. POST /api/get     email=<addr>            (form) → {"<addr>":{"emails":[{token,subject,summary,body}]}}
 //
 // KHÔNG cần key, KHÔNG Cloudflare — http.Client thường qua proxy pool.
 package temp

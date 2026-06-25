@@ -57,7 +57,7 @@ func NewTempMailPlus(domainList, proxyStr string) *TempMailPlus {
 // CreateEmail tạo địa chỉ email client-side, random pick domain từ danh sách.
 func (t *TempMailPlus) CreateEmail(ctx context.Context) (string, error) {
 	t.domain = t.domains[rand.Intn(len(t.domains))]
-	user := randomString(8) + fmt.Sprintf("%04d", rand.Intn(10000))
+	user := realisticLocalPart() // tên giống thật (vd brian.hamilton1995) thay vì random thuần
 	t.user = user
 	t.email = user + "@" + t.domain
 	return t.email, nil

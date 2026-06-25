@@ -1,10 +1,10 @@
 // tempmailworld.go — tempmail.world service (Next.js, mailbox bind theo IP).
 //
 // Flow (xác nhận live 2026-06-19):
-//   1. GET /api/domains   → {"id","email","sessionToken":"1234","expires"}
-//      (vừa tạo guest mailbox vừa set cookie sessionToken=1234 — HẰNG SỐ chung)
-//   2. GET /api/guestInbox            → [{id,from,name,subject,body,date}]  (KHÔNG truyền email)
-//   3. GET /api/guestInbox/message/{id} → {..., htmlBody}
+//  1. GET /api/domains   → {"id","email","sessionToken":"1234","expires"}
+//     (vừa tạo guest mailbox vừa set cookie sessionToken=1234 — HẰNG SỐ chung)
+//  2. GET /api/guestInbox            → [{id,from,name,subject,body,date}]  (KHÔNG truyền email)
+//  3. GET /api/guestInbox/message/{id} → {..., htmlBody}
 //
 // ⚠️ QUAN TRỌNG — mailbox BIND THEO IP, KHÔNG theo cookie/param:
 //   - sessionToken=1234 chỉ là cổng "có-cookie" (thiếu → 401), KHÔNG định danh mailbox.
