@@ -1295,7 +1295,7 @@ func saveRegOutcome(
 		Token:     token,
 		Email:     "", // user yêu cầu: không lưu email vào file tài khoản thành công
 		Country:   country,
-		IsNVR:     true,          // C#: register xong = NVR (not-verified-yet)
+		IsNVR:     false,         // user yêu cầu: BỎ suffix |NVR khỏi dòng output
 		EmailMeta: acc.EmailMeta, // TempMail mode → persist creds vào file (cần cho split-mode verify)
 	}, nil)
 
@@ -1593,12 +1593,13 @@ func (a *App) nextVerifyPlatform() string {
 }
 
 // formatRegResultLine — format kết quả đăng ký thành 1 dòng file
-// Format: UID|password|cookies|access_token|datetime|country|NVR[|SRN:<srnonce>|SCUID:<sessionlessCryptedUID>]
+// Format: UID|password|cookies|access_token|datetime|country[|SRN:<srnonce>|SCUID:<sessionlessCryptedUID>]
 // iOS accounts: cookie + token rỗng, nhưng SRN:/SCUID: được append để file-based verify dùng được.
+// (Suffix |NVR đã bỏ theo yêu cầu user.)
 func formatRegResultLine(result *instagram.RegResult, profile instagram.RegInput) string {
 	now := time.Now().Format("02-01-2006 15:04:05")
 	country := phoneCountryCode(profile.Phone)
-	line := fmt.Sprintf("%s|%s|%s|%s|%s|%s|NVR",
+	line := fmt.Sprintf("%s|%s|%s|%s|%s|%s",
 		result.UID, result.Password, result.Cookie, result.AccessToken, now, country)
 	if result.Srnonce != "" {
 		line += "|SRN:" + result.Srnonce
