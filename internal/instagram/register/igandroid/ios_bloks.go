@@ -35,13 +35,24 @@ const (
 	igIOSClientDocID = "38523300859713187485104132294" // constant across tất cả steps
 )
 
-// igIOSVersions — Instagram iOS app versions.
+// igIOSVersions — Instagram iOS app versions (AppVer + Build cho User-Agent).
+// Mở rộng từ 5 → 13 version để đa dạng UA (tránh pattern bot khi reg hàng loạt).
+// Build ID lấy từ pool dự án sẵn có (igcore.igAppVersionPool + bộ ios_bloks gốc);
+// IG reg KHÔNG validate version↔build nên mix an toàn — chỉ là chuỗi UA cho analytics.
 var igIOSVersions = []struct{ AppVer, Build string }{
+	{"435.0.0.25.108", "742613068"},
+	{"428.0.0.26.88", "732266754"},
+	{"420.0.0.45.97", "719879636"},
+	{"416.0.0.37.86", "712543085"},
 	{"410.1.0.36.70", "849447290"},
 	{"407.0.0.24.99", "843437295"},
 	{"405.0.0.24.95", "839437284"},
 	{"402.0.0.21.80", "833337280"},
+	{"400.0.0.32.126", "695501093"},
 	{"399.0.0.18.73", "827437270"},
+	{"390.0.0.31.136", "676625680"},
+	{"380.0.0.24.127", "661064929"},
+	{"374.0.0.21.121", "651580628"},
 }
 
 // igIOSDevices — iPhone models for UA.
