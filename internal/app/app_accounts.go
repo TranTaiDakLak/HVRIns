@@ -20,7 +20,7 @@ type Account struct {
 	ID           int    `json:"id"`
 	UID          string `json:"uid"`
 	Username     string `json:"username,omitempty"` // Instagram username (vd "eagle.1000041")
-	FullData     string `json:"fullData"` // Dữ liệu gốc (dòng import nguyên bản)
+	FullData     string `json:"fullData"`           // Dữ liệu gốc (dòng import nguyên bản)
 	Password     string `json:"password"`
 	Twofa        string `json:"twofa"`
 	Email        string `json:"email"`
@@ -601,8 +601,8 @@ func autoDetectAccount(line string) Account {
 			continue
 		}
 
-		// 5. Token — bắt đầu bằng "EAA"
-		if strings.HasPrefix(f, "EAA") {
+		// 5. Token — Facebook Graph "EAA..." HOẶC IG Bearer "IGT:2:..."
+		if strings.HasPrefix(f, "EAA") || strings.HasPrefix(f, "IGT:") {
 			acc.Token = f
 			continue
 		}

@@ -1280,12 +1280,19 @@ func saveRegOutcome(
 			country = loc[3:]
 		}
 	}
+	// Token = IG Bearer "IGT:2:..." dựng từ cookie (ds_user_id+sessionid). IG reg
+	// KHÔNG trả access_token EAA — bearer này mới là token xác thực IG. Fallback
+	// acc.Token nếu cookie thiếu (vd acc cũ/khác platform).
+	token := acc.Token
+	if bearer := resultpkg.BuildIGBearerToken(acc.Cookie); bearer != "" {
+		token = bearer
+	}
 	line := resultpkg.FormatReg(resultpkg.RegData{
 		UID:       acc.UID,
 		Username:  acc.Username, // field đầu = @handle IG (UID số vẫn còn trong cookie)
 		Password:  acc.Password,
 		Cookie:    acc.Cookie,
-		Token:     acc.Token,
+		Token:     token,
 		Email:     "", // user yêu cầu: không lưu email vào file tài khoản thành công
 		Country:   country,
 		IsNVR:     true,          // C#: register xong = NVR (not-verified-yet)

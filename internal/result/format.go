@@ -11,6 +11,7 @@ package result
 
 import (
 	"encoding/base64"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -62,6 +63,8 @@ func FormatReg(d RegData, now *time.Time) string {
 	if d.Email != "" {
 		parts = append(parts, d.Email)
 	}
+	// Format chuẩn: username|password|cookie|token|datetime|country
+	// (token TRƯỚC datetime; token = IG Bearer "IGT:2:...", không phải EAA của FB).
 	parts = append(parts, t.Format("02-01-2006 15:04:05"), d.Country)
 	out := joinNonNil(parts)
 	if d.IsNVR {
@@ -72,6 +75,32 @@ func FormatReg(d RegData, now *time.Time) string {
 		out += "|MM:" + base64.StdEncoding.EncodeToString([]byte(d.EmailMeta))
 	}
 	return out
+}
+
+// BuildIGBearerToken dựng IG Authorization token "IGT:2:<base64>" từ cookie
+// (ds_user_id + sessionid). IG xác thực API qua header `Authorization: Bearer IGT:2:...`
+// — token này KHÁC access_token "EAA..." của Facebook Graph. base64 bọc JSON
+// {ds_user_id, sessionid} (sessionid giữ nguyên dạng url-encoded như trong cookie).
+// Trả "" nếu cookie thiếu ds_user_id hoặc sessionid.
+func BuildIGBearerToken(cookie string) string {
+	uid := cookieValue(cookie, "ds_user_id")
+	sid := cookieValue(cookie, "sessionid")
+	if uid == "" || sid == "" {
+		return ""
+	}
+	payload := fmt.Sprintf(`{"ds_user_id":"%s","sessionid":"%s","should_use_header_over_cookies":true}`, uid, sid)
+	return "IGT:2:" + base64.StdEncoding.EncodeToString([]byte(payload))
+}
+
+// cookieValue lấy value của 1 key trong cookie string "k1=v1; k2=v2; ...".
+func cookieValue(cookie, key string) string {
+	for _, seg := range strings.Split(cookie, ";") {
+		seg = strings.TrimSpace(seg)
+		if strings.HasPrefix(seg, key+"=") {
+			return strings.TrimPrefix(seg, key+"=")
+		}
+	}
+	return ""
 }
 
 // ParseEmailMetaFromLine — extract EmailMeta từ saved reg/verify line.
