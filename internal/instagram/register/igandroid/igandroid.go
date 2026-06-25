@@ -390,6 +390,18 @@ func buildBloksBody(clientInputParams, serverParams map[string]any) string {
 
 // ── reg_info JSON builder ───────────────────────────────────────────────────────
 
+// regMachineIDForRegInfo trả X-MID làm reg_info.machine_id. Capture IGRegisterVIP cho thấy
+// reg_info.machine_id = X-MID (ig-set-x-mid, "ajwC...") — KHÔNG phải random 24-char. Trước
+// đây dùng p.RegMachineID (random) → lệch với x-mid header + cip.machine_id → tín hiệu bất
+// thường. Fallback RegMachineID nếu X-MID chưa có (không nên xảy ra: attestation/qe lấy X-MID
+// trước mọi bước reg_info).
+func regMachineIDForRegInfo(p *androidProfile) string {
+	if p.MachineID != "" {
+		return p.MachineID
+	}
+	return p.RegMachineID
+}
+
 func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
 	nilStr := func(v string) any {
 		if v == "" {
@@ -480,7 +492,7 @@ func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
 		"device_id":                   p.AndroidID,
 		"ig4a_qe_device_id":           p.DeviceID,
 		"family_device_id":            p.FamilyDeviceID,
-		"machine_id":                  p.RegMachineID,
+		"machine_id":                  regMachineIDForRegInfo(p), // X-MID (khớp capture), KHÔNG random
 		"registration_flow_id":        p.RegFlowID,
 		"fdid_available_on_start":     true,
 		"fdid_rid_available_on_start": true,
