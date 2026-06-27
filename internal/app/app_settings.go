@@ -594,6 +594,13 @@ type InteractionConfig struct {
 	// đã chuyển vào InteractionConfig để reg và verify tự cài luồng riêng.
 	RegThreads int `json:"regThreads"`
 
+	// Device pool (mid/datr/ig_did) — tái dùng device aged giống datr-pool FB.
+	// Harvest mid sau reg thành công → inject vào reg sau → IG thấy "thiết bị có lịch sử".
+	// DevicePoolMaxUses: 1 mid dùng tối đa N lần rồi loại (chống IG link nhiều acc/device). 0 → default 2.
+	// DevicePoolMinSize: pool phải đủ ≥ N device mới bật inject (tránh trùng mid lúc pool nhỏ). 0 → dùng RegThreads.
+	DevicePoolMaxUses int `json:"devicePoolMaxUses"`
+	DevicePoolMinSize int `json:"devicePoolMinSize"`
+
 	// AutoRestart — sau N phút, tự động STOP toàn bộ tiến trình + RESET counters + RUN lại từ đầu.
 	// Dùng để rotate proxy/datr pool (tránh burn dài).
 	AutoRestartEnabled bool `json:"autoRestartEnabled"`
@@ -846,6 +853,11 @@ func applyInteractionStringDefaults(c *InteractionConfig) {
 	}
 	if strings.TrimSpace(c.PhoneMailMode) == "" {
 		c.PhoneMailMode = "random-normal"
+	}
+	// Device pool: maxUses default 9 (giống FB) — mỗi mid dùng 9 lần rồi cả pool
+	// recycle (xoay lại). minSize giữ 0 = inject ngay khi pool có ≥1 device.
+	if c.DevicePoolMaxUses == 0 {
+		c.DevicePoolMaxUses = 9
 	}
 	// VERIFY string defaults
 	if strings.TrimSpace(c.ApiVerifyPlatform) == "" {

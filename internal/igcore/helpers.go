@@ -47,13 +47,39 @@ var (
 
 // parseRegContext bóc reg_context server cấp từ response (để mang sang step kế).
 // Trả "" nếu không thấy.
+//
+// TỐI ƯU CPU (đo pprof: hàm này chiếm ~62% CPU khi reg nhiều luồng): response bloks
+// có thể 200KB+. CŨ: ReplaceAll(cả 200KB) + regex `{200,}` quét toàn chuỗi mỗi response
+// → cực nặng. MỚI: tìm marker "regm" 1 lần (strings.Index, không alloc); chỉ un-escape +
+// trích trong CỬA SỔ nhỏ quanh marker, walk-back lấy token thay vì regex {200,}.
 func parseRegContext(resp string) string {
-	clean := strings.ReplaceAll(resp, `\`, "")
-	// Tìm cụm: "reg_context") (dkc "<value>") — value thường ngay sau reg_context trong keys/values.
-	// Fallback: regex bắt blob dài kết thúc |regm.
-	if m := regexp.MustCompile(`([A-Za-z0-9_\-]{200,}\|regm)`).FindStringSubmatch(clean); len(m) > 1 {
-		return m[1]
+	// Fast path: blob "...|regm" (định dạng phổ biến — chính là cái regex {200,} cũ bắt).
+	if k := strings.Index(resp, "regm"); k >= 200 {
+		start := k - 8192 // blob {200,}; cửa sổ 8KB đủ rộng, rẻ hơn ReplaceAll 200KB
+		if start < 0 {
+			start = 0
+		}
+		w := strings.ReplaceAll(resp[start:k+4], `\`, "")
+		if i := strings.LastIndex(w, "|regm"); i >= 200 {
+			j := i
+			for j > 0 {
+				c := w[j-1]
+				if (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-' {
+					j--
+					continue
+				}
+				break
+			}
+			if i-j >= 200 {
+				return w[j:i] + "|regm"
+			}
+		}
 	}
+	// Fallback hiếm (format reg_context khác |regm) — chỉ chạy khi có "reg_context".
+	if !strings.Contains(resp, "reg_context") {
+		return ""
+	}
+	clean := strings.ReplaceAll(resp, `\`, "")
 	if m := reRegContext.FindStringSubmatch(clean); len(m) > 1 {
 		return m[1]
 	}

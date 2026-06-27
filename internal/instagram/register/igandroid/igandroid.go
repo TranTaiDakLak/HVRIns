@@ -7,11 +7,7 @@ package igandroid
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/sha256"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -148,26 +144,16 @@ type androidProfile struct {
 	AACInitTS      int64
 	AACJID         string
 	AACCS          string
-	// ECDSA-P256 ephemeral keystore key (generated once per session)
-	keystoreKey  *ecdsa.PrivateKey
-	keystoreHash string // SHA-256(DER pubkey), hex — x-key-hash in keystore request
+	aacJSON        string // cache buildAACJSON (input cố định/account) — tránh marshal lại ~8 lần
 }
 
 func newAndroidProfile(locale string) (*androidProfile, error) {
 	if locale == "" {
 		locale = "en_GB"
 	}
-	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	if err != nil {
-		return nil, fmt.Errorf("generate keystore key: %w", err)
-	}
-	derPub, err := x509.MarshalPKIXPublicKey(&key.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("marshal pub key: %w", err)
-	}
-	h := sha256.Sum256(derPub)
-	keyHash := fmt.Sprintf("%x", h[:])
-
+	// KHÔNG sinh ECDSA keystore key nữa: attestation gửi key_hash RỖNG (không ký),
+	// key sinh ra trước đây không bao giờ được dùng → bỏ keygen P-256 mỗi account
+	// (tốn CPU lớn khi chạy nhiều luồng).
 	return &androidProfile{
 		AndroidID:      "android-" + randHex(8),
 		DeviceID:       strings.ToLower(uuid.New().String()),
@@ -182,12 +168,17 @@ func newAndroidProfile(locale string) (*androidProfile, error) {
 		AACInitTS:      time.Now().Unix(),
 		AACJID:         strings.ToLower(uuid.New().String()),
 		AACCS:          randBase64URL(43),
-		keystoreKey:    key,
-		keystoreHash:   keyHash,
 	}, nil
 }
 
 // ── TLS session (Okhttp4Android13) ─────────────────────────────────────────────
+
+// sharedZstdDecoder — 1 decoder DÙNG CHUNG cho toàn package. DecodeAll an toàn
+// gọi đồng thời nhiều goroutine. Trước đây mỗi session tạo decoder riêng (spawn
+// ~GOMAXPROCS goroutine/decoder) và KHÔNG Close → leak goroutine, CPU tăng dần
+// theo số account (đặc biệt country-detect tạo session phụ mỗi acc). Dùng chung
+// → tổng goroutine bị giới hạn, không leak theo số luồng.
+var sharedZstdDecoder, _ = zstd.NewReader(nil)
 
 type androidSession struct {
 	client tls_client.HttpClient
@@ -211,8 +202,7 @@ func newAndroidSession(proxyStr string) (*androidSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create android tls client: %w", err)
 	}
-	zr, _ := zstd.NewReader(nil)
-	return &androidSession{client: c, zr: zr}, nil
+	return &androidSession{client: c, zr: sharedZstdDecoder}, nil
 }
 
 func (s *androidSession) post(ctx context.Context, rawURL, body string, headers [][2]string) (string, fhttp.Header, error) {
@@ -244,6 +234,30 @@ func (s *androidSession) decode(_ string, raw []byte) string {
 		return string(out)
 	}
 	return string(raw)
+}
+
+var ccCountryRe = regexp.MustCompile(`"countryCode"\s*:\s*"([A-Z]{2})"`)
+
+// checkProxyCountry detect country code của proxy bằng CHÍNH client reg (tái dùng
+// kết nối + proxy) — thay vì tạo 1 igcore session MỚI mỗi account (mỗi cái = 1 TLS
+// client + handshake riêng → tốn CPU lớn khi nhiều luồng). Trả "" nếu lỗi.
+func (s *androidSession) checkProxyCountry(ctx context.Context) string {
+	req, err := fhttp.NewRequestWithContext(ctx, "GET", "http://ip-api.com/json/?fields=countryCode", nil)
+	if err != nil {
+		return ""
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
+	if m := ccCountryRe.FindStringSubmatch(string(body)); len(m) > 1 {
+		return m[1]
+	}
+	return ""
 }
 
 // ── Android device pool (datr/mid/ig_did) ─────────────────────────────────────
@@ -402,7 +416,7 @@ func regMachineIDForRegInfo(p *androidProfile) string {
 	return p.RegMachineID
 }
 
-func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
+func buildRegInfoMap(p *androidProfile, s *regInfoState) map[string]any {
 	nilStr := func(v string) any {
 		if v == "" {
 			return nil
@@ -577,6 +591,24 @@ func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
 		"client_known_key_hash":                 nil,
 		"youth_regulation_config":               youthCfg,
 	}
+	return m
+}
+
+// buildRegInfoJSON marshal map reg_info → JSON string (dùng cho android callers).
+func buildRegInfoJSON(p *androidProfile, s *regInfoState) string {
+	b, _ := json.Marshal(buildRegInfoMap(p, s))
+	return string(b)
+}
+
+// buildRegInfoIOSJSON build reg_info + set thẳng 4 field iOS rồi marshal MỘT lần.
+// Thay patchRegInfoForIOS(buildRegInfoJSON(...)) vốn: build map → marshal → unmarshal
+// lại 100 field → sửa 4 field → marshal lại (tốn CPU, chạy 7 lần/account × 400 luồng).
+func buildRegInfoIOSJSON(p *androidProfile, s *regInfoState) string {
+	m := buildRegInfoMap(p, s)
+	m["device_id"] = p.DeviceID
+	m["ig4a_qe_device_id"] = nil
+	m["caa_reg_flow_source"] = "nta_native_integration_point"
+	m["skip_slow_rel_check"] = false
 	b, _ := json.Marshal(m)
 	return string(b)
 }
@@ -688,13 +720,17 @@ func buildSafetynetToken(email string) string {
 // ── AAC helper ───────────────────────────────────────────────────────────────────
 
 func buildAACJSON(p *androidProfile) string {
+	if p.aacJSON != "" {
+		return p.aacJSON // cache: input cố định/account, profile riêng mỗi goroutine (no race)
+	}
 	m := map[string]any{
 		"aac_init_timestamp": p.AACInitTS,
 		"aacjid":             p.AACJID,
 		"aaccs":              p.AACCS,
 	}
 	b, _ := json.Marshal(m)
-	return string(b)
+	p.aacJSON = string(b)
+	return p.aacJSON
 }
 
 // ── Attestation ──────────────────────────────────────────────────────────────────
@@ -1089,7 +1125,7 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 	// Capture IGRegisterVIP: create.account KHÔNG gửi header x-ig-attest-params,
 	// reg_info.attestation_result = null. Bỏ injection attest params.
 
-	const maxAttempts = 3 // retry createAccount (giảm từ 8 — tránh chờ lâu khi IP fail)
+	const maxAttempts = 3 // retry: system_error → học jurisdiction + giữ IP; integrity_block → đổi IP
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		regInfo := buildRegInfoJSON(e.p, e.state)
 		cip := map[string]any{
@@ -1120,6 +1156,9 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 			if igSess.Mid == "" {
 				igSess.Mid = jar.Mid
 			}
+			if igSess.Mid == "" && e.p.MachineID != "" {
+				igSess.Mid = e.p.MachineID // fallback: ig-set-x-mid không tự vào jar
+			}
 			if igSess.Datr == "" {
 				igSess.Datr = jar.Datr
 			}
@@ -1132,6 +1171,7 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 			igSess.FullCookie = igcore.BuildFullCookieStr(igSess)
 		}
 		if igSess.SessionID != "" {
+			incCreateOK()
 			e.logf("createAccount OK uid=%s mid=%.8s…", igSess.UID, igSess.Mid)
 			return igSess, nil
 		}
@@ -1145,24 +1185,21 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 					return igcore.IGSession{}, ctx.Err()
 				}
 				// Quyết định đổi IP hay giữ IP (port từ iOS Bloks):
-				//   integrity_block / lois → LUÔN đổi IP (IP flag/gate, cần IP sạch).
-				//   system_error → IG báo jurisdiction lệch GeoIP của IP hiện tại. Học
-				//                  jurisdiction IG trả về rồi GIỮ IP retry → khớp GeoIP của
-				//                  chính IP đó → qua được. Đổi IP lúc này làm jurisdiction vừa
-				//                  học thành stale. CHỈ đổi IP khi jurisdiction đã khớp mà vẫn lỗi.
-				rotate := true
+				//   integrity_block / lois → ĐỔI IP (IP flag/gate, cần IP sạch).
+				//   system_error → GIỮ IP + học jurisdiction IG trả về → retry cùng IP khớp
+				//                  GeoIP → qua. Đổi IP lúc này làm jurisdiction vừa học stale → vô dụng.
+				rotate := isIntegrity
 				reason := "integrity_block"
 				if isSystemErr {
 					reason = "system_error"
 					if m := regJurisdictionRe.FindStringSubmatch(resp); len(m) > 1 {
-						igCC := m[1]
-						if e.state.Jurisdiction != igCC {
+						if igCC := m[1]; e.state.Jurisdiction != igCC {
 							e.logf("createAccount %d/%d: system_error jurisdiction %q→%q", attempt, maxAttempts, e.state.Jurisdiction, igCC)
 							e.state.Jurisdiction = igCC
-							rotate = false // vừa học jurisdiction mới → giữ IP cho khớp
 						}
 					}
 				} else if isLOIS {
+					rotate = true
 					reason = "lois_gate"
 					if attempt == 1 {
 						if dir := debugDir(); dir != "" {
@@ -1175,6 +1212,7 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 					// Đổi IP: tạo session mới (giữ proxy mới). reg_info rebuild ở vòng sau.
 					newProxy := igcore.RotateSession(e.proxyStr)
 					if newSess, err := newAndroidSession(newProxy); err == nil {
+						e.sess.client.CloseIdleConnections() // close session CŨ trước khi thay
 						e.sess = newSess
 						e.proxyStr = newProxy
 					}
@@ -1187,8 +1225,12 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 			reason := "integrity_block"
 			if isSystemErr {
 				reason = "system_error"
+				incSystemErr()
 			} else if isLOIS {
 				reason = "lois_gate"
+				incIntegrity()
+			} else {
+				incIntegrity()
 			}
 			return igcore.IGSession{}, fmt.Errorf("createAccount: %s sau %d lần thử", reason, maxAttempts)
 		}
@@ -1199,6 +1241,8 @@ func (e *igAndroidEngine) createAccount(ctx context.Context, addr, username, nam
 				writeDebug(dir, fmt.Sprintf("createaccount_getpayload_%d.txt", attempt), resp)
 			}
 		}
+		incNoSession()
+		captureNoSessionSample(resp) // dump 3 mẫu đầu → xem parser có bỏ sót session không
 		return igcore.IGSession{}, fmt.Errorf("createAccount: no session in response (%.200s)", resp)
 	}
 	return igcore.IGSession{}, fmt.Errorf("createAccount: thất bại sau %d lần", maxAttempts)
@@ -1357,9 +1401,18 @@ func buildPassword() string {
 type igAndroidRegisterer struct{}
 
 func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.RegInput, onStatus func(string)) *instagram.RegResult {
+	// agedDev: mid mượn từ pool — gắn nhãn [mid:...] vào mọi log của luồng này.
+	var agedDev *igcore.AgedDevice
+	midTag := func() string {
+		if agedDev != nil {
+			return "[mid:" + agedDev.Mid + "] "
+		}
+		return ""
+	}
+
 	status := func(msg string) {
 		if onStatus != nil {
-			onStatus(msg)
+			onStatus(midTag() + msg)
 		}
 	}
 
@@ -1367,7 +1420,7 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 		return &instagram.RegResult{
 			Success: false,
 			Email:   input.Email,
-			Message: fmt.Sprintf("[igandroid/%s] %s", stage, msg),
+			Message: fmt.Sprintf("%s[igandroid/%s] %s", midTag(), stage, msg),
 		}
 	}
 
@@ -1385,6 +1438,8 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 	if err != nil {
 		return fail("session", err.Error())
 	}
+	// Giải phóng conn + readLoop goroutine khi reg xong (tránh leak → CPU tăng dần).
+	defer sess.client.CloseIdleConnections()
 	p, err := newAndroidProfile("en_GB")
 	if err != nil {
 		return fail("profile", err.Error())
@@ -1397,7 +1452,8 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 	if SharedAndroidDevicePool != nil {
 		if dev := SharedAndroidDevicePool.Next(); dev != nil {
 			injectAgedDevice(sess, p, dev)
-			status(fmt.Sprintf("inject aged device mid=%.8s…", dev.Mid))
+			agedDev = dev
+			status("inject aged device") // nhãn [mid:...] tự thêm bởi status()
 		}
 	}
 
@@ -1405,19 +1461,17 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 	jurisdiction := "VN"
 	{
 		ccCh := make(chan string, 1)
+		ccCtx, ccCancel := context.WithTimeout(ctx, 4*time.Second)
 		go func() {
-			if iosSess, err := igcore.NewIGSession(proxyStr); err == nil {
-				ccCh <- iosSess.CheckProxyCountry(context.Background())
-			} else {
-				ccCh <- ""
-			}
+			// Tái dùng client reg + ctx CÓ timeout → goroutine không lingering khi proxy chậm.
+			ccCh <- sess.checkProxyCountry(ccCtx)
 		}()
 		cc := ""
 		select {
 		case cc = <-ccCh:
-		case <-time.After(8 * time.Second):
-		case <-ctx.Done():
+		case <-ccCtx.Done():
 		}
+		ccCancel()
 		if cc != "" {
 			jurisdiction = cc
 		}
@@ -1512,23 +1566,19 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 		return fail("createAccount", err.Error())
 	}
 
-	// ── Harvest device cookies để pool cho lần reg sau ───
-	if SharedAndroidDevicePool != nil {
-		if dev := harvestDevice(sess); dev != nil {
-			if added := SharedAndroidDevicePool.Add(dev.Mid, dev.Datr, dev.IgDID); added {
-				status(fmt.Sprintf("harvest device mid=%.8s… → pool", dev.Mid))
-			}
+	// ── Harvest device → pool cho lần reg sau. Lấy từ igSess (merge mid từ X-MID
+	// + ig_did/datr từ response body) thay vì jar trần (jar bloks thường thiếu
+	// ig_did/datr). dedupe theo mid trong Add().
+	if SharedAndroidDevicePool != nil && igSess.SessionID != "" {
+		if added := SharedAndroidDevicePool.Add(igSess.Mid, igSess.Datr, igSess.IgDID); added {
+			status(fmt.Sprintf("harvest device mid=%.8s… → pool", igSess.Mid))
 		}
 	}
 
-	// ── CheckLive ngay sau reg — dùng IG API (không phải graph.facebook.com) ───
-	status("checklive")
-	liveCtx, liveCancel := context.WithTimeout(ctx, 15*time.Second)
-	defer liveCancel()
-	liveStatus := eng.checkLive(liveCtx, igSess.FullCookie)
-	status(fmt.Sprintf("checklive → %s", liveStatus))
-
-	base := &instagram.RegResult{
+	// KHÔNG checklive ở đây (block slot ~15s). createAccount trả sessionid = reg OK.
+	// Live/Die check ASYNC ở app_register → slot nhả ngay cho luồng kế.
+	status("reg OK (checklive async)")
+	return &instagram.RegResult{
 		UID:            igSess.UID,
 		Username:       username,
 		Password:       password,
@@ -1537,23 +1587,10 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 		DeviceID:       p.DeviceID,
 		FamilyDeviceID: p.FamilyDeviceID,
 		UserAgent:      p.UserAgent,
-		LiveStatus:     liveStatus,
+		LiveStatus:     "",
+		Success:        true,
+		Message:        "ok",
 	}
-	switch liveStatus {
-	case "checkpoint":
-		base.Success = false
-		base.Message = "checkpoint: tài khoản cần xác minh"
-	case "suspended":
-		base.Success = false
-		base.Message = "blocked: tài khoản bị treo"
-	case "die":
-		base.Success = false
-		base.Message = "die: session chết ngay sau reg"
-	default: // "live" hoặc "unknown" → coi như live
-		base.Success = true
-		base.Message = "ok"
-	}
-	return base
 }
 
 // SubmitEmailOTP triggers an OTP email send for the given address using the Android Bloks
@@ -1569,6 +1606,7 @@ func SubmitEmailOTP(ctx context.Context, email, proxyStr, waterfallID string) er
 	if err != nil {
 		return fmt.Errorf("SubmitEmailOTP session: %w", err)
 	}
+	defer sess.client.CloseIdleConnections()
 	p, err := newAndroidProfile("en_GB")
 	if err != nil {
 		return fmt.Errorf("SubmitEmailOTP profile: %w", err)
@@ -1602,6 +1640,7 @@ func QeSync(ctx context.Context, proxyStr string) (mid, igDID, ua string, err er
 	if sErr != nil {
 		return "", "", "", fmt.Errorf("session: %w", sErr)
 	}
+	defer sess.client.CloseIdleConnections() // pre-harvest gọi 400×/run → bắt buộc close
 	p, pErr := newAndroidProfile("en_GB")
 	if pErr != nil {
 		return "", "", "", fmt.Errorf("profile: %w", pErr)
@@ -1645,6 +1684,7 @@ func QeSyncWithMid(ctx context.Context, proxyStr, midIn string) (midUsed, midSer
 	if sErr != nil {
 		return "", "", false, fmt.Errorf("session: %w", sErr)
 	}
+	defer sess.client.CloseIdleConnections()
 	p, pErr := newAndroidProfile("en_GB")
 	if pErr != nil {
 		return "", "", false, fmt.Errorf("profile: %w", pErr)

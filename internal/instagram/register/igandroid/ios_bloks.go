@@ -21,7 +21,6 @@ import (
 	tls_client "github.com/bogdanfinn/tls-client"
 	"github.com/bogdanfinn/tls-client/profiles"
 	"github.com/google/uuid"
-	"github.com/klauspost/compress/zstd"
 )
 
 // regJurisdictionRe trích xuất regulation_jurisdiction từ system_error response của IG.
@@ -207,29 +206,7 @@ func newIOSSession(proxyStr string) (*androidSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create ios tls client: %w", err)
 	}
-	zr, _ := zstd.NewReader(nil)
-	return &androidSession{client: c, zr: zr}, nil
-}
-
-// patchRegInfoForIOS sửa các trường reg_info không đúng cho iOS (so với Android defaults):
-//   - device_id: UUID (p.DeviceID), không phải "android-HEX" (p.AndroidID)
-//   - ig4a_qe_device_id: null (iOS không set field này)
-//   - caa_reg_flow_source: "nta_native_integration_point" (iOS NTA flow)
-//   - skip_slow_rel_check: false (iOS default)
-func patchRegInfoForIOS(regInfoJSON string, p *androidProfile) string {
-	var m map[string]any
-	if err := json.Unmarshal([]byte(regInfoJSON), &m); err != nil {
-		return regInfoJSON
-	}
-	m["device_id"] = p.DeviceID
-	m["ig4a_qe_device_id"] = nil
-	m["caa_reg_flow_source"] = "nta_native_integration_point"
-	m["skip_slow_rel_check"] = false
-	b, err := json.Marshal(m)
-	if err != nil {
-		return regInfoJSON
-	}
-	return string(b)
+	return &androidSession{client: c, zr: sharedZstdDecoder}, nil
 }
 
 // iosTimestamp trả về pigeon-rawclienttime format iOS: "1781142963.309754" (giây.microseconds).
@@ -598,7 +575,7 @@ func iosSubmitEmail(ctx context.Context, eng *iosEngine, addr string) error {
 		"is_from_device_emails":        0,
 	}
 	sp := eng.iosCommonServerParams(0)
-	sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+	sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 	sp["cp_funnel"] = 0
 	sp["cp_source"] = 0
 	sp["text_input_id"] = randQplID()
@@ -629,7 +606,7 @@ func iosConfirmOTP(ctx context.Context, eng *iosEngine, addr, otp string) error 
 		"network_bssid":         nil,
 	}
 	sp := eng.iosCommonServerParams(3)
-	sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+	sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 	resp, err := iosAsyncPost(ctx, eng, "com.bloks.www.bloks.caa.reg.confirmation.async", cip, sp, nil)
 	if err != nil {
 		return err
@@ -656,7 +633,7 @@ func iosSetPassword(ctx context.Context, eng *iosEngine, addr, password string) 
 		"aac":                buildAACJSON(eng.p),
 	}
 	sp := eng.iosCommonServerParams(4)
-	sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+	sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 	_, err = iosAsyncPost(ctx, eng, "com.bloks.www.bloks.caa.reg.password.async", cip, sp, nil)
 	return err
 }
@@ -686,7 +663,7 @@ func iosBirthday(ctx context.Context, eng *iosEngine) error {
 		"is_youth_regulation_flow_complete": 0,
 	}
 	sp := eng.iosCommonServerParams(6)
-	sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+	sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 	_, err := iosAsyncPost(ctx, eng, "com.bloks.www.bloks.caa.reg.birthday.async", cip, sp, nil)
 	return err
 }
@@ -703,7 +680,7 @@ func iosSetName(ctx context.Context, eng *iosEngine, name string) error {
 		"zero_balance_state": "",
 	}
 	sp := eng.iosCommonServerParams(7)
-	sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+	sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 	_, err := iosAsyncPost(ctx, eng, "com.bloks.www.bloks.caa.reg.name_ig_and_soap.async", cip, sp, nil)
 	return err
 }
@@ -729,7 +706,7 @@ func iosSetUsername(ctx context.Context, eng *iosEngine, username string) error 
 		"qe_device_id":       eng.p.DeviceID,
 	}
 	sp := eng.iosCommonServerParams(8)
-	sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+	sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 	sp["text_input_id"] = randQplID()
 	sp["suggestions_container_id"] = randQplID()
 	sp["action"] = 1
@@ -746,7 +723,7 @@ func iosSetUsername(ctx context.Context, eng *iosEngine, username string) error 
 func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, error) {
 	eng.state.ScreenVisited = append(eng.state.ScreenVisited, "bk_caa_reg_icon_text_list_tos_screen")
 
-	const maxAttempts = 3 // retry createAccount (giảm từ 12 — tránh chờ lâu khi IP fail)
+	const maxAttempts = 3 // retry: system_error → học jurisdiction + giữ IP; integrity_block → đổi IP
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		cip := map[string]any{
 			"aac":                                    buildAACJSON(eng.p),
@@ -769,7 +746,7 @@ func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, er
 			"no_contact_perm_email_oauth_token":      "",
 		}
 		sp := eng.iosCommonServerParams(9)
-		sp["reg_info"] = patchRegInfoForIOS(buildRegInfoJSON(eng.p, eng.state), eng.p)
+		sp["reg_info"] = buildRegInfoIOSJSON(eng.p, eng.state)
 		sp["bloks_controller_source"] = "bk_caa_reg_icon_text_list_tos_screen"
 
 		resp, err := iosAsyncPost(ctx, eng, "com.bloks.www.bloks.caa.reg.create.account.async", cip, sp, nil)
@@ -785,6 +762,9 @@ func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, er
 			if igSess.Mid == "" {
 				igSess.Mid = jar.Mid
 			}
+			if igSess.Mid == "" && eng.p.MachineID != "" {
+				igSess.Mid = eng.p.MachineID // fallback: ig-set-x-mid không tự vào jar
+			}
 			if igSess.Datr == "" {
 				igSess.Datr = jar.Datr
 			}
@@ -797,6 +777,7 @@ func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, er
 			igSess.FullCookie = igcore.BuildFullCookieStr(igSess)
 		}
 		if igSess.SessionID != "" {
+			incCreateOK()
 			return igSess, nil
 		}
 
@@ -805,22 +786,19 @@ func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, er
 		if isIntegrity || isSystemErr {
 			if attempt < maxAttempts {
 				// Quyết định đổi IP hay giữ IP:
-				//   integrity_block → LUÔN đổi IP (IP bị flag/rate-limit, cần IP sạch).
-				//   system_error    → IG báo jurisdiction lệch GeoIP của IP hiện tại.
-				//                      Học jurisdiction IG trả về rồi GIỮ IP retry → jurisdiction
-				//                      khớp đúng GeoIP của chính IP đó → qua được. Đổi IP lúc này
-				//                      làm jurisdiction vừa học thành stale → lệch nhịp mãi mãi.
-				//                      CHỈ đổi IP khi jurisdiction đã khớp mà vẫn lỗi (học bế tắc).
-				rotate := true
+				//   integrity_block → ĐỔI IP (IP bị flag/rate-limit, cần IP sạch).
+				//   system_error    → GIỮ IP + học jurisdiction IG trả về → retry cùng IP
+				//                      khớp GeoIP → qua. Đổi IP lúc này làm jurisdiction vừa
+				//                      học thành stale → vô dụng, nên system_error KHÔNG rotate.
+				rotate := isIntegrity
 				reason := "integrity_block"
 				if isSystemErr {
 					reason = "system_error"
+					captureSystemErrSample(resp) // dump 3 mẫu đầu để phân tích jurisdiction
 					if m := regJurisdictionRe.FindStringSubmatch(resp); len(m) > 1 {
-						igCC := m[1]
-						if eng.state.Jurisdiction != igCC {
+						if igCC := m[1]; eng.state.Jurisdiction != igCC {
 							eng.logf("ios createAccount %d/%d: system_error jurisdiction %q→%q", attempt, maxAttempts, eng.state.Jurisdiction, igCC)
 							eng.state.Jurisdiction = igCC
-							rotate = false // vừa học jurisdiction mới → giữ IP cho khớp
 						}
 					}
 				}
@@ -846,9 +824,14 @@ func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, er
 			reason := "integrity_block"
 			if isSystemErr {
 				reason = "system_error"
+				incSystemErr()
+			} else {
+				incIntegrity()
 			}
 			return igcore.IGSession{}, fmt.Errorf("createAccount: %s sau %d lần", reason, maxAttempts)
 		}
+		incNoSession()
+		captureNoSessionSample(resp) // dump 3 mẫu đầu → xem parser có bỏ sót session không
 		return igcore.IGSession{}, fmt.Errorf("createAccount: no session (%.200s)", resp)
 	}
 	return igcore.IGSession{}, fmt.Errorf("createAccount: thất bại sau %d lần", maxAttempts)
@@ -859,9 +842,19 @@ func iosCreateAccount(ctx context.Context, eng *iosEngine) (igcore.IGSession, er
 type igIOSBloksRegisterer struct{}
 
 func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.RegInput, onStatus func(string)) *instagram.RegResult {
+	// agedDev: mid mượn từ pool (nếu có). Khai báo sớm để status/fail gắn nhãn mid
+	// vào MỌI dòng log của luồng reg này → user thấy luồng đang dùng mid nào.
+	var agedDev *igcore.AgedDevice
+	midTag := func() string {
+		if agedDev != nil {
+			return "[mid:" + agedDev.Mid + "] "
+		}
+		return ""
+	}
+
 	status := func(msg string) {
 		if onStatus != nil {
-			onStatus(msg)
+			onStatus(midTag() + msg)
 		}
 	}
 
@@ -869,7 +862,7 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 		return &instagram.RegResult{
 			Success: false,
 			Email:   input.Email,
-			Message: fmt.Sprintf("[igiosbloks/%s] %s", stage, msg),
+			Message: fmt.Sprintf("%s[igiosbloks/%s] %s", midTag(), stage, msg),
 		}
 	}
 
@@ -883,24 +876,25 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 	if err != nil {
 		return fail("session", err.Error())
 	}
+	// Giải phóng conn + readLoop goroutine HTTP/2 khi reg xong. IdleConnTimeout=0 →
+	// conn sống vĩnh viễn nếu KHÔNG close → leak goroutine, CPU tăng dần theo account.
+	defer sess.client.CloseIdleConnections()
 
 	// Detect country qua proxy IP để locale/timezone khớp với IP thật.
-	// Dùng goroutine + select để enforce timeout — tls-client không đảm bảo cancel theo context.
 	cc := ""
 	{
 		ccCh := make(chan string, 1)
+		ccCtx, ccCancel := context.WithTimeout(ctx, 4*time.Second)
 		go func() {
-			if geoSess, err := igcore.NewIGSession(proxyStr); err == nil {
-				ccCh <- geoSess.CheckProxyCountry(context.Background())
-			} else {
-				ccCh <- ""
-			}
+			// Tái dùng client reg + ctx CÓ timeout → request bị hủy đúng 4s, goroutine
+			// KHÔNG lingering tới timeout client (60s) khi proxy chậm → tránh leak.
+			ccCh <- sess.checkProxyCountry(ccCtx)
 		}()
 		select {
 		case cc = <-ccCh:
-		case <-time.After(8 * time.Second):
-		case <-ctx.Done():
+		case <-ccCtx.Done():
 		}
+		ccCancel()
 	}
 	loc := localeFromCountry(cc)
 	status("country:" + cc + " locale:" + loc.Locale)
@@ -913,6 +907,17 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 	p.UserAgent = randomIOSUA(loc.Locale)
 	p.AndroidID = p.DeviceID
 	status("ua:" + p.UserAgent)
+
+	// ── Inject aged device từ pool — TRƯỚC qe/sync để server thấy datr/ig_did +
+	// aged mid ngay từ handshake đầu. Pick 1 lần, giữ agedDev để (1) chặn qe/sync
+	// ghi đè mid, (2) gắn nhãn [mid:...] vào mọi log của luồng này.
+	if igcore.SharedDevicePool != nil {
+		if dev := igcore.SharedDevicePool.Next(); dev != nil {
+			injectAgedDevice(sess, p, dev)
+			agedDev = dev
+			status("inject aged device") // nhãn [mid:...] tự thêm bởi status()
+		}
+	}
 
 	// qe/sync để lấy encryption key
 	status("qe/sync")
@@ -936,7 +941,9 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 		pubKey = qeHeader.Get("ig-set-password-encryption-pub-key")
 		xmid = qeHeader.Get("ig-set-x-mid")
 	}
-	if xmid != "" {
+	// Chỉ nhận mid tươi từ qe/sync khi KHÔNG inject aged device — nếu có aged mid
+	// thì giữ nó (mục đích tái dùng device), không để mid tươi ghi đè.
+	if xmid != "" && agedDev == nil {
 		p.MachineID = xmid
 	}
 	if keyID == "" || pubKey == "" {
@@ -944,7 +951,7 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 		if err != nil {
 			return fail("qeSync", err.Error())
 		}
-		if xmid != "" {
+		if xmid != "" && agedDev == nil {
 			p.MachineID = xmid
 		}
 	}
@@ -1023,12 +1030,20 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 		return fail("createAccount", err.Error())
 	}
 
-	liveCtx, liveCancel := context.WithTimeout(ctx, 15*time.Second)
-	defer liveCancel()
-	liveStatus := igcore.CheckLiveByCookie(liveCtx, igSess.FullCookie, p.UserAgent, proxyStr)
-	status(fmt.Sprintf("checklive → %s", liveStatus))
+	// ── Harvest device → pool cho lần reg sau. Lấy từ igSess (đã merge mid từ
+	// X-MID + ig_did từ response body + datr từ jar) thay vì đọc lại jar trần
+	// (jar bloks thường thiếu ig_did/datr). dedupe theo mid trong Add().
+	if igcore.SharedDevicePool != nil && igSess.SessionID != "" {
+		if added := igcore.SharedDevicePool.Add(igSess.Mid, igSess.Datr, igSess.IgDID); added {
+			status(fmt.Sprintf("harvest device mid=%.8s… → pool", igSess.Mid))
+		}
+	}
 
-	base2 := &instagram.RegResult{
+	// KHÔNG checklive ở đây (trước đây block slot ~15s/account). createAccount trả
+	// sessionid = reg thành công. Live/Die được check ASYNC ở app_register
+	// (CheckLiveByUsername) → slot nhả NGAY cho luồng kế → reg nhanh hơn nhiều.
+	status("reg OK (checklive async)")
+	return &instagram.RegResult{
 		UID:            igSess.UID,
 		Username:       username,
 		Password:       password,
@@ -1037,23 +1052,10 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 		DeviceID:       p.DeviceID,
 		FamilyDeviceID: p.FamilyDeviceID,
 		UserAgent:      p.UserAgent,
-		LiveStatus:     liveStatus,
+		LiveStatus:     "", // chưa biết — async re-check sẽ phân loại
+		Success:        true,
+		Message:        "ok",
 	}
-	switch liveStatus {
-	case "checkpoint":
-		base2.Success = false
-		base2.Message = "checkpoint: tài khoản cần xác minh"
-	case "suspended":
-		base2.Success = false
-		base2.Message = "blocked: tài khoản bị treo"
-	case "die":
-		base2.Success = false
-		base2.Message = "die: session chết ngay sau reg"
-	default:
-		base2.Success = true
-		base2.Message = "ok"
-	}
-	return base2
 }
 
 func init() {

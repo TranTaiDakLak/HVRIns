@@ -6,8 +6,11 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof" // pprof endpoint để chẩn đoán CPU/goroutine (localhost:6060)
 	"os"
 	"path/filepath"
+	"runtime/debug"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -28,6 +31,10 @@ var AppVersion = "dev"
 // Cách dùng: HaVu.exe -minimized
 var flagMinimized = flag.Bool("minimized", false, "Khởi động app ở trạng thái minimized (tiết kiệm RAM khi chạy 24/7)")
 
+// -pprof CLI flag: bật pprof server ở localhost:6060 để chẩn đoán CPU/goroutine.
+// Cách dùng: HaVu.exe -pprof  → rồi `go tool pprof http://127.0.0.1:6060/debug/pprof/profile?seconds=20`
+var flagPprof = flag.Bool("pprof", false, "Bật pprof server localhost:6060 (chẩn đoán CPU/goroutine)")
+
 // instanceUniqueID trả về ID duy nhất dựa trên đường dẫn thư mục chứa exe.
 // Mỗi thư mục khác nhau → ID khác nhau → nhiều bản copy chạy độc lập song song.
 func instanceUniqueID() string {
@@ -42,6 +49,19 @@ func instanceUniqueID() string {
 
 func main() {
 	flag.Parse()
+
+	// GC tuning: reg chạy nhiều luồng cấp phát JSON liên tục → GC mặc định (GOGC=100)
+	// chạy rất thường xuyên, tốn CPU. Tăng lên 300 → GC chạy ~1/3 tần suất → giảm CPU
+	// GC đáng kể, đổi bằng RAM (chạy reg dư RAM). Env GOGC vẫn override nếu user set.
+	if os.Getenv("GOGC") == "" {
+		debug.SetGCPercent(300)
+	}
+
+	// pprof: chỉ bật khi -pprof → không ảnh hưởng run thường. Lỗi bind (port bận / chạy
+	// nhiều bản) bỏ qua. Dùng để chẩn đoán CHÍNH XÁC hàm nào ăn CPU khi reg nhiều luồng.
+	if *flagPprof {
+		go func() { _ = http.ListenAndServe("127.0.0.1:6060", nil) }()
+	}
 
 	igapp.SetBuildVersion(AppVersion)
 

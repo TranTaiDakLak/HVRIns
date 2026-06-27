@@ -486,7 +486,7 @@ func newIOSGQLSession(proxyStr string) (*iosGQLSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create ios15 tls client: %w", err)
 	}
-	zr, _ := zstd.NewReader(nil)
+	zr := sharedZstdDecoder // dùng chung — tránh leak goroutine decoder mỗi session
 	return &iosGQLSession{client: c, zr: zr}, nil
 }
 
@@ -1010,9 +1010,18 @@ func gqlBackoff(i int) {
 type iosGQLRegisterer struct{}
 
 func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInput, onStatus func(string)) *instagram.RegResult {
+	// agedDev: mid mượn từ pool — gắn nhãn [mid:...] vào mọi log của luồng này.
+	var agedDev *igcore.AgedDevice
+	midTag := func() string {
+		if agedDev != nil {
+			return "[mid:" + agedDev.Mid + "] "
+		}
+		return ""
+	}
+
 	status := func(msg string) {
 		if onStatus != nil {
-			onStatus(msg)
+			onStatus(midTag() + msg)
 		}
 	}
 
@@ -1028,7 +1037,7 @@ func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInp
 		return &instagram.RegResult{
 			Success: false,
 			Email:   addr,
-			Message: fmt.Sprintf("[igiosgql/%s] %s", stage, msg),
+			Message: fmt.Sprintf("%s[igiosgql/%s] %s", midTag(), stage, msg),
 		}
 	}
 
@@ -1084,12 +1093,9 @@ func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInp
 		if igcore.SharedDevicePool != nil {
 			if dev := igcore.SharedDevicePool.Next(); dev != nil {
 				sess.injectAgedDevice(p, dev)
+				agedDev = dev // gắn nhãn [mid:...] vào log luồng + giữ aged mid
 				deviceSrc = "pool"
-				midPreview := dev.Mid
-				if len(midPreview) > 10 {
-					midPreview = midPreview[:10]
-				}
-				logf("  device aged injected (mid: %s...)", midPreview)
+				logf("  device aged injected")
 			}
 		}
 		logf("  device_src=%s ua=%s", deviceSrc, p.UserAgent)
@@ -1133,6 +1139,12 @@ func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInp
 	if err != nil {
 		return fail("qeSync", err.Error())
 	}
+	// Close session cuối khi reg xong (tránh leak conn + readLoop goroutine HTTP/2).
+	defer func() {
+		if st != nil && st.sess != nil {
+			st.sess.client.CloseIdleConnections()
+		}
+	}()
 	status("ua:" + st.p.UserAgent)
 
 	// ── aymh ───────────────────────────────────────────────────────────────
@@ -1150,6 +1162,7 @@ func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInp
 		if attempt > 1 {
 			logf("  submitEmail retry %d/%d — rotate IP...", attempt, maxSubmit)
 			if ns, e2 := buildSession(input.Proxy); e2 == nil {
+				st.sess.client.CloseIdleConnections() // close session CŨ trước khi thay
 				st = ns
 				// aymh lại với session mới
 				_ = st.eng.aymh(ctx)
@@ -1238,30 +1251,28 @@ func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInp
 	}
 
 	igSession := st.eng.Session
-	liveCtx, liveCancel := context.WithTimeout(ctx, 15*time.Second)
-	defer liveCancel()
-	liveStatus := igcore.CheckLiveByCookie(liveCtx, igSession.FullCookie, st.p.UserAgent, "")
-	logf("checklive → %s", liveStatus)
 
-	result := &instagram.RegResult{
-		UID:       igSession.UID,
-		Username:  username,
-		Password:  password,
-		Cookie:    igSession.FullCookie,
-		Email:     addr,
-		UserAgent: st.p.UserAgent,
+	// ── Harvest device → pool cho lần reg sau (chung pool iOS với ig_ios_bloks).
+	if igcore.SharedDevicePool != nil && igSession.SessionID != "" {
+		if added := igcore.SharedDevicePool.Add(igSession.Mid, igSession.Datr, igSession.IgDID); added {
+			logf("harvest device mid=%.8s… → pool", igSession.Mid)
+		}
 	}
-	switch liveStatus {
-	case "checkpoint":
-		result.Success = false
-		result.Message = "checkpoint: tài khoản cần xác minh"
-	case "suspended", "die":
-		result.Success = false
-		result.Message = liveStatus + ": session chết ngay sau reg"
-	default:
-		result.Success = true
+
+	// KHÔNG checklive ở đây (block slot ~15s). createAccount OK = reg OK.
+	// Live/Die check ASYNC ở app_register → slot nhả ngay.
+	logf("reg OK (checklive async)")
+	return &instagram.RegResult{
+		UID:        igSession.UID,
+		Username:   username,
+		Password:   password,
+		Cookie:     igSession.FullCookie,
+		Email:      addr,
+		UserAgent:  st.p.UserAgent,
+		LiveStatus: "",
+		Success:    true,
+		Message:    "ok",
 	}
-	return result
 	} // end outer retry loop
 	return fail("createAccount", fmt.Sprintf("SESSION_FLAGGED — thất bại sau %d lần thử", maxOuter))
 }

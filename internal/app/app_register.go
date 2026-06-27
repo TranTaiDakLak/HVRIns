@@ -19,6 +19,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	goruntime "runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
@@ -459,23 +460,36 @@ func (a *App) RunRegister(maxThreads int) string {
 		})
 	}
 
-	// ── IG iOS device pool (mid/datr/ig_did) ─────────────────────────────────
+	// ── IG device pool (mid/datr/ig_did) ─────────────────────────────────────
 	// Tương tự datr-pool bên FB: harvest mid/ig_did từ account live → inject
 	// trước reg mới → IG thấy "thiết bị có lịch sử" → trust score cao hơn.
+	// maxUses: số lần 1 mid dùng trước khi cả pool recycle (default 9 như FB; 0 = vô hạn).
+	// minSize: 0 = inject ngay khi pool có ≥1 device. Lấy thẳng từ config.
+	devPoolMaxUses := interactionCfg.DevicePoolMaxUses
+	devPoolMinSize := interactionCfg.DevicePoolMinSize
+	maxUsesLabel := fmt.Sprintf("%d (recycle)", devPoolMaxUses)
+	if devPoolMaxUses <= 0 {
+		maxUsesLabel = "vô hạn"
+	}
+
 	igDeviceFile := defaultCookieDir() + "/ig_devices.txt"
-	igDevicePool := igcore.NewDevicePool(igDeviceFile, 3)
+	igDevicePool := igcore.NewDevicePool(igDeviceFile, devPoolMaxUses)
+	igDevicePool.SetMinSize(devPoolMinSize)
 	if sz := igDevicePool.Size(); sz > 0 {
 		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 			"index": 0, "phone": "system", "proxy": "",
-			"msg": fmt.Sprintf("[IGDevicePool] %d device aged sẵn sàng (mid/ig_did)", sz),
+			"msg": fmt.Sprintf("[IGDevicePool] %d device aged sẵn sàng (mid/ig_did) — maxUses %s, minSize %d", sz, maxUsesLabel, devPoolMinSize),
 		})
 	}
 	igcore.SharedDevicePool = igDevicePool
-	defer func() { igcore.SharedDevicePool = nil }()
+	// KHÔNG nil pool bằng defer ở đây: RunRegister return NGAY (spawner chạy nền) →
+	// defer sẽ nil pool tức thì trong khi worker còn chạy → inject/harvest thấy nil.
+	// Việc nil pool dời vào spawner sau wg.Wait() (xem cuối spawner goroutine).
 
 	// ── IG Android device pool (datr/mid/ig_did) ──────────────────────────────
 	igAndroidDeviceFile := defaultCookieDir() + "/ig_android_devices.txt"
-	igAndroidDevicePool := igcore.NewDevicePool(igAndroidDeviceFile, 3)
+	igAndroidDevicePool := igcore.NewDevicePool(igAndroidDeviceFile, devPoolMaxUses)
+	igAndroidDevicePool.SetMinSize(devPoolMinSize)
 	if sz := igAndroidDevicePool.Size(); sz > 0 {
 		runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 			"index": 0, "phone": "system", "proxy": "",
@@ -483,7 +497,7 @@ func (a *App) RunRegister(maxThreads int) string {
 		})
 	}
 	igandroid.SharedAndroidDevicePool = igAndroidDevicePool
-	defer func() { igandroid.SharedAndroidDevicePool = nil }()
+	// (nil pool dời vào spawner sau wg.Wait() — xem ghi chú ở iOS pool phía trên)
 
 	// Pre-harvest mid nếu pool rỗng — chạy qe/sync để lấy mid thật trước batch.
 	// Số mid harvest = max(threads*2, 20), tối đa 10 workers song song.
@@ -511,6 +525,41 @@ func (a *App) RunRegister(maxThreads int) string {
 				"msg": fmt.Sprintf("[IGAndroidPool] Pre-harvest xong: %d mid đã lưu vào pool", added),
 			})
 		}(harvestN, harvestProxy, igAndroidDevicePool)
+	}
+
+	// Pre-harvest iOS: MỖI lần chạy nạp thêm 1 batch mid tươi (= RegThreads) để pool
+	// LỚN DẦN + luôn có mid mới (tránh tái dùng mãi 1 tập + tích mid cháy — ta chưa có
+	// expiry). Chạy nền, không chặn reg. mid tươi từ qe/sync (server-token). Dừng khi
+	// chạm trần maxIOSPool để file không phình vô hạn.
+	if interactionCfg.RegThreads > 0 {
+		const maxIOSPool = 5000
+		cur := igDevicePool.Size()
+		iosTarget := cur + interactionCfg.RegThreads
+		if iosTarget > maxIOSPool {
+			iosTarget = maxIOSPool
+		}
+		if cur < iosTarget {
+			harvestN := iosTarget - cur
+			runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
+				"index": 0, "phone": "system", "proxy": "",
+				"msg": fmt.Sprintf("[IGDevicePool] Pool %d < %d — pre-harvest %d mid qua qe/sync...", cur, iosTarget, harvestN),
+			})
+			harvestProxy := ""
+			if len(proxyPool) > 0 {
+				harvestProxy = proxyPool[0]
+			}
+			go func(nh int, proxy string, pool *igcore.DevicePool) {
+				added := igandroid.PreHarvestPool(a.ctx, proxy, nh, pool, func(msg string) {
+					runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
+						"index": 0, "phone": "system", "proxy": "", "msg": msg,
+					})
+				})
+				runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
+					"index": 0, "phone": "system", "proxy": "",
+					"msg": fmt.Sprintf("[IGDevicePool] Pre-harvest xong: +%d mid (pool ~%d)", added, pool.Size()),
+				})
+			}(harvestN, harvestProxy, igDevicePool)
+		}
 	}
 
 	// User yêu cầu: nếu CookieInitialMethod="file" mà không có datr nào → DỪNG HOÀN TOÀN.
@@ -1195,6 +1244,35 @@ func (a *App) RunRegister(maxThreads int) string {
 		"index": 0, "phone": "system", "proxy": "",
 		"msg": fmt.Sprintf("Bắt đầu đăng ký liên tục với %d luồng song song...", maxThreads),
 	})
+
+	// [Diag] Theo dõi goroutine mỗi 30s — phân biệt leak (số leo) vs tải nền (số phẳng).
+	// Dừng theo batch ctx. Nếu goroutine ổn định quanh ~luồng+hằng số → leak đã hết.
+	go func() {
+		t := time.NewTicker(30 * time.Second)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				ok, se, ig, ns := igandroid.RegErrorStats()
+				total := ok + se + ig + ns
+				pct := func(n int64) int {
+					if total == 0 {
+						return 0
+					}
+					return int(n * 100 / total)
+				}
+				line := fmt.Sprintf("[RegStats] OK=%d(%d%%) system_error=%d(%d%%) integrity=%d(%d%%) no_session=%d | goroutines=%d",
+					ok, pct(ok), se, pct(se), ig, pct(ig), ns, goruntime.NumGoroutine())
+				runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
+					"index": 0, "phone": "system", "proxy": "", "msg": line,
+				})
+				// Ghi ra file để đọc dễ (không cần tìm trong UI log view).
+				_ = os.WriteFile(filepath.Join(AppDataDir(), "reg_stats.txt"), []byte(line+"\n"), 0644)
+			}
+		}
+	}()
 	if len(regPlatforms) > 1 {
 		msg := fmt.Sprintf("[MultiReg] %d phiên bản: %s — mỗi luồng cố định 1 phiên bản (chia đều theo slot)", len(regPlatforms), strings.Join(regPlatforms, ", "))
 		if len(regPlatforms) > maxThreads {
@@ -1253,6 +1331,10 @@ func (a *App) RunRegister(maxThreads int) string {
 				})
 			}
 			wg.Wait()
+			// Reg workers đã xong → giờ mới nil device pool (KHÔNG nil bằng defer trong
+			// RunRegister vì hàm đó return ngay khi spawner còn chạy → sẽ nil quá sớm).
+			igcore.SharedDevicePool = nil
+			igandroid.SharedAndroidDevicePool = nil
 			// TRUE SPLIT drain — reg workers đã xong (wg.Wait) → KHÔNG còn job đẩy vào
 			// splitVerifyCh. close() báo VER workers hết job → range thoát sau khi drain
 			// hết queue còn lại. splitVerWg.Wait() chờ toàn bộ VER xong (vẫn dùng

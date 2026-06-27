@@ -259,6 +259,7 @@ func CheckLiveByCookie(ctx context.Context, cookie, userAgent, proxyStr string) 
 	if err != nil {
 		return "unknown"
 	}
+	defer sess.client.CloseIdleConnections() // tránh leak conn + readLoop goroutine mỗi lần check
 	req, err := fhttp.NewRequestWithContext(ctx, "GET",
 		igHost+"/api/v1/accounts/current_user/?edit=true", nil)
 	if err != nil {
@@ -299,6 +300,7 @@ func CheckLiveByCheckerCookie(ctx context.Context, checkerCookie, username, prox
 	if err != nil {
 		return "unknown"
 	}
+	defer sess.client.CloseIdleConnections()
 
 	endpoint := "https://www.instagram.com/api/v1/users/web_profile_info/?username=" + username
 	req, err := fhttp.NewRequestWithContext(ctx, "GET", endpoint, nil)
@@ -375,6 +377,7 @@ func CheckLiveByUsername(ctx context.Context, username, proxyStr string) string 
 	if err != nil {
 		return "unknown"
 	}
+	defer sess.client.CloseIdleConnections()
 	req, err := fhttp.NewRequestWithContext(ctx, "GET",
 		"https://www.instagram.com/"+username+"/", nil)
 	if err != nil {

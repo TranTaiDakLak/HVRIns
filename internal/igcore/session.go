@@ -25,6 +25,12 @@ const (
 	qeSyncURL   = igHost + "/api/v1/qe/sync/"
 )
 
+// sharedZstdDecoder — 1 decoder DÙNG CHUNG cho cả package. DecodeAll an toàn gọi
+// đồng thời. Trước đây mỗi session tạo decoder riêng (spawn ~GOMAXPROCS goroutine)
+// và KHÔNG Close → leak goroutine theo số session (country-detect tạo session phụ
+// mỗi account). Dùng chung → tổng goroutine bị giới hạn.
+var sharedZstdDecoder, _ = zstd.NewReader(nil)
+
 type igSession struct {
 	client tls_client.HttpClient
 	zr     *zstd.Decoder
@@ -47,8 +53,7 @@ func newIGSession(proxyStr string) (*igSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create tls client: %w", err)
 	}
-	zr, _ := zstd.NewReader(nil)
-	return &igSession{client: c, zr: zr}, nil
+	return &igSession{client: c, zr: sharedZstdDecoder}, nil
 }
 
 // post gửi form body với header order chuẩn, decode response (zstd/gzip/plain).
@@ -157,8 +162,7 @@ func newChromeCheckSession(proxyStr string) (*igSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create chrome tls client: %w", err)
 	}
-	zr, _ := zstd.NewReader(nil)
-	return &igSession{client: c, zr: zr}, nil
+	return &igSession{client: c, zr: sharedZstdDecoder}, nil
 }
 
 var _ = bytes.MinRead

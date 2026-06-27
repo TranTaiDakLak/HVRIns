@@ -7,6 +7,7 @@ package igcore
 
 import (
 	"bufio"
+	"log/slog"
 	"os"
 	"strings"
 	"sync"
@@ -27,14 +28,13 @@ type DevicePool struct {
 	seen     map[string]bool // dedupe theo mid
 	idx      int             // round-robin cursor
 	maxUses  int             // số lần tối đa 1 device được dùng
+	minSize  int             // pool phải đủ ≥ minSize device thì Next() mới trả (0 = trả ngay khi có ≥1)
 	filePath string
 }
 
 // NewDevicePool tạo pool với giới hạn usage và file lưu.
+// maxUses <= 0 nghĩa là KHÔNG giới hạn — 1 mid tái dùng vô hạn (round-robin).
 func NewDevicePool(filePath string, maxUses int) *DevicePool {
-	if maxUses <= 0 {
-		maxUses = 3
-	}
 	p := &DevicePool{
 		seen:     make(map[string]bool),
 		maxUses:  maxUses,
@@ -49,6 +49,15 @@ func (p *DevicePool) Size() int {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return len(p.devices)
+}
+
+// SetMinSize đặt ngưỡng tối thiểu: pool phải có ≥ n device thì Next() mới trả device.
+// Tránh nhiều account dùng chung vài mid khi pool còn nhỏ → giảm rủi ro IG link-ban.
+// n ≤ 0 nghĩa là không giới hạn (trả ngay khi có ≥1 device).
+func (p *DevicePool) SetMinSize(n int) {
+	p.mu.Lock()
+	p.minSize = n
+	p.mu.Unlock()
 }
 
 // Add thêm 1 device harvest được (dedupe theo mid). Trả true nếu là mới.
@@ -69,24 +78,36 @@ func (p *DevicePool) Add(mid, datr, igDID string) bool {
 }
 
 // Next lấy 1 device aged (round-robin), tăng usage. Trả nil nếu pool rỗng
-// hoặc tất cả device đã vượt maxUses.
+// hoặc chưa đủ ngưỡng minSize.
+//
+// Cơ chế RECYCLE (giống PartitionedDatrPool bên FB): khi maxUses > 0 và TẤT CẢ
+// device đã dùng đủ maxUses lần → reset uses=0 cho cả pool rồi dùng lại từ đầu.
+// → "luôn có mid dùng, hết thì xoay lại" nhưng có nhịp nghỉ (mỗi mid chỉ phục vụ
+// maxUses acc trong 1 vòng trước khi cả pool cùng được tái chế). maxUses <= 0 = vô hạn.
 func (p *DevicePool) Next() *AgedDevice {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	n := len(p.devices)
-	if n == 0 {
-		return nil
+	if n == 0 || n < p.minSize {
+		return nil // pool rỗng hoặc chưa đủ ngưỡng minSize → reg device tươi
 	}
+	// Vòng 1: tìm device chưa hết lượt.
 	for i := 0; i < n; i++ {
 		d := p.devices[p.idx%n]
 		p.idx++
-		if d.uses < p.maxUses {
+		if p.maxUses <= 0 || d.uses < p.maxUses {
 			d.uses++
-			// trả copy để caller không sửa state pool
-			return &AgedDevice{Mid: d.Mid, Datr: d.Datr, IgDID: d.IgDID}
+			return &AgedDevice{Mid: d.Mid, Datr: d.Datr, IgDID: d.IgDID} // copy, caller không sửa state
 		}
 	}
-	return nil // tất cả device đã hết lượt
+	// Tất cả đã hết lượt (maxUses > 0) → RECYCLE: reset toàn bộ rồi cấp device kế tiếp.
+	for _, d := range p.devices {
+		d.uses = 0
+	}
+	d := p.devices[p.idx%n]
+	p.idx++
+	d.uses++
+	return &AgedDevice{Mid: d.Mid, Datr: d.Datr, IgDID: d.IgDID}
 }
 
 // ── File persistence ──────────────────────────────────────────────────────────
@@ -127,8 +148,13 @@ func (p *DevicePool) appendToFile(mid, datr, igDID string) {
 	}
 	f, err := os.OpenFile(p.filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
+		// KHÔNG nuốt im lặng: mid vẫn nằm trong memory pool phiên này, nhưng nếu
+		// ghi file fail → mất khi restart. Log để biết thay vì âm thầm mất mid.
+		slog.Warn("devicepool: mở file pool để ghi thất bại", "file", p.filePath, "mid", mid, "err", err)
 		return
 	}
 	defer f.Close()
-	_, _ = f.WriteString(mid + "|" + datr + "|" + igDID + "\n")
+	if _, werr := f.WriteString(mid + "|" + datr + "|" + igDID + "\n"); werr != nil {
+		slog.Warn("devicepool: ghi mid vào file pool thất bại", "file", p.filePath, "mid", mid, "err", werr)
+	}
 }
