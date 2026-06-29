@@ -455,8 +455,8 @@ const poolFileSaveCount = ref(0)
 let _datrPoolTimer: ReturnType<typeof setInterval> | null = null
 
 async function loadDatrPoolCount() {
-  const fnPool = (window as any)?.go?.main?.App?.GetDatrPoolSize
-  const fnSaved = (window as any)?.go?.main?.App?.GetPoolFileSaveCount
+  const fnPool = (window as any)?.go?.app?.App?.GetDevicePoolSize
+  const fnSaved = (window as any)?.go?.app?.App?.GetPoolFileSaveCount
   try {
     if (typeof fnPool === 'function') datrPoolCount.value = Number(await fnPool())
     if (typeof fnSaved === 'function') poolFileSaveCount.value = Number(await fnSaved())
@@ -3048,7 +3048,7 @@ function resetForms() {
                   <button type="button" class="rp-mini-btn" :title="cookieInitialResolvedPath || form.cookieInitialFile"
                     @click="openCookieInitialFile">Mở file datr</button>
                   <span class="rp-ci-count" :class="{ 'rp-ci-count--error': !!cookieInitialFileStatus }">
-                    {{ cookieInitialFileStatus ? 'Không đọc được file' : `${cookieInitialFileCount.toLocaleString()} datr${datrPoolCount > 0 ? ` · pool: ${datrPoolCount.toLocaleString()}` : ''}${poolFileSaveCount > 0 ? ` · +${poolFileSaveCount.toLocaleString()} saved` : ''}` }}
+                    {{ cookieInitialFileStatus ? 'Không đọc được file' : `${cookieInitialFileCount > 0 ? cookieInitialFileCount.toLocaleString() + ' datr · ' : ''}mid-pool: ${datrPoolCount.toLocaleString()} device${poolFileSaveCount > 0 ? ` · +${poolFileSaveCount.toLocaleString()} saved` : ''}` }}
                   </span>
                 </div>
               </div>

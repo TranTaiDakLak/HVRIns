@@ -466,6 +466,10 @@ func (a *App) RunRegister(maxThreads int) string {
 	// maxUses: số lần 1 mid dùng trước khi cả pool recycle (default 9 như FB; 0 = vô hạn).
 	// minSize: 0 = inject ngay khi pool có ≥1 device. Lấy thẳng từ config.
 	devPoolMaxUses := interactionCfg.DevicePoolMaxUses
+	// "Lượt dùng" (UI COOKIE INITIAL) điều khiển maxUses mid-pool (logic recycle giữ nguyên).
+	if interactionCfg.LimitCookieInitial && interactionCfg.LimitCookieInitialCount > 0 {
+		devPoolMaxUses = interactionCfg.LimitCookieInitialCount
+	}
 	devPoolMinSize := interactionCfg.DevicePoolMinSize
 	maxUsesLabel := fmt.Sprintf("%d (recycle)", devPoolMaxUses)
 	if devPoolMaxUses <= 0 {

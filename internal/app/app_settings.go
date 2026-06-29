@@ -18,6 +18,7 @@ import (
 	emailrent "HVRIns/internal/email/rent"
 	emailtemp "HVRIns/internal/email/temp"
 	"HVRIns/internal/fbdata"
+	"HVRIns/internal/igcore"
 	"HVRIns/internal/instagram"
 	"HVRIns/internal/instagram/fakeinfo"
 	androidreg "HVRIns/internal/instagram/register/android"
@@ -1319,6 +1320,16 @@ func (a *App) GetCookieInitialStatus(path string) map[string]interface{} {
 // Trả về 0 khi chưa có run nào khởi động pool.
 func (a *App) GetDatrPoolSize() int {
 	p := androidreg.SharedPool
+	if p == nil {
+		return 0
+	}
+	return p.Size()
+}
+
+// GetDevicePoolSize trả về số device (mid+datr+ig_did) trong mid-pool IG
+// (igcore.SharedDevicePool) — aged-device pool THẬT mà flow ig_ios_bloks dùng.
+func (a *App) GetDevicePoolSize() int {
+	p := igcore.SharedDevicePool
 	if p == nil {
 		return 0
 	}
