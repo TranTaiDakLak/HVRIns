@@ -38,6 +38,7 @@ Khác với `docs/old-docs/` (xem [ghi chú bên dưới](#-ghi-chú-về-docsol
 |------|----------|
 | [add-facebook-reg-version.md](./add-facebook-reg-version.md) | **Runbook thêm Reg / Verify version mới (Android FB4A là chính).** Hướng dẫn từng bước (§1–§10 thêm reg version, §11–§18 verify platforms reference). Đặc biệt: [§12 — RULE token-required KHÔNG login bằng cookie](./add-facebook-reg-version.md#12-rule-quan-trọng--token-required-platform-không-được-login-bằng-cookie), [§13.6 — iOS native FBIOS bắt buộc token EAAAAAY](./add-facebook-reg-version.md#136-ios-native-fbios-verify-ios562-ios563--bắt-buộc-token-eaaaaay), [§13.7 — Login-at-verify + Token/Cookie realtime](./add-facebook-reg-version.md#137-login-at-verify--tokencookie-hiển-thị-realtime-cập-nhật-2026-05-31). Các file 00–06 **link tới runbook** thay vì lặp lại nội dung. |
 | [add-ios-reg-version.md](./add-ios-reg-version.md) | **Runbook CHUYÊN iOS Native (FBIOS) — thêm version reg+verify mới.** Quy trình clone `ios562` → `iosNNN` (trích doc_id/bloks/styles/FBAV từ capture, sed swap constants, wiring 8 điểm app.go + factory + scheduler + frontend, build verify). Ví dụ tham chiếu: `ios555` (2026-05-31). |
+| [ig-spc-secondary-account-creation.md](./ig-spc-secondary-account-creation.md) | **🆕 Instagram SPC — tạo IG account mới từ IG parent đã login.** Tài liệu kỹ thuật + API contract đầy đủ cho luồng "Add account → Create new" trong Profile Switcher: 4 endpoint Bloks (`get_sso_accounts`, `username.async`, `ac_optin.async`, `create.account.async`), 7 token động cần replace, gotcha "body verbatim", rate-limit awareness, plan port vào engine `internal/instagram/register/igspc/`. Verified working 2026-06-29 (7/8 success rate). Test ref: [`cmd/test_spc_ig/`](../../cmd/test_spc_ig/). |
 
 ### 📦 Ghi chú về `docs/old-docs/`
 
@@ -146,6 +147,10 @@ Phần này nối tất cả các file lại bằng một mạch chuyện ngắn
 | Luật token-required KHÔNG login cookie | [add-facebook-reg-version.md](./add-facebook-reg-version.md) | [§12](./add-facebook-reg-version.md#12-rule-quan-trọng--token-required-platform-không-được-login-bằng-cookie) |
 | iOS native FBIOS bắt buộc token EAAAAAY | [add-facebook-reg-version.md](./add-facebook-reg-version.md) | [§13.6](./add-facebook-reg-version.md#136-ios-native-fbios-verify-ios562-ios563--bắt-buộc-token-eaaaaay) |
 | Login-at-verify + Token/Cookie realtime | [add-facebook-reg-version.md](./add-facebook-reg-version.md) | [§13.7](./add-facebook-reg-version.md#137-login-at-verify--tokencookie-hiển-thị-realtime-cập-nhật-2026-05-31) |
+| **🆕 IG SPC — tạo IG mới từ IG live (parent)** | [ig-spc-secondary-account-creation.md](./ig-spc-secondary-account-creation.md) | toàn bộ |
+| IG SPC: 4 API endpoint cụ thể | [ig-spc-secondary-account-creation.md](./ig-spc-secondary-account-creation.md) | [§3](./ig-spc-secondary-account-creation.md#3-4-api-endpoint-cụ-thể) |
+| IG SPC: 7 token cần replace khi clone body | [ig-spc-secondary-account-creation.md](./ig-spc-secondary-account-creation.md) | [§4](./ig-spc-secondary-account-creation.md#4-token-cần-thay-khi-clone-capture) |
+| IG SPC: plan port vào engine HVRIns | [ig-spc-secondary-account-creation.md](./ig-spc-secondary-account-creation.md) | [§6](./ig-spc-secondary-account-creation.md#6-plan-port-vào-engine-hvrins) |
 
 ---
 
