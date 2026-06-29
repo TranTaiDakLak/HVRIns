@@ -127,6 +127,13 @@ export interface PlatformUAConfig {
   kind?: 'reg' | 'ver'     // pick pool FBAV split: regPlatformCfg → 'reg', verPlatformCfg → 'ver'
 }
 
+export interface SubMailConfig {
+  mailType?: 'temp' | 'rent'
+  provider?: MailProviderType | string
+  tempMailDomain?: string
+  tempMailToken?: string
+}
+
 export interface VerifyConfig {
   // Verify tài khoản (groupBox2)
   verifyEnabled: boolean           // chkVerifyAccount
@@ -260,6 +267,8 @@ export interface VerifyConfig {
   addInfoDataDir: string        // addInfoDataDir — thư mục chứa file data (mặc định Config/AddInfo)
   addInfoDelayMs: number        // addInfoDelayMs — ms delay giữa mỗi bước AddInfo
   addSubEmail: boolean          // addsubemail — thêm email phụ vào tài khoản
+  subMail?: SubMailConfig       // Mail #2 (phụ) — provider RIÊNG; undefined = dùng Mail #1
+  subMailStash?: SubMailConfig  // cất config Mail #2 khi tắt toggle (bật lại khôi phục)
   createAds: boolean            // createads — tạo tài khoản quảng cáo
   autoUploadAfterVerify: boolean // tự đẩy lên site sau khi verify xong
 

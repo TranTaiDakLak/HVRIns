@@ -421,6 +421,15 @@ type PlatformUAConfig struct {
 }
 
 // InteractionConfig cấu hình chạy — mapping từ frontend VerifyConfig
+// SubMailConfig — config provider RIÊNG cho Mail #2 (email phụ).
+// Scaffold sẵn cho IG add-email (backend reg/verify CHƯA consume — wire sau).
+type SubMailConfig struct {
+	MailType       string `json:"mailType,omitempty"`
+	Provider       string `json:"provider,omitempty"`
+	TempMailDomain string `json:"tempMailDomain,omitempty"`
+	TempMailToken  string `json:"tempMailToken,omitempty"`
+}
+
 type InteractionConfig struct {
 	VerifyEnabled       bool   `json:"verifyEnabled"`
 	MailProvider        string `json:"mailProvider"`
@@ -656,6 +665,8 @@ type InteractionConfig struct {
 	// ReUseEmail — reuse email đã verify success (ArchiveEmailCollection).
 	// Sau verify OK → archive email → account kế có thể dùng lại (UsedCount < UseEmailTime).
 	ReUseEmail   bool `json:"reUseEmail"`
+	SubMail      *SubMailConfig `json:"subMail,omitempty"`      // Mail #2 (phụ) — scaffold, backend chưa consume
+	SubMailStash *SubMailConfig `json:"subMailStash,omitempty"`
 	UseEmailTime int  `json:"useEmailTime"` // số lần tái dùng tối đa (default 1)
 
 	// FmUserTmpMail — format username tempmail theo login info (phone/email) thay vì random.

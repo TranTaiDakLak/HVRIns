@@ -32,6 +32,22 @@ const formRef = computed(() => props.form)
 
 const authSourceTab = ref<'mail' | 'phone'>('mail')
 
+// Mail #2 (phụ — ReUseEmail swap) — bật/tắt config riêng. Tắt = cất vào subMailStash
+// (khôi phục khi bật lại). Scaffold sẵn cho IG add-email (backend wire sau).
+const subMailEnabled = computed<boolean>({
+  get: () => !!props.form.subMail,
+  set: (v: boolean) => {
+    if (v) {
+      props.form.subMail = props.form.subMail ?? props.form.subMailStash ?? { mailType: 'temp', provider: 'moakt' }
+      props.form.subMailStash = undefined
+    } else {
+      if (props.form.subMail) props.form.subMailStash = props.form.subMail
+      props.form.subMail = undefined
+    }
+    props.saveNow?.()
+  },
+})
+
 const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'moakt',          label: 'Moakt' },
   //{ value: '@i2b.vn',       label: 'Mail1sec' },          // ẩn
@@ -859,10 +875,76 @@ const {
         </div>
       </div>
     </div>
+
+    <!-- Mail #2 (phụ — ReUseEmail swap) — scaffold sẵn cho IG add-email (backend wire sau) -->
+    <div class="asp-submail">
+      <div class="asp-submail__head">
+        <span class="asp-submail__title">♻ Mail #2 (phụ — ReUseEmail swap)</span>
+        <span class="asp-submail__desc">Email #2 thêm vào account sau verify Live; cấu hình KEY RIÊNG (không dùng chung Mail #1). Sẵn sàng — backend IG add-email sẽ wire sau.</span>
+      </div>
+      <label class="asp-submail__toggle">
+        <input type="checkbox" :checked="subMailEnabled" @change="subMailEnabled = ($event.target as HTMLInputElement).checked" />
+        <span>Cấu hình riêng cho Mail #2 <small>(tắt = dùng provider Mail #1)</small></span>
+      </label>
+      <div v-if="subMailEnabled && form.subMail" class="asp-submail__body">
+        <div class="rp-mail-cats">
+          <div class="rp-mail-cats__group">
+            <button :class="['rp-mail-cat', { 'rp-mail-cat--active': (form.subMail.mailType || 'temp') === 'temp' }]"
+              @click="form.subMail.mailType = 'temp'; saveNow?.()">Temp Mail</button>
+            <button :class="['rp-mail-cat', { 'rp-mail-cat--active': form.subMail.mailType === 'rent' }]"
+              @click="form.subMail.mailType = 'rent'; saveNow?.()">Rent Mail</button>
+          </div>
+        </div>
+        <div class="rp-auth-row">
+          <div class="rp-field rp-field--provider">
+            <label>Mail #2 Provider: <span class="rp-field-hint">({{ TEMP_MAIL_PROVIDERS.length }} nhà cung cấp)</span></label>
+            <SearchableSelect
+              :model-value="form.subMail.provider || ''"
+              :options="TEMP_MAIL_PROVIDERS"
+              search-placeholder="Tìm provider..."
+              @update:model-value="v => { form.subMail!.provider = v as string; saveNow?.() }"
+            />
+          </div>
+        </div>
+        <div class="rp-auth-row">
+          <div class="rp-field rp-field--col">
+            <label>Domain <span class="rp-field-hint">(cách nhau bằng dấu phẩy)</span></label>
+            <input type="text" class="vr-input" :value="form.subMail.tempMailDomain || ''"
+              @input="form.subMail!.tempMailDomain = ($event.target as HTMLInputElement).value; saveNow?.()"
+              placeholder="để trống = mặc định provider" />
+          </div>
+          <div class="rp-field rp-field--col">
+            <label>Token / API key <span class="rp-field-hint">(tuỳ chọn)</span></label>
+            <input type="text" class="vr-input" :value="form.subMail.tempMailToken || ''"
+              @input="form.subMail!.tempMailToken = ($event.target as HTMLInputElement).value; saveNow?.()"
+              placeholder="để trống nếu không cần" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Mail #2 (phụ — ReUseEmail swap) section */
+.asp-submail {
+  margin-top: 12px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-default);
+  border-left: 3px solid var(--success-text, #4caf50);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.asp-submail__head { display: flex; flex-direction: column; gap: 2px; }
+.asp-submail__title { font-size: var(--font-size-sm); font-weight: 700; color: var(--text-primary); }
+.asp-submail__desc { font-size: var(--font-size-xs); color: var(--text-muted); line-height: 1.5; }
+.asp-submail__toggle { display: flex; align-items: center; gap: 8px; font-size: var(--font-size-xs); color: var(--text-secondary); cursor: pointer; }
+.asp-submail__toggle small { color: var(--text-muted); }
+.asp-submail__body { display: flex; flex-direction: column; gap: 10px; }
+
 /* Lưu ý: phần lớn class (.rp-sf-panel, .rp-auth-tab, .rp-mail-cat, .rp-mail-provider,
    .rp-auth-row, .rp-field, .vr-input, .vr-select, .vr-btn, .vr-stock-badge, ...)
    được style global ở InteractionSetupPage.vue. Khi page InteractionSetupPage còn render
