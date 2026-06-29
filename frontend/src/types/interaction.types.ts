@@ -60,6 +60,8 @@ export type MailProviderType =
   | 'tempmailapp'
   | 'tempamail'
   | 'tempmailai'
+  | 'internxt'
+  | 'tempmailasia'
   | 'tempemailcc'
   | 'tempmailerme'
   | 'mailwave'
@@ -231,6 +233,7 @@ export interface VerifyConfig {
   delayDisplayResult: number // giây giữ kết quả trên UI trước khi fetch account mới
   addMailRetry: number       // số lần retry thêm khi add mail fail (0 = mặc định 2 outer attempts)
   retryUnknownNow: boolean   // sau pass 1, tự verify lại các acc Unknown/Error 1 pass nữa
+  retryUnknownRelogin?: boolean  // UI NullCore: relogin acc Unknown roi verify lai (cosmetic neu backend chua co)
 
   // API & Logic
   apiVerifyPlatform: string    // nền tảng verify "focus" (UA config bên dưới áp cho version này)
@@ -601,6 +604,7 @@ export const DEFAULT_VERIFY_CONFIG: VerifyConfig = {
   delayDisplayResult: 1,
   addMailRetry: 0,
   retryUnknownNow: false,
+  retryUnknownRelogin: false,
   // API & Logic
   apiVerifyPlatform: 'api android',
   apiVerifyPlatforms: [],

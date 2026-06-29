@@ -4,7 +4,7 @@
 
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { X, ChevronDown, ChevronUp, ChevronRight, ArrowUpToLine } from 'lucide-vue-next'
+import { X, ChevronRight, ArrowUpToLine } from 'lucide-vue-next'
 import { ROUTE_PATHS } from '@/constants/routes'
 import { useAppStore } from '@/stores/app.store'
 import { getInteractionService, getFileDialogService, getSettingsService, getVerifyRunnerService } from '@/services/client'
@@ -26,12 +26,61 @@ import FieldHelp from '@/features/settings/components/FieldHelp.vue'
 import ProfileManager from '@/features/settings/components/ProfileManager.vue'
 import InlineValidation from '@/features/settings/components/InlineValidation.vue'
 import SearchableSelect from '@/components/ui/SearchableSelect.vue'
+import BaseToggle from '@/components/ui/BaseToggle.vue'
 
 const appStore = useAppStore()
 const router = useRouter()
 
 // ─── Verify / interaction form ───────────────────────────────────────────────
 const form = ref<VerifyConfig>({ ...DEFAULT_VERIFY_CONFIG })
+
+// ─── Pipeline stages (S02-D2-T001) — 3 thẻ cố định Reg → Ver → ReUseEmail ────
+// Bấm chip = chọn stage (panel hiện ở T002). Toggle chip = bật/tắt stage
+// (thay checkbox Register/Verify cũ). ReUseEmail = stage ③ riêng.
+// Stage ③ "Add Mail" = thêm email #2; ④ "Tương tác" = tab xem-trước (disabled).
+type PipelineStageKey = 'reg' | 'ver' | 'reuse' | 'interact'
+const activeStage = ref<PipelineStageKey>('reg')
+const PIPELINE_STAGES = [
+  { key: 'reg',      num: 1, icon: '📝', label: 'Register',  sub: 'Tạo tài khoản' },
+  { key: 'ver',      num: 2, icon: '✓',  label: 'Verify',    sub: 'Xác thực OTP' },
+  { key: 'reuse',    num: 3, icon: '➕', label: 'Add Mail',  sub: 'Thêm email #2' },
+  { key: 'interact', num: 4, icon: '⚡', label: 'Tương tác', sub: 'Xem trước' },
+] as const
+
+function stageEnabled(key: PipelineStageKey): boolean {
+  if (key === 'reg') return true // Register luôn bật
+  if (key === 'ver') return form.value.verifyEnabled
+  if (key === 'reuse') return form.value.addSubEmail
+  return false // interact: tab xem-trước, không bật được
+}
+function setStageEnabled(key: PipelineStageKey, val: boolean) {
+  if (key === 'reg') { form.value.createEnabled = true; return } // không cho tắt
+  else if (key === 'ver') form.value.verifyEnabled = val
+  else if (key === 'reuse') {
+    // "Add Mail" = thêm email #2. Backend gate swap+recycle cần CẢ AddSubEmail && ReUseEmail
+    // (xem internal/.../reuseemail.go), nên bật/tắt đồng bộ cả 2 để chạy được ngay.
+    // Checkbox "Tái sử dụng mail ver" trong panel vẫn cho tinh chỉnh reUseEmail riêng.
+    form.value.addSubEmail = val
+    form.value.reUseEmail = val
+  }
+  // interact: no-op (toggle disabled)
+}
+
+// ─── Family filter cho grid version mỗi stage (S02-D2-T002) ───────────────────
+// Lọc HIỂN THỊ nhóm version theo family (KHÔNG đổi lựa chọn đã lưu). 'all' = hiện hết.
+type PlatformFamily = 'all' | 'android' | 'ios' | 'mess' | 'lite'
+const regFamily = ref<PlatformFamily>('all')
+const verFamily = ref<PlatformFamily>('all')
+const PLATFORM_FAMILIES: { key: PlatformFamily; label: string }[] = [
+  { key: 'all',     label: 'Tất cả' },
+  { key: 'android', label: 'Android' },
+  { key: 'ios',     label: 'iOS' },
+  { key: 'mess',    label: 'Mess' },
+  { key: 'lite',    label: 'FB Lite' },
+]
+function famShow(current: PlatformFamily, fam: PlatformFamily): boolean {
+  return current === 'all' || current === fam
+}
 
 // ─── Load interaction service khi mount ──────────────────────────────────────
 onMounted(async () => {
@@ -56,10 +105,13 @@ onMounted(async () => {
       if (interactionData.outputPath) await validateOutputPath(interactionData.outputPath)
       ensureRegPlatformsForm()
       ensureVerifyPlatformsForm()
+      form.value.createEnabled = true // Register luôn bật
+      // Stage mở đầu = stage đang bật đầu tiên (chỉ verify → mở Verify, ngược lại Reg).
+      if (form.value.verifyEnabled && !form.value.createEnabled) activeStage.value = 'ver'
     }
     // FORCE: Result folder luôn là default (./result/ cạnh exe) — port C# hardcode path.
     // Bỏ qua value user đã save trong interaction.json để tránh trỏ về path cũ không mong muốn.
-    const getDefault = (window as any)?.go?.app?.App?.GetDefaultResultPath
+    const getDefault = (window as any)?.go?.main?.App?.GetDefaultResultPath
     if (typeof getDefault === 'function') {
       const defaultPath = await getDefault()
       if (defaultPath) form.value.resultFolderPath = defaultPath
@@ -67,7 +119,7 @@ onMounted(async () => {
 
     // Cookie Initial: luôn dùng file mặc định cạnh app, không cho chọn file riêng.
     // Backend GetDefaultCookiePaths() auto-tạo file rỗng để user paste datr.
-    const getCookiePaths = (window as any)?.go?.app?.App?.GetDefaultCookiePaths
+    const getCookiePaths = (window as any)?.go?.main?.App?.GetDefaultCookiePaths
     if (typeof getCookiePaths === 'function') {
       const paths = await getCookiePaths()
       if (paths?.initial) form.value.cookieInitialFile = paths.initial
@@ -80,7 +132,7 @@ onMounted(async () => {
     }
 
     // Load proxy lists (TempMail + Gmail) từ Config/Proxy/*.txt.
-    const loadProxy = (window as any)?.go?.app?.App?.LoadProxyList
+    const loadProxy = (window as any)?.go?.main?.App?.LoadProxyList
     if (typeof loadProxy === 'function') {
       try {
         proxyTempmailList.value = await loadProxy('tempmail')
@@ -90,7 +142,7 @@ onMounted(async () => {
 
     // Sync VerifySourceFolderPath ↔ General.AccountSourcePath — 2 field là 1 nguồn duy nhất.
     if (!form.value.verifySourceFolderPath || !form.value.verifySourceFolderPath.trim()) {
-      const getAccountSource = (window as any)?.go?.app?.App?.GetAccountSourceFolder
+      const getAccountSource = (window as any)?.go?.main?.App?.GetAccountSourceFolder
       if (typeof getAccountSource === 'function') {
         try {
           const generalPath = await getAccountSource()
@@ -111,7 +163,7 @@ onMounted(async () => {
       const svc = await getSettingsService()
       const saved = await svc.load()
       const t = Number(saved?.general?.threadRequest)
-      form.value.regThreads = (t && t > 0) ? Math.min(600, Math.floor(t)) : 20
+      form.value.regThreads = (t && t > 0) ? Math.min(100000, Math.floor(t)) : 20
     } catch {
       form.value.regThreads = 20
     }
@@ -185,7 +237,7 @@ onBeforeUnmount(() => {
   _datrPoolTimer = null
 })
 async function saveProxyList(kind: 'tempmail' | 'gmail', content: string) {
-  const save = (window as any)?.go?.app?.App?.SaveProxyList
+  const save = (window as any)?.go?.main?.App?.SaveProxyList
   if (typeof save !== 'function') {
     appStore.notify('error', 'Backend chưa sẵn sàng')
     return
@@ -206,8 +258,31 @@ const saveProxyGmail = () => saveProxyList('gmail', proxyGmailList.value)
 // ─── Summary drawer ───────────────────────────────────────────────────────────
 const showSummary = ref(false)
 
-// ─── Section accordion state ──────────────────────────────────────────────────
-const sectionCollapsed = reactive({ s1: false, s2: false, s3: false })
+// Section headers (rp-section__header--toggle) đã bỏ ở S02-D2-T002 — chip pipeline
+// thay thế (số + tên + toggle). subCollapsed (subsection) vẫn dùng riêng bên dưới.
+
+// ─── Sub-section accordion (mục con thu gọn được) ─────────────────────────────
+// Mặc định: API picker MỞ (việc chính), các mục cài đặt/timing THU GỌN cho đỡ rối.
+// Thu lại → header hiện "đang chọn mấy cái". Nhớ trạng thái qua localStorage.
+const SUB_COLLAPSE_KEY = 'havu:subCollapsed'
+const subCollapsed = reactive<Record<string, boolean>>({
+  verApi: false, verTiming: true,
+  regApi: false, regSettings: true, regCookie: true,
+})
+try {
+  const saved = JSON.parse(localStorage.getItem(SUB_COLLAPSE_KEY) || '{}')
+  if (saved && typeof saved === 'object') Object.assign(subCollapsed, saved)
+} catch { /* ignore */ }
+function toggleSub(key: string) {
+  subCollapsed[key] = !subCollapsed[key]
+  try { localStorage.setItem(SUB_COLLAPSE_KEY, JSON.stringify(subCollapsed)) } catch { /* ignore */ }
+}
+const verPlatCount = computed(() => form.value.apiVerifyPlatforms?.length ?? 0)
+const regPlatCount = computed(() => form.value.apiRegPlatforms?.length ?? 0)
+const verOptCount = computed(() => [
+  form.value.sendAgainCode, form.value.checkLiveDieEnabled, form.value.retryUnknownNow,
+  form.value.retryUnknownRelogin, form.value.reUseEmail, form.value.fmUserTmpMail, form.value.getNewDatrOnLive,
+].filter(Boolean).length)
 
 // ─── Auth source tab ──────────────────────────────────────────────────────────
 const authSourceTab = ref<'mail' | 'phone'>('mail')
@@ -228,6 +303,7 @@ async function reloadForm() {
       if (!form.value.verifyPlatformUA) form.value.verifyPlatformUA = {}
       ensureRegPlatformsForm()
       ensureVerifyPlatformsForm()
+      form.value.createEnabled = true // Register luôn bật
     }
   } catch { /* ignore on reload */ }
 }
@@ -307,7 +383,7 @@ async function handleBrowseVerifySourceFolder() {
     if (!path) return
     form.value.verifySourceFolderPath = path
     // Sync vào Cài đặt chung > Nguồn tài khoản — 2 field này là 1 nguồn duy nhất.
-    const setAccountSource = (window as any)?.go?.app?.App?.SetAccountSourceFolder
+    const setAccountSource = (window as any)?.go?.main?.App?.SetAccountSourceFolder
     if (typeof setAccountSource === 'function') {
       try { await setAccountSource(path) } catch { /* ignore */ }
     }
@@ -324,7 +400,7 @@ async function handleBrowseRegisterFolder() {
 
 
 async function openCookieInitialFile() {
-  const fn = (window as any)?.go?.app?.App?.OpenCookieInitialFile
+  const fn = (window as any)?.go?.main?.App?.OpenCookieInitialFile
   if (typeof fn !== 'function') return
   try {
     const result = await fn('')
@@ -364,7 +440,7 @@ const cookieInitialFileStatus = ref('')
 const cookieInitialResolvedPath = ref('')
 
 async function loadCookieInitialStatus() {
-  const fn = (window as any)?.go?.app?.App?.GetCookieInitialStatus
+  const fn = (window as any)?.go?.main?.App?.GetCookieInitialStatus
   if (typeof fn !== 'function') return
   try {
     const status = await fn(form.value.cookieInitialFile)
@@ -382,8 +458,8 @@ const poolFileSaveCount = ref(0)
 let _datrPoolTimer: ReturnType<typeof setInterval> | null = null
 
 async function loadDatrPoolCount() {
-  const fnPool = (window as any)?.go?.app?.App?.GetDatrPoolSize
-  const fnSaved = (window as any)?.go?.app?.App?.GetPoolFileSaveCount
+  const fnPool = (window as any)?.go?.main?.App?.GetDatrPoolSize
+  const fnSaved = (window as any)?.go?.main?.App?.GetPoolFileSaveCount
   try {
     if (typeof fnPool === 'function') datrPoolCount.value = Number(await fnPool())
     if (typeof fnSaved === 'function') poolFileSaveCount.value = Number(await fnSaved())
@@ -410,13 +486,13 @@ watch(() => form.value.cookieInitialFile, () => {
 })
 
 // Active UA pool — show "Đang dùng: ..." hint sau khi user click 1 trong 3 button
-const activeUaPoolMeta = computed(() => UA_POOLS.find(p => p.key === form.value.uaPoolKey) ?? null)
-
 // ─── UA file counts ───────────────────────────────────────────────────────────
+// uaCounts/loadUACounts vẫn dùng cho count per-pool ở UA per-platform (REG/VERIFY grid).
+// Global uaPoolKey selector + activeUaPoolMeta + openUAFile đã chuyển sang Cài đặt chung (S02-D2-T006).
 const uaCounts = ref<Record<string, number>>({ android: 0, iphone: 0, request: 0, webchrome: 0, android_mess: 0, ios_mess: 0 })
 
 async function loadUACounts() {
-  const fn = (window as any)?.go?.app?.App?.GetUAPoolsStatus
+  const fn = (window as any)?.go?.main?.App?.GetUAPoolsStatus
   if (typeof fn !== 'function') return
   try {
     const statuses: Array<{ kind: string; count: number }> = await fn()
@@ -427,19 +503,14 @@ async function loadUACounts() {
   } catch { /* ignore */ }
 }
 
-async function openUAFile() {
-  const fn = (window as any)?.go?.app?.App?.OpenUAFileInEditor
-  if (typeof fn !== 'function') return
-  await fn(form.value.uaPoolKey)
-}
-
-
 // ── UA Config per-platform (inline) ─────────────────────────────────────────
 
 // UA gốc cố định theo platform (copy từ internal/facebook/register/s5xx/body.go).
 const ORIGINAL_UA_STRINGS: Record<string, string> = {
   // Generic Android FB app (SM-G991B — Galaxy S21)
   android: '[FBAN/FB4A;FBAV/560.0.0.26.63;FBBV/959741200;FBDM/{density=2.625,width=1080,height=2400};FBLC/en_US;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G991B;FBSV/14;FBOP/1;FBCA/arm64-v8a:;]',
+  // Facebook Lite (FBAN/EMA v499) Android — Dalvik prefix, SM-G996B
+  fblite: 'Dalvik/2.1.0 (Linux; U; Android 15; SM-G996B Build/AP3A.240905.015.A2) [FBAN/EMA;FBBV/890307206;FBAV/499.0.0.9.106;FBDV/SM-G996B;FBSV/15;FBCX/OkHttp3;FBDM/{density=2.8125}]',
   // Web Android — mobile Chrome browser
   webandroid: 'Mozilla/5.0 (Linux; Android 15; SM-S931B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.7390.107 Mobile Safari/537.36',
   // iOS Facebook app (iPhone 14 Pro — iPhone15,2)
@@ -588,6 +659,7 @@ const ORIGINAL_UA_STRINGS: Record<string, string> = {
   ios430: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/19H390 [FBAN/FBIOS;FBAV/430.0.0.33.114;FBBV/510613204;FBDV/iPhone15,2;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/0]',
   ios420: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_8_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/19H390 [FBAN/FBIOS;FBAV/420.0.0.24.58;FBBV/486889524;FBDV/iPhone15,2;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/0]',
   ios564: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H115 [FBAN/FBIOS;FBAV/564.0.0.57.71;FBBV/985438427;FBDV/iPhone15,2;FBMD/iPhone;FBSN/iOS;FBSV/16.7;FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/0]',
+  ios565: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H115 [FBAN/FBIOS;FBAV/565.0.0.61.71;FBBV/991371006;FBDV/iPhone15,2;FBMD/iPhone;FBSN/iOS;FBSV/16.7;FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/0]',
   ios562: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/20H115 [FBAN/FBIOS;FBAV/563.0.0.67.72;FBBV/980285082;FBDV/iPhone15,2;FBMD/iPhone;FBSN/iOS;FBSV/16.7;FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/0]',
   // Samsung Galaxy S22 (SM-S901B)
   s22: '[FBAN/FB4A;FBAV/560.0.0.26.63;FBBV/959741200;FBDM/{density=2.625,width=1080,height=2340};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-S901B;FBSV/13;FBOP/1;FBCA/arm64-v8a:;]',
@@ -780,7 +852,20 @@ const ORIGINAL_UA_STRINGS: Record<string, string> = {
   s564v2s23: '[FBAN/FB4A;FBAV/564.0.0.0.61;FBBV/980390555;FBDM/{density=3.0,width=1080,height=2340};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-S911B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s564v3s21: '[FBAN/FB4A;FBAV/564.0.0.48.74;FBBV/986612294;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s564v3s23: '[FBAN/FB4A;FBAV/564.0.0.48.74;FBBV/986612294;FBDM/{density=3.0,width=1080,height=2340};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-S911B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s564v4s21: '[FBAN/FB4A;FBAV/564.0.0.48.74;FBBV/986612294;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s564v5s21: '[FBAN/FB4A;FBAV/564.0.0.48.74;FBBV/992344641;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s565s21: '[FBAN/FB4A;FBAV/565.0.0.0.28;FBBV/984080529;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s566s21: '[FBAN/FB4A;FBAV/566.0.0.32.73;FBBV/995704816;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s566v2s21: '[FBAN/FB4A;FBAV/566.0.0.38.73;FBBV/996054886;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s567s21: '[FBAN/FB4A;FBAV/567.0.0.0.59;FBBV/997301760;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s565v5s21: '[FBAN/FB4A;FBAV/565.0.0.49.74;FBBV/992344909;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s566v3s21: '[FBAN/FB4A;FBAV/566.0.0.48.73;FBBV/997672374;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s568s21: '[FBAN/FB4A;FBAV/568.0.0.0.42;FBBV/1001003340;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s568v2s21: '[FBAN/FB4A;FBAV/568.0.0.0.58;FBBV/1002137807;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s567v2s21: '[FBAN/FB4A;FBAV/567.0.0.43.74;FBBV/1002430997;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s566v4s21: '[FBAN/FB4A;FBAV/566.0.0.48.73;FBBV/997672361;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/armeabi-v7a:armeabi;]',
+  s565v3s21: '[FBAN/FB4A;FBAV/565.0.0.49.74;FBBV/992346805;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
+  s565v4s21: '[FBAN/FB4A;FBAV/565.0.0.49.74;FBBV/992346800;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s565s23: '[FBAN/FB4A;FBAV/565.0.0.0.28;FBBV/984080529;FBDM/{density=3.0,width=1080,height=2340};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-S911B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s565v2s21: '[FBAN/FB4A;FBAV/565.0.0.0.58;FBBV/986097483;FBDM/{density=2.8125,width=1080,height=2400};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-G996B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s565v2s23: '[FBAN/FB4A;FBAV/565.0.0.0.58;FBBV/986097483;FBDM/{density=3.0,width=1080,height=2340};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-S911B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
@@ -790,6 +875,16 @@ const ORIGINAL_UA_STRINGS: Record<string, string> = {
   s562v4s23: '[FBAN/FB4A;FBAV/562.0.0.51.73;FBBV/976057955;FBDM/{density=3.0,width=1080,height=2340};FBLC/en_GB;FBRV/0;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBPN/com.facebook.katana;FBDV/SM-S911B;FBSV/15;FBOP/1;FBCA/arm64-v8a:;]',
   s399: 'Dalvik/2.1.0 (Linux; U; Android 15; SM-S911B Build/AP3A.240905.015.A2) [FBAN/FB4A;FBAV/399.0.0.24.93;FBPN/com.facebook.katana;FBLC/en_GB;FBBV/440587081;FBCR/Viettel;FBMF/samsung;FBBD/samsung;FBDV/SM-S911B;FBSV/15;FBLC/en_GB;FBOP/1;FBCA/arm64-v8a:armeabi-v7a;]',
   s273: 'Dalvik/2.1.0 (Linux; U; Android 9; V2242A Build/PQ3A.190705.05150936) [FBAN/FB4A;FBAV/273.0.0.39.123;FBPN/com.facebook.katana;FBLC/vi_VN;FBBV/218047977;FBCR/MobiFone;FBMF/vivo;FBBD/vivo;FBDV/V2242A;FBSV/9;FBCA/x86:armeabi-v7a;FBDM/{density=1.5,width=900,height=1600};FB_FW/1;FBRV/0;]',
+  // Messenger Lite iOS
+  iosmess558: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/558.2.0.42.110;FBBV/952277649;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess559: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/559.0.0.40.105;FBBV/955589806;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess560: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/560.1.0.45.108;FBBV/964803015;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess561: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/561.0.0.38.103;FBBV/968079208;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess562: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/562.0.0.40.107;FBBV/975021560;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess564: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/564.0.0.41.103;FBBV/988438975;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess565: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/565.0.0.29.108;FBBV/991411137;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess566: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/566.0.0.23.105;FBBV/996862463;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
+  iosmess567: 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/567.0.0.27.106;FBBV/1001940950;FBDV/iPhone9,1;FBMD/iPhone;FBSN/iOS;FBSV/15.8.4;FBSS/2;FBCR/;FBID/phone;FBLC/vi_VN;FBOP/0]',
 }
 
 const REG_PLATFORM_LABELS: Record<string, string> = {
@@ -864,10 +959,11 @@ const REG_PLATFORM_LABELS: Record<string, string> = {
   s555: 'S23 (Fb_555)', s555v2: 'S23 (Fb_555v2)', s556: 'S23 (Fb_556)', s557: 'S23 (Fb_557)',
   s550v2: 'S23 (Fb_550v2)', s551v2: 'S23 (Fb_551v2)', s552v2: 'S23 (Fb_552v2)', s553v2: 'S23 (Fb_553v2)', s554v2: 'S23 (Fb_554v2)',
   s556v2: 'S23 (Fb_556v2)', s557v2: 'S23 (Fb_557v2)',
-  s558: 'S23 (Fb_558)', s558v2: 'S23 (Fb_558v2)', s559: 'S23 (Fb_559)', s559v2: 'S23 (Fb_559v2)', s560: 'S23 (Fb_560)', s560v2: 'S23 (Fb_560v2)', s560v3: 'S23 (Fb_560v3)', s561: 'S23 (Fb_561)', s561v2: 'S23 (Fb_561v2)', s561v3: 'S23 (Fb_561v3)', s561v99: 'S23 (Fb_561v99)', s561v4s21: 'S21+ (Fb_561v4)', s561v4s23: 'S23 (Fb_561v4)', s562: 'S23 (Fb_562)', s562v3: 'S23 (Fb_562v3)', s562v4s21: 'S21+ (Fb_562v4)', s562v4s23: 'S23 (Fb_562v4)', s563: 'S23 (Fb_563)', s563s21: 'S21+ (Fb_563)', s563v3s21: 'S21+ (Fb_563v3)', s563v4s21: 'S21+ (Fb_563v4)', s563v4s23: 'S23 (Fb_563v4)', s564v1s21: 'S21+ (Fb_564v1)', s564v1s23: 'S23 (Fb_564v1)', s563v5s21: 'S21+ (Fb_563v5)', s563v5s23: 'S23 (Fb_563v5)', s563v6s21: 'S21+ (Fb_563v6)', s563v6s23: 'S23 (Fb_563v6)', s564v2s21: 'S21+ (Fb_564v2)', s564v2s23: 'S23 (Fb_564v2)', s564v3s21: 'S21+ (Fb_564v3)', s564v3s23: 'S23 (Fb_564v3)', s565: 'S21+ (Fb_565_S21)', s565s23: 'S23 (Fb_565_S23)', s565v2s21: 'S21+ (Fb_565v2_S21)', s565v2s23: 'S23 (Fb_565v2_S23)', s399: 'S23 (Fb_399)',
+  s558: 'S23 (Fb_558)', s558v2: 'S23 (Fb_558v2)', s559: 'S23 (Fb_559)', s559v2: 'S23 (Fb_559v2)', s560: 'S23 (Fb_560)', s560v2: 'S23 (Fb_560v2)', s560v3: 'S23 (Fb_560v3)', s561: 'S23 (Fb_561)', s561v2: 'S23 (Fb_561v2)', s561v3: 'S23 (Fb_561v3)', s561v99: 'S23 (Fb_561v99)', s561v4s21: 'S21+ (Fb_561v4)', s561v4s23: 'S23 (Fb_561v4)', s562: 'S23 (Fb_562)', s562v3: 'S23 (Fb_562v3)', s562v4s21: 'S21+ (Fb_562v4)', s562v4s23: 'S23 (Fb_562v4)', s563: 'S23 (Fb_563)', s563s21: 'S21+ (Fb_563)', s563v3s21: 'S21+ (Fb_563v3)', s563v4s21: 'S21+ (Fb_563v4)', s563v4s23: 'S23 (Fb_563v4)', s564v1s21: 'S21+ (Fb_564v1)', s564v1s23: 'S23 (Fb_564v1)', s563v5s21: 'S21+ (Fb_563v5)', s563v5s23: 'S23 (Fb_563v5)', s563v6s21: 'S21+ (Fb_563v6)', s563v6s23: 'S23 (Fb_563v6)', s564v2s21: 'S21+ (Fb_564v2)', s564v2s23: 'S23 (Fb_564v2)', s564v3s21: 'S21+ (Fb_564v3)', s564v3s23: 'S23 (Fb_564v3)', s564v4s21: 'S21+ (Fb_564v4)', s564v5s21: 'S21+ (Fb_564v5)', s565: 'S21+ (Fb_565_S21)', s565s23: 'S23 (Fb_565_S23)', s565v2s21: 'S21+ (Fb_565v2_S21)', s565v2s23: 'S23 (Fb_565v2_S23)', s566s21: 'S21+ (Fb_566_S21)', s566v2s21: 'S21+ (Fb_566v2_S21)', s566v3s21: 'S21+ (Fb_566v3_S21)', s566v4s21: 'S21+ (Fb_566v4_S21)', s567s21: 'S21+ (Fb_567_S21)', s567v2s21: 'S21+ (Fb_567v2_S21)', s568s21: 'S21+ (Fb_568_S21)', s568v2s21: 'S21+ (Fb_568v2_S21)', s565v3s21: 'S21+ (Fb_565v3_S21)', s565v4s21: 'S21+ (Fb_565v4_S21)', s565v5s21: 'S21+ (Fb_565v5_S21)', s399: 'S23 (Fb_399)',
   // iOS Native App (FBIOS) group
   ios562: 'iOS App (FBIOS 562)',
 ios564: 'iOS App (FBIOS 564)',
+ios565: 'iOS App (FBIOS 565)',
 ios560: 'iOS App (FBIOS 560)',
 ios555: 'iOS App (FBIOS 555)',
 ios550: 'iOS App (FBIOS 550)',
@@ -1012,11 +1108,12 @@ const VER_PLATFORM_LABELS: Record<string, string> = {
   'api token': 'api token', 'api web andr': 'api web andr',
   s415: 'S23 (Fb_415)', s425: 'S23 (Fb_425)', s435: 'S23 (Fb_435)', s445: 'S23 (Fb_445)', s455: 'S23 (Fb_455)',
   s550v2: 'S23 (Fb_550v2)', s551v2: 'S23 (Fb_551v2)', s552v2: 'S23 (Fb_552v2)', s553v2: 'S23 (Fb_553v2)', s554v2: 'S23 (Fb_554v2)', s555: 'S23 (Fb_555)', s555v2: 'S23 (Fb_555v2)', s556: 'S23 (Fb_556)', s556v2: 'S23 (Fb_556v2)', s557: 'S23 (Fb_557)', s557v2: 'S23 (Fb_557v2)',
-  s558: 'S23 (Fb_558)', s558v2: 'S23 (Fb_558v2)', s559: 'S23 (Fb_559)', s559v2: 'S23 (Fb_559v2)', s560: 'S23 (Fb_560)', s560v2: 'S23 (Fb_560v2)', s560v3: 'S23 (Fb_560v3)', s561: 'S23 (Fb_561)', s561v2: 'S23 (Fb_561v2)', s561v3: 'S23 (Fb_561v3)', s561v99: 'S23 (Fb_561v99)', s561v4s21: 'S21+ (Fb_561v4)', s561v4s23: 'S23 (Fb_561v4)', s562: 'S23 (Fb_562)', s562v3: 'S23 (Fb_562v3)', s562v4s21: 'S21+ (Fb_562v4)', s562v4s23: 'S23 (Fb_562v4)', s563: 'S23 (Fb_563)', s563v2: 'S23 (Fb_563v2)', s563s21: 'S21+ (Fb_563)', s563v3s21: 'S21+ (Fb_563v3)', s563v4s21: 'S21+ (Fb_563v4)', s563v4s23: 'S23 (Fb_563v4)', s564v1s21: 'S21+ (Fb_564v1)', s564v1s23: 'S23 (Fb_564v1)', s563v5s21: 'S21+ (Fb_563v5)', s563v5s23: 'S23 (Fb_563v5)', s563v6s21: 'S21+ (Fb_563v6)', s563v6s23: 'S23 (Fb_563v6)', s564v2s21: 'S21+ (Fb_564v2)', s564v2s23: 'S23 (Fb_564v2)', s564v3s21: 'S21+ (Fb_564v3)', s564v3s23: 'S23 (Fb_564v3)', s565: 'S21+ (Fb_565_S21)', s565s23: 'S23 (Fb_565_S23)', s565v2s21: 'S21+ (Fb_565v2_S21)', s565v2s23: 'S23 (Fb_565v2_S23)',
+  s558: 'S23 (Fb_558)', s558v2: 'S23 (Fb_558v2)', s559: 'S23 (Fb_559)', s559v2: 'S23 (Fb_559v2)', s560: 'S23 (Fb_560)', s560v2: 'S23 (Fb_560v2)', s560v3: 'S23 (Fb_560v3)', s561: 'S23 (Fb_561)', s561v2: 'S23 (Fb_561v2)', s561v3: 'S23 (Fb_561v3)', s561v99: 'S23 (Fb_561v99)', s561v4s21: 'S21+ (Fb_561v4)', s561v4s23: 'S23 (Fb_561v4)', s562: 'S23 (Fb_562)', s562v3: 'S23 (Fb_562v3)', s562v4s21: 'S21+ (Fb_562v4)', s562v4s23: 'S23 (Fb_562v4)', s563: 'S23 (Fb_563)', s563v2: 'S23 (Fb_563v2)', s563s21: 'S21+ (Fb_563)', s563v3s21: 'S21+ (Fb_563v3)', s563v4s21: 'S21+ (Fb_563v4)', s563v4s23: 'S23 (Fb_563v4)', s564v1s21: 'S21+ (Fb_564v1)', s564v1s23: 'S23 (Fb_564v1)', s563v5s21: 'S21+ (Fb_563v5)', s563v5s23: 'S23 (Fb_563v5)', s563v6s21: 'S21+ (Fb_563v6)', s563v6s23: 'S23 (Fb_563v6)', s564v2s21: 'S21+ (Fb_564v2)', s564v2s23: 'S23 (Fb_564v2)', s564v3s21: 'S21+ (Fb_564v3)', s564v3s23: 'S23 (Fb_564v3)', s564v4s21: 'S21+ (Fb_564v4)', s564v5s21: 'S21+ (Fb_564v5)', s565: 'S21+ (Fb_565_S21)', s565s23: 'S23 (Fb_565_S23)', s565v2s21: 'S21+ (Fb_565v2_S21)', s565v2s23: 'S23 (Fb_565v2_S23)', s566s21: 'S21+ (Fb_566_S21)', s566v2s21: 'S21+ (Fb_566v2_S21)', s566v3s21: 'S21+ (Fb_566v3_S21)', s566v4s21: 'S21+ (Fb_566v4_S21)', s567s21: 'S21+ (Fb_567_S21)', s567v2s21: 'S21+ (Fb_567v2_S21)', s568s21: 'S21+ (Fb_568_S21)', s568v2s21: 'S21+ (Fb_568v2_S21)', s565v3s21: 'S21+ (Fb_565v3_S21)', s565v4s21: 'S21+ (Fb_565v4_S21)', s565v5s21: 'S21+ (Fb_565v5_S21)',
   s399: 'S23 (Fb_399 — 2-step)',
   // iOS Native App (FBIOS) verify group
-  ios562: 'iOS App (FBIOS 562)',
+  ios562: 'iOS App (FBIOS 562)', ios563: 'iOS App (FBIOS 563)',
 ios564: 'iOS App (FBIOS 564)',
+ios565: 'iOS App (FBIOS 565)',
 ios560: 'iOS App (FBIOS 560)',
 ios555: 'iOS App (FBIOS 555)',
 ios550: 'iOS App (FBIOS 550)',
@@ -1154,14 +1251,124 @@ ios559: 'iOS App (FBIOS 559)',
 ios561: 'iOS App (FBIOS 561)',
 ios440: 'iOS App (FBIOS 440)',
 ios430: 'iOS App (FBIOS 430)',  ios420: 'iOS App (FBIOS 420)',
+  // Messenger Lite iOS
+  iosmess: 'Mess Lite iOS 563', iosmess558: 'Mess Lite iOS 558', iosmess559: 'Mess Lite iOS 559', iosmess560: 'Mess Lite iOS 560', iosmess561: 'Mess Lite iOS 561', iosmess562: 'Mess Lite iOS 562', iosmess564: 'Mess Lite iOS 564', iosmess565: 'Mess Lite iOS 565', iosmess566: 'Mess Lite iOS 566', iosmess567: 'Mess Lite iOS 567',
 }
 
 const REG_PLATFORMS_STD = [
-  { key: 'ig_ios_bloks', label: 'iOS Bloks ✓' },
-  { key: 'ig_android', label: 'Android' },
+  { key: 'android', label: 'Android' }, { key: 'webandroid', label: 'Web Android' },
+  { key: 'ios', label: 'iOS' }, { key: 's22', label: 'S22' }, { key: 's23', label: 'S23' },
+  { key: 's24', label: 'S24' }, { key: 's25', label: 'S25' }, { key: 's26', label: 'S26' },
 ]
-const REG_PLATFORMS_VER: PlatformOption[] = []
-const REG_PLATFORMS_IOS: PlatformOption[] = []
+const REG_PLATFORMS_VER = [
+  { key: 's399', label: 'Fb_399' },
+  { key: 's415', label: 'Fb_415' }, { key: 's416', label: 'Fb_416' },
+  { key: 's417', label: 'Fb_417' }, { key: 's418', label: 'Fb_418' },
+  { key: 's419', label: 'Fb_419' }, { key: 's420', label: 'Fb_420' },
+  { key: 's421', label: 'Fb_421' }, { key: 's422', label: 'Fb_422' },
+  { key: 's423', label: 'Fb_423' }, { key: 's424', label: 'Fb_424' },
+  { key: 's425', label: 'Fb_425' }, { key: 's426', label: 'Fb_426' },
+  { key: 's427', label: 'Fb_427' }, { key: 's428', label: 'Fb_428' },
+  { key: 's429', label: 'Fb_429' }, { key: 's430', label: 'Fb_430' },
+  { key: 's431', label: 'Fb_431' }, { key: 's432', label: 'Fb_432' },
+  { key: 's433', label: 'Fb_433' }, { key: 's434', label: 'Fb_434' },
+  { key: 's435', label: 'Fb_435' }, { key: 's436', label: 'Fb_436' },
+  { key: 's437', label: 'Fb_437' }, { key: 's438', label: 'Fb_438' },
+  { key: 's439', label: 'Fb_439' }, { key: 's440', label: 'Fb_440' },
+  { key: 's441', label: 'Fb_441' }, { key: 's442', label: 'Fb_442' },
+  { key: 's443', label: 'Fb_443' }, { key: 's444', label: 'Fb_444' },
+  { key: 's445', label: 'Fb_445' }, { key: 's446', label: 'Fb_446' },
+  { key: 's447', label: 'Fb_447' }, { key: 's448', label: 'Fb_448' },
+  { key: 's449', label: 'Fb_449' }, { key: 's450', label: 'Fb_450' },
+  { key: 's451', label: 'Fb_451' }, { key: 's452', label: 'Fb_452' },
+  { key: 's453', label: 'Fb_453' }, { key: 's454', label: 'Fb_454' },
+  { key: 's455', label: 'Fb_455' },
+  { key: 's456', label: 'Fb_456' }, { key: 's457', label: 'Fb_457' },
+  { key: 's458', label: 'Fb_458' }, { key: 's459', label: 'Fb_459' }, { key: 's460', label: 'Fb_460' },
+  { key: 's461', label: 'Fb_461' }, { key: 's462', label: 'Fb_462' },
+  { key: 's463', label: 'Fb_463' }, { key: 's464', label: 'Fb_464' }, { key: 's465', label: 'Fb_465' },
+  { key: 's466', label: 'Fb_466' }, { key: 's467', label: 'Fb_467' },
+  { key: 's468', label: 'Fb_468' }, { key: 's469', label: 'Fb_469' }, { key: 's470', label: 'Fb_470' },
+  { key: 's471', label: 'Fb_471' }, { key: 's472', label: 'Fb_472' },
+  { key: 's473', label: 'Fb_473' }, { key: 's474', label: 'Fb_474' }, { key: 's475', label: 'Fb_475' },
+  { key: 's476', label: 'Fb_476' }, { key: 's477', label: 'Fb_477' },
+  { key: 's478', label: 'Fb_478' }, { key: 's479', label: 'Fb_479' }, { key: 's480', label: 'Fb_480' },
+  { key: 's481', label: 'Fb_481' }, { key: 's482', label: 'Fb_482' },
+  { key: 's483', label: 'Fb_483' }, { key: 's484', label: 'Fb_484' }, { key: 's485', label: 'Fb_485' },
+  { key: 's486', label: 'Fb_486' }, { key: 's487', label: 'Fb_487' },
+  { key: 's488', label: 'Fb_488' }, { key: 's489', label: 'Fb_489' }, { key: 's490', label: 'Fb_490' },
+  { key: 's491', label: 'Fb_491' }, { key: 's492', label: 'Fb_492' },
+  { key: 's493', label: 'Fb_493' }, { key: 's494', label: 'Fb_494' }, { key: 's495', label: 'Fb_495' },
+  { key: 's496', label: 'Fb_496' }, { key: 's497', label: 'Fb_497' },
+  { key: 's498', label: 'Fb_498' }, { key: 's499', label: 'Fb_499' },
+  { key: 's500', label: 'Fb_500' }, { key: 's501', label: 'Fb_501' },
+  { key: 's502', label: 'Fb_502' }, { key: 's503', label: 'Fb_503' },
+  { key: 's504', label: 'Fb_504' }, { key: 's505', label: 'Fb_505' },
+  { key: 's506', label: 'Fb_506' }, { key: 's507', label: 'Fb_507' },
+  { key: 's508', label: 'Fb_508' }, { key: 's509', label: 'Fb_509' },
+  { key: 's510', label: 'Fb_510' }, { key: 's511', label: 'Fb_511' },
+  { key: 's512', label: 'Fb_512' }, { key: 's513', label: 'Fb_513' },
+  { key: 's514', label: 'Fb_514' }, { key: 's515', label: 'Fb_515' },
+  { key: 's516', label: 'Fb_516' }, { key: 's517', label: 'Fb_517' },
+  { key: 's518', label: 'Fb_518' }, { key: 's519', label: 'Fb_519' },
+  { key: 's520', label: 'Fb_520' }, { key: 's521', label: 'Fb_521' },
+  { key: 's522', label: 'Fb_522' }, { key: 's523', label: 'Fb_523' },
+  { key: 's524', label: 'Fb_524' }, { key: 's525', label: 'Fb_525' },
+  { key: 's526', label: 'Fb_526' }, { key: 's527', label: 'Fb_527' },
+  { key: 's528', label: 'Fb_528' }, { key: 's529', label: 'Fb_529' },
+  { key: 's530', label: 'Fb_530' }, { key: 's531', label: 'Fb_531' },
+  { key: 's532', label: 'Fb_532' }, { key: 's533', label: 'Fb_533' }, { key: 's534', label: 'Fb_534' },
+  { key: 's535', label: 'Fb_535' }, { key: 's536', label: 'Fb_536' },
+  { key: 's537', label: 'Fb_537' }, { key: 's538', label: 'Fb_538' },
+  { key: 's539', label: 'Fb_539' }, { key: 's540', label: 'Fb_540' },
+  { key: 's541', label: 'Fb_541' }, { key: 's542', label: 'Fb_542' },
+  { key: 's543', label: 'Fb_543' }, { key: 's544', label: 'Fb_544' },
+  { key: 's545', label: 'Fb_545' }, { key: 's546', label: 'Fb_546' },
+  { key: 's547', label: 'Fb_547' }, { key: 's548', label: 'Fb_548' },
+  { key: 's549', label: 'Fb_549' }, { key: 's550', label: 'Fb_550' },
+  { key: 's551', label: 'Fb_551' }, { key: 's552', label: 'Fb_552' },
+  { key: 's553', label: 'Fb_553' }, { key: 's554', label: 'Fb_554' },
+  { key: 's555', label: 'Fb_555' }, { key: 's555v2', label: 'Fb_555v2' }, { key: 's556', label: 'Fb_556' },
+  { key: 's557', label: 'Fb_557' }, { key: 's558', label: 'Fb_558' }, { key: 's558v2', label: 'Fb_558v2' },
+  { key: 's559', label: 'Fb_559' }, { key: 's559v2', label: 'Fb_559v2' },
+  { key: 's560', label: 'Fb_560' }, { key: 's560v2', label: 'Fb_560v2' },
+  { key: 's561', label: 'Fb_561' }, { key: 's561v2', label: 'Fb_561v2' }, { key: 's561v3', label: 'Fb_561v3' },{ key: 's561v99', label: 'Fb_561v99' },  { key: 's561v4s21', label: 'Fb_561v4_S21' }, { key: 's561v4s23', label: 'Fb_561v4_S23' },  { key: 's562', label: 'Fb_562' }, { key: 's562v3', label: 'Fb_562v3' }, { key: 's562v4s21', label: 'Fb_562v4_S21' }, { key: 's562v4s23', label: 'Fb_562v4_S23' }, { key: 's563', label: 'Fb_563' }, { key: 's563s21', label: 'Fb_563_S21' }, { key: 's563v3s21', label: 'Fb_563v3_S21' }, { key: 's563v4s21', label: 'Fb_563v4_S21' }, { key: 's563v4s23', label: 'Fb_563v4_S23' }, { key: 's563v5s21', label: 'Fb_563v5_S21' }, { key: 's563v5s23', label: 'Fb_563v5_S23' }, { key: 's563v6s21', label: 'Fb_563v6_S21' }, { key: 's563v6s23', label: 'Fb_563v6_S23' }, { key: 's564v1s21', label: 'Fb_564v1_S21' }, { key: 's564v1s23', label: 'Fb_564v1_S23' }, { key: 's564v2s21', label: 'Fb_564v2_S21' }, { key: 's564v2s23', label: 'Fb_564v2_S23' }, { key: 's564v3s21', label: 'Fb_564v3_S21' }, { key: 's564v3s23', label: 'Fb_564v3_S23' }, { key: 's564v4s21', label: 'Fb_564v4_S21' }, { key: 's564v5s21', label: 'Fb_564v5_S21' }, { key: 's565s21', label: 'Fb_565_S21' }, { key: 's565s23', label: 'Fb_565_S23' }, { key: 's565v2s21', label: 'Fb_565v2_S21' }, { key: 's565v2s23', label: 'Fb_565v2_S23' }, { key: 's565v3s21', label: 'Fb_565v3_S21' }, { key: 's565v4s21', label: 'Fb_565v4_S21' }, { key: 's565v5s21', label: 'Fb_565v5_S21' }, { key: 's566s21', label: 'Fb_566_S21' }, { key: 's566v2s21', label: 'Fb_566v2_S21' }, { key: 's566v3s21', label: 'Fb_566v3_S21' }, { key: 's566v4s21', label: 'Fb_566v4_S21' }, { key: 's567s21', label: 'Fb_567_S21' }, { key: 's567v2s21', label: 'Fb_567v2_S21' }, { key: 's568s21', label: 'Fb_568_S21' }, { key: 's568v2s21', label: 'Fb_568v2_S21' },
+]
+
+// iOS Native App (FBIOS) — KHÁC Android, dùng graph.facebook.com + OAuth 6628568379.
+// Sắp xếp giảm dần (mới nhất lên đầu), không duplicate.
+const REG_PLATFORMS_IOS = [
+  { key: 'ios565', label: 'iOS_565' }, { key: 'ios564', label: 'iOS_564' }, { key: 'ios563', label: 'iOS_563' }, { key: 'ios562', label: 'iOS_562' }, { key: 'ios561', label: 'iOS_561' },
+  { key: 'ios560', label: 'iOS_560' }, { key: 'ios559', label: 'iOS_559' }, { key: 'ios558', label: 'iOS_558' }, { key: 'ios557', label: 'iOS_557' }, { key: 'ios556', label: 'iOS_556' },
+  { key: 'ios555', label: 'iOS_555' }, { key: 'ios554', label: 'iOS_554' }, { key: 'ios553', label: 'iOS_553' }, { key: 'ios552', label: 'iOS_552' }, { key: 'ios551', label: 'iOS_551' },
+  { key: 'ios550', label: 'iOS_550' }, { key: 'ios549', label: 'iOS_549' }, { key: 'ios548', label: 'iOS_548' }, { key: 'ios547', label: 'iOS_547' }, { key: 'ios546', label: 'iOS_546' },
+  { key: 'ios545', label: 'iOS_545' }, { key: 'ios544', label: 'iOS_544' }, { key: 'ios543', label: 'iOS_543' }, { key: 'ios542', label: 'iOS_542' }, { key: 'ios541', label: 'iOS_541' },
+  { key: 'ios540', label: 'iOS_540' }, { key: 'ios539', label: 'iOS_539' }, { key: 'ios538', label: 'iOS_538' }, { key: 'ios537', label: 'iOS_537' }, { key: 'ios536', label: 'iOS_536' },
+  { key: 'ios535', label: 'iOS_535' }, { key: 'ios534', label: 'iOS_534' }, { key: 'ios533', label: 'iOS_533' }, { key: 'ios532', label: 'iOS_532' }, { key: 'ios531', label: 'iOS_531' },
+  { key: 'ios530', label: 'iOS_530' }, { key: 'ios529', label: 'iOS_529' }, { key: 'ios528', label: 'iOS_528' }, { key: 'ios527', label: 'iOS_527' }, { key: 'ios526', label: 'iOS_526' },
+  { key: 'ios525', label: 'iOS_525' }, { key: 'ios524', label: 'iOS_524' }, { key: 'ios523', label: 'iOS_523' }, { key: 'ios522', label: 'iOS_522' }, { key: 'ios521', label: 'iOS_521' },
+  { key: 'ios520', label: 'iOS_520' }, { key: 'ios519', label: 'iOS_519' }, { key: 'ios518', label: 'iOS_518' }, { key: 'ios517', label: 'iOS_517' }, { key: 'ios516', label: 'iOS_516' },
+  { key: 'ios515', label: 'iOS_515' }, { key: 'ios514', label: 'iOS_514' }, { key: 'ios513', label: 'iOS_513' }, { key: 'ios512', label: 'iOS_512' }, { key: 'ios511', label: 'iOS_511' },
+  { key: 'ios510', label: 'iOS_510' }, { key: 'ios509', label: 'iOS_509' }, { key: 'ios508', label: 'iOS_508' }, { key: 'ios507', label: 'iOS_507' }, { key: 'ios506', label: 'iOS_506' },
+  { key: 'ios505', label: 'iOS_505' }, { key: 'ios504', label: 'iOS_504' }, { key: 'ios503', label: 'iOS_503' }, { key: 'ios502', label: 'iOS_502' }, { key: 'ios501', label: 'iOS_501' },
+  { key: 'ios500', label: 'iOS_500' }, { key: 'ios499', label: 'iOS_499' }, { key: 'ios498', label: 'iOS_498' }, { key: 'ios497', label: 'iOS_497' }, { key: 'ios496', label: 'iOS_496' },
+  { key: 'ios495', label: 'iOS_495' }, { key: 'ios494', label: 'iOS_494' }, { key: 'ios493', label: 'iOS_493' }, { key: 'ios492', label: 'iOS_492' }, { key: 'ios491', label: 'iOS_491' },
+  { key: 'ios490', label: 'iOS_490' }, { key: 'ios489', label: 'iOS_489' }, { key: 'ios488', label: 'iOS_488' }, { key: 'ios487', label: 'iOS_487' }, { key: 'ios486', label: 'iOS_486' },
+  { key: 'ios485', label: 'iOS_485' }, { key: 'ios484', label: 'iOS_484' }, { key: 'ios483', label: 'iOS_483' }, { key: 'ios482', label: 'iOS_482' }, { key: 'ios481', label: 'iOS_481' },
+  { key: 'ios480', label: 'iOS_480' }, { key: 'ios479', label: 'iOS_479' }, { key: 'ios478', label: 'iOS_478' }, { key: 'ios477', label: 'iOS_477' }, { key: 'ios476', label: 'iOS_476' },
+  { key: 'ios475', label: 'iOS_475' }, { key: 'ios474', label: 'iOS_474' }, { key: 'ios473', label: 'iOS_473' }, { key: 'ios472', label: 'iOS_472' }, { key: 'ios471', label: 'iOS_471' },
+  { key: 'ios470', label: 'iOS_470' }, { key: 'ios469', label: 'iOS_469' }, { key: 'ios468', label: 'iOS_468' }, { key: 'ios467', label: 'iOS_467' }, { key: 'ios466', label: 'iOS_466' },
+  { key: 'ios465', label: 'iOS_465' }, { key: 'ios464', label: 'iOS_464' }, { key: 'ios463', label: 'iOS_463' }, { key: 'ios462', label: 'iOS_462' }, { key: 'ios461', label: 'iOS_461' },
+  { key: 'ios460', label: 'iOS_460' }, { key: 'ios459', label: 'iOS_459' }, { key: 'ios458', label: 'iOS_458' }, { key: 'ios457', label: 'iOS_457' }, { key: 'ios456', label: 'iOS_456' },
+  { key: 'ios455', label: 'iOS_455' }, { key: 'ios454', label: 'iOS_454' }, { key: 'ios453', label: 'iOS_453' }, { key: 'ios452', label: 'iOS_452' }, { key: 'ios451', label: 'iOS_451' },
+  { key: 'ios450', label: 'iOS_450' }, { key: 'ios449', label: 'iOS_449' }, { key: 'ios448', label: 'iOS_448' }, { key: 'ios447', label: 'iOS_447' }, { key: 'ios446', label: 'iOS_446' },
+  { key: 'ios445', label: 'iOS_445' }, { key: 'ios444', label: 'iOS_444' }, { key: 'ios443', label: 'iOS_443' }, { key: 'ios442', label: 'iOS_442' }, { key: 'ios441', label: 'iOS_441' },
+  { key: 'ios440', label: 'iOS_440' }, { key: 'ios439', label: 'iOS_439' }, { key: 'ios438', label: 'iOS_438' }, { key: 'ios437', label: 'iOS_437' }, { key: 'ios436', label: 'iOS_436' },
+  { key: 'ios435', label: 'iOS_435' }, { key: 'ios434', label: 'iOS_434' }, { key: 'ios433', label: 'iOS_433' }, { key: 'ios432', label: 'iOS_432' }, { key: 'ios431', label: 'iOS_431' },
+  { key: 'ios430', label: 'iOS_430' }, { key: 'ios429', label: 'iOS_429' }, { key: 'ios428', label: 'iOS_428' }, { key: 'ios427', label: 'iOS_427' }, { key: 'ios426', label: 'iOS_426' },
+  { key: 'ios425', label: 'iOS_425' }, { key: 'ios424', label: 'iOS_424' }, { key: 'ios423', label: 'iOS_423' }, { key: 'ios422', label: 'iOS_422' }, { key: 'ios421', label: 'iOS_421' },
+  { key: 'ios420', label: 'iOS_420' },
+]
 
 const VER_PLATFORMS_ANDR = [
   { key: 'api android', label: 'android' }, { key: 'api token', label: 'token' },
@@ -1178,180 +1385,109 @@ const VER_PLATFORMS_VER = [
   { key: 's557', label: 'Fb_557' }, { key: 's557v2', label: 'Fb_557v2' }, { key: 's558', label: 'Fb_558' }, { key: 's558v2', label: 'Fb_558v2' },
   { key: 's559', label: 'Fb_559' }, { key: 's559v2', label: 'Fb_559v2' }, { key: 's560', label: 'Fb_560' },
   { key: 's560v2', label: 'Fb_560v2' }, { key: 's560v3', label: 'Fb_560v3' },
-  { key: 's561', label: 'Fb_561' }, { key: 's561v2', label: 'Fb_561v2' }, { key: 's561v3', label: 'Fb_561v3' }, { key: 's561v99', label: 'Fb_561v99' }, { key: 's561v4s21', label: 'Fb_561v4_S21' }, { key: 's561v4s23', label: 'Fb_561v4_S23' }, { key: 's562', label: 'Fb_562' }, { key: 's562v3', label: 'Fb_562v3' }, { key: 's562v4s21', label: 'Fb_562v4_S21' }, { key: 's562v4s23', label: 'Fb_562v4_S23' }, { key: 's563', label: 'Fb_563' }, { key: 's563v2', label: 'Fb_563v2' }, { key: 's563s21', label: 'Fb_563_S21' }, { key: 's563v3s21', label: 'Fb_563v3_S21' }, { key: 's563v4s21', label: 'Fb_563v4_S21' }, { key: 's563v4s23', label: 'Fb_563v4_S23' }, { key: 's563v5s21', label: 'Fb_563v5_S21' }, { key: 's563v5s23', label: 'Fb_563v5_S23' }, { key: 's563v6s21', label: 'Fb_563v6_S21' }, { key: 's563v6s23', label: 'Fb_563v6_S23' }, { key: 's564v1s21', label: 'Fb_564v1_S21' }, { key: 's564v1s23', label: 'Fb_564v1_S23' }, { key: 's564v2s21', label: 'Fb_564v2_S21' }, { key: 's564v2s23', label: 'Fb_564v2_S23' }, { key: 's564v3s21', label: 'Fb_564v3_S21' }, { key: 's564v3s23', label: 'Fb_564v3_S23' }, { key: 's565s21', label: 'Fb_565_S21' }, { key: 's565s23', label: 'Fb_565_S23' }, { key: 's565v2s21', label: 'Fb_565v2_S21' }, { key: 's565v2s23', label: 'Fb_565v2_S23' },
+  { key: 's561', label: 'Fb_561' }, { key: 's561v2', label: 'Fb_561v2' }, { key: 's561v3', label: 'Fb_561v3' }, { key: 's561v99', label: 'Fb_561v99' }, { key: 's561v4s21', label: 'Fb_561v4_S21' }, { key: 's561v4s23', label: 'Fb_561v4_S23' }, { key: 's562', label: 'Fb_562' }, { key: 's562v3', label: 'Fb_562v3' }, { key: 's562v4s21', label: 'Fb_562v4_S21' }, { key: 's562v4s23', label: 'Fb_562v4_S23' }, { key: 's563', label: 'Fb_563' }, { key: 's563v2', label: 'Fb_563v2' }, { key: 's563s21', label: 'Fb_563_S21' }, { key: 's563v3s21', label: 'Fb_563v3_S21' }, { key: 's563v4s21', label: 'Fb_563v4_S21' }, { key: 's563v4s23', label: 'Fb_563v4_S23' }, { key: 's563v5s21', label: 'Fb_563v5_S21' }, { key: 's563v5s23', label: 'Fb_563v5_S23' }, { key: 's563v6s21', label: 'Fb_563v6_S21' }, { key: 's563v6s23', label: 'Fb_563v6_S23' }, { key: 's564v1s21', label: 'Fb_564v1_S21' }, { key: 's564v1s23', label: 'Fb_564v1_S23' }, { key: 's564v2s21', label: 'Fb_564v2_S21' }, { key: 's564v2s23', label: 'Fb_564v2_S23' }, { key: 's564v3s21', label: 'Fb_564v3_S21' }, { key: 's564v3s23', label: 'Fb_564v3_S23' }, { key: 's564v4s21', label: 'Fb_564v4_S21' }, { key: 's564v5s21', label: 'Fb_564v5_S21' }, { key: 's565s21', label: 'Fb_565_S21' }, { key: 's565s23', label: 'Fb_565_S23' }, { key: 's565v2s21', label: 'Fb_565v2_S21' }, { key: 's565v2s23', label: 'Fb_565v2_S23' }, { key: 's565v3s21', label: 'Fb_565v3_S21' }, { key: 's565v4s21', label: 'Fb_565v4_S21' }, { key: 's565v5s21', label: 'Fb_565v5_S21' }, { key: 's566s21', label: 'Fb_566_S21' }, { key: 's566v2s21', label: 'Fb_566v2_S21' }, { key: 's566v3s21', label: 'Fb_566v3_S21' }, { key: 's566v4s21', label: 'Fb_566v4_S21' }, { key: 's567s21', label: 'Fb_567_S21' }, { key: 's567v2s21', label: 'Fb_567v2_S21' }, { key: 's568s21', label: 'Fb_568_S21' }, { key: 's568v2s21', label: 'Fb_568v2_S21' },
 ]
 
-// iOS Native App (FBIOS) verify group.
-// iOS_562 verify đã dùng bộ constant v563 (doc_id/bloks/FBAV 563) → verify được account iOS.
-// KHÔNG có nút iOS_563 ở verify: chưa có verifier ios563 riêng (sẽ "verifier not registered").
-// Khi nào có capture verify iOS563 thật + verify/ios563/ thì mới thêm lại.
+// iOS Native App (FBIOS) verify group — giảm dần (mới nhất lên đầu), không duplicate.
 const VER_PLATFORMS_IOS = [
-  { key: 'ios564', label: 'iOS_564' },
-  { key: 'ios563', label: 'iOS_563' },
-  { key: 'ios562', label: 'iOS_562' },
-  { key: 'ios561', label: 'iOS_561' },
-{ key: 'ios560', label: 'iOS_560' },
-{ key: 'ios559', label: 'iOS_559' },
-{ key: 'ios558', label: 'iOS_558' },
-{ key: 'ios557', label: 'iOS_557' },
-{ key: 'ios556', label: 'iOS_556' },
-{ key: 'ios555', label: 'iOS_555' },
-{ key: 'ios554', label: 'iOS_554' },
-{ key: 'ios553', label: 'iOS_553' },
-{ key: 'ios552', label: 'iOS_552' },
-{ key: 'ios551', label: 'iOS_551' },
-{ key: 'ios550', label: 'iOS_550' },
-{ key: 'ios549', label: 'iOS_549' },
-{ key: 'ios548', label: 'iOS_548' },
-{ key: 'ios547', label: 'iOS_547' },
-{ key: 'ios546', label: 'iOS_546' },
-{ key: 'ios545', label: 'iOS_545' },
-{ key: 'ios544', label: 'iOS_544' },
-{ key: 'ios543', label: 'iOS_543' },
-{ key: 'ios542', label: 'iOS_542' },
-{ key: 'ios541', label: 'iOS_541' },
-{ key: 'ios540', label: 'iOS_540' },
-{ key: 'ios539', label: 'iOS_539' },
-{ key: 'ios538', label: 'iOS_538' },
-{ key: 'ios537', label: 'iOS_537' },
-{ key: 'ios536', label: 'iOS_536' },
-{ key: 'ios535', label: 'iOS_535' },
-{ key: 'ios534', label: 'iOS_534' },
-{ key: 'ios533', label: 'iOS_533' },
-{ key: 'ios532', label: 'iOS_532' },
-{ key: 'ios531', label: 'iOS_531' },
-{ key: 'ios530', label: 'iOS_530' },
-{ key: 'ios529', label: 'iOS_529' },
-{ key: 'ios528', label: 'iOS_528' },
-{ key: 'ios527', label: 'iOS_527' },
-{ key: 'ios526', label: 'iOS_526' },
-{ key: 'ios525', label: 'iOS_525' },
-{ key: 'ios524', label: 'iOS_524' },
-{ key: 'ios523', label: 'iOS_523' },
-{ key: 'ios522', label: 'iOS_522' },
-{ key: 'ios521', label: 'iOS_521' },
-{ key: 'ios520', label: 'iOS_520' },
-{ key: 'ios519', label: 'iOS_519' },
-{ key: 'ios518', label: 'iOS_518' },
-{ key: 'ios517', label: 'iOS_517' },
-{ key: 'ios516', label: 'iOS_516' },
-{ key: 'ios515', label: 'iOS_515' },
-{ key: 'ios514', label: 'iOS_514' },
-{ key: 'ios513', label: 'iOS_513' },
-{ key: 'ios512', label: 'iOS_512' },
-{ key: 'ios511', label: 'iOS_511' },
-{ key: 'ios510', label: 'iOS_510' },
-{ key: 'ios509', label: 'iOS_509' },
-{ key: 'ios508', label: 'iOS_508' },
-{ key: 'ios507', label: 'iOS_507' },
-{ key: 'ios506', label: 'iOS_506' },
-{ key: 'ios505', label: 'iOS_505' },
-{ key: 'ios504', label: 'iOS_504' },
-{ key: 'ios503', label: 'iOS_503' },
-{ key: 'ios502', label: 'iOS_502' },
-{ key: 'ios501', label: 'iOS_501' },
-{ key: 'ios500', label: 'iOS_500' },
-{ key: 'ios499', label: 'iOS_499' },
-{ key: 'ios498', label: 'iOS_498' },
-{ key: 'ios497', label: 'iOS_497' },
-{ key: 'ios496', label: 'iOS_496' },
-{ key: 'ios495', label: 'iOS_495' },
-{ key: 'ios494', label: 'iOS_494' },
-{ key: 'ios493', label: 'iOS_493' },
-{ key: 'ios492', label: 'iOS_492' },
-{ key: 'ios491', label: 'iOS_491' },
-{ key: 'ios490', label: 'iOS_490' },
-{ key: 'ios489', label: 'iOS_489' },
-{ key: 'ios488', label: 'iOS_488' },
-{ key: 'ios487', label: 'iOS_487' },
-{ key: 'ios486', label: 'iOS_486' },
-{ key: 'ios485', label: 'iOS_485' },
-{ key: 'ios484', label: 'iOS_484' },
-{ key: 'ios483', label: 'iOS_483' },
-{ key: 'ios482', label: 'iOS_482' },
-{ key: 'ios481', label: 'iOS_481' },
-{ key: 'ios480', label: 'iOS_480' },
-{ key: 'ios479', label: 'iOS_479' },
-{ key: 'ios478', label: 'iOS_478' },
-{ key: 'ios477', label: 'iOS_477' },
-{ key: 'ios476', label: 'iOS_476' },
-{ key: 'ios475', label: 'iOS_475' },
-{ key: 'ios474', label: 'iOS_474' },
-{ key: 'ios473', label: 'iOS_473' },
-{ key: 'ios472', label: 'iOS_472' },
-{ key: 'ios471', label: 'iOS_471' },
-{ key: 'ios470', label: 'iOS_470' },
-{ key: 'ios469', label: 'iOS_469' },
-{ key: 'ios468', label: 'iOS_468' },
-{ key: 'ios467', label: 'iOS_467' },
-{ key: 'ios466', label: 'iOS_466' },
-{ key: 'ios465', label: 'iOS_465' },
-{ key: 'ios464', label: 'iOS_464' },
-{ key: 'ios463', label: 'iOS_463' },
-{ key: 'ios462', label: 'iOS_462' },
-{ key: 'ios461', label: 'iOS_461' },
-{ key: 'ios460', label: 'iOS_460' },
-{ key: 'ios459', label: 'iOS_459' },
-{ key: 'ios458', label: 'iOS_458' },
-{ key: 'ios457', label: 'iOS_457' },
-{ key: 'ios456', label: 'iOS_456' },
-{ key: 'ios455', label: 'iOS_455' },
-{ key: 'ios454', label: 'iOS_454' },
-{ key: 'ios453', label: 'iOS_453' },
-{ key: 'ios452', label: 'iOS_452' },
-{ key: 'ios451', label: 'iOS_451' },
-{ key: 'ios450', label: 'iOS_450' },
-{ key: 'ios449', label: 'iOS_449' },
-{ key: 'ios448', label: 'iOS_448' },
-{ key: 'ios447', label: 'iOS_447' },
-{ key: 'ios446', label: 'iOS_446' },
-{ key: 'ios445', label: 'iOS_445' },
-{ key: 'ios444', label: 'iOS_444' },
-{ key: 'ios443', label: 'iOS_443' },
-{ key: 'ios442', label: 'iOS_442' },
-{ key: 'ios441', label: 'iOS_441' },
-{ key: 'ios440', label: 'iOS_440' },
-{ key: 'ios439', label: 'iOS_439' },
-{ key: 'ios438', label: 'iOS_438' },
-{ key: 'ios437', label: 'iOS_437' },
-{ key: 'ios436', label: 'iOS_436' },
-{ key: 'ios435', label: 'iOS_435' },
-{ key: 'ios434', label: 'iOS_434' },
-{ key: 'ios433', label: 'iOS_433' },
-{ key: 'ios432', label: 'iOS_432' },
-{ key: 'ios431', label: 'iOS_431' },
-{ key: 'ios430', label: 'iOS_430' },
-{ key: 'ios429', label: 'iOS_429' },
-{ key: 'ios428', label: 'iOS_428' },
-{ key: 'ios427', label: 'iOS_427' },
-{ key: 'ios426', label: 'iOS_426' },
-{ key: 'ios425', label: 'iOS_425' },
-{ key: 'ios424', label: 'iOS_424' },
-{ key: 'ios423', label: 'iOS_423' },
-{ key: 'ios422', label: 'iOS_422' },
-{ key: 'ios421', label: 'iOS_421' },
-{ key: 'ios420', label: 'iOS_420' },
+  { key: 'ios565', label: 'iOS_565' }, { key: 'ios564', label: 'iOS_564' }, { key: 'ios563', label: 'iOS_563' }, { key: 'ios562', label: 'iOS_562' }, { key: 'ios561', label: 'iOS_561' },
+  { key: 'ios560', label: 'iOS_560' }, { key: 'ios559', label: 'iOS_559' }, { key: 'ios558', label: 'iOS_558' }, { key: 'ios557', label: 'iOS_557' }, { key: 'ios556', label: 'iOS_556' },
+  { key: 'ios555', label: 'iOS_555' }, { key: 'ios554', label: 'iOS_554' }, { key: 'ios553', label: 'iOS_553' }, { key: 'ios552', label: 'iOS_552' }, { key: 'ios551', label: 'iOS_551' },
+  { key: 'ios550', label: 'iOS_550' }, { key: 'ios549', label: 'iOS_549' }, { key: 'ios548', label: 'iOS_548' }, { key: 'ios547', label: 'iOS_547' }, { key: 'ios546', label: 'iOS_546' },
+  { key: 'ios545', label: 'iOS_545' }, { key: 'ios544', label: 'iOS_544' }, { key: 'ios543', label: 'iOS_543' }, { key: 'ios542', label: 'iOS_542' }, { key: 'ios541', label: 'iOS_541' },
+  { key: 'ios540', label: 'iOS_540' }, { key: 'ios539', label: 'iOS_539' }, { key: 'ios538', label: 'iOS_538' }, { key: 'ios537', label: 'iOS_537' }, { key: 'ios536', label: 'iOS_536' },
+  { key: 'ios535', label: 'iOS_535' }, { key: 'ios534', label: 'iOS_534' }, { key: 'ios533', label: 'iOS_533' }, { key: 'ios532', label: 'iOS_532' }, { key: 'ios531', label: 'iOS_531' },
+  { key: 'ios530', label: 'iOS_530' }, { key: 'ios529', label: 'iOS_529' }, { key: 'ios528', label: 'iOS_528' }, { key: 'ios527', label: 'iOS_527' }, { key: 'ios526', label: 'iOS_526' },
+  { key: 'ios525', label: 'iOS_525' }, { key: 'ios524', label: 'iOS_524' }, { key: 'ios523', label: 'iOS_523' }, { key: 'ios522', label: 'iOS_522' }, { key: 'ios521', label: 'iOS_521' },
+  { key: 'ios520', label: 'iOS_520' }, { key: 'ios519', label: 'iOS_519' }, { key: 'ios518', label: 'iOS_518' }, { key: 'ios517', label: 'iOS_517' }, { key: 'ios516', label: 'iOS_516' },
+  { key: 'ios515', label: 'iOS_515' }, { key: 'ios514', label: 'iOS_514' }, { key: 'ios513', label: 'iOS_513' }, { key: 'ios512', label: 'iOS_512' }, { key: 'ios511', label: 'iOS_511' },
+  { key: 'ios510', label: 'iOS_510' }, { key: 'ios509', label: 'iOS_509' }, { key: 'ios508', label: 'iOS_508' }, { key: 'ios507', label: 'iOS_507' }, { key: 'ios506', label: 'iOS_506' },
+  { key: 'ios505', label: 'iOS_505' }, { key: 'ios504', label: 'iOS_504' }, { key: 'ios503', label: 'iOS_503' }, { key: 'ios502', label: 'iOS_502' }, { key: 'ios501', label: 'iOS_501' },
+  { key: 'ios500', label: 'iOS_500' }, { key: 'ios499', label: 'iOS_499' }, { key: 'ios498', label: 'iOS_498' }, { key: 'ios497', label: 'iOS_497' }, { key: 'ios496', label: 'iOS_496' },
+  { key: 'ios495', label: 'iOS_495' }, { key: 'ios494', label: 'iOS_494' }, { key: 'ios493', label: 'iOS_493' }, { key: 'ios492', label: 'iOS_492' }, { key: 'ios491', label: 'iOS_491' },
+  { key: 'ios490', label: 'iOS_490' }, { key: 'ios489', label: 'iOS_489' }, { key: 'ios488', label: 'iOS_488' }, { key: 'ios487', label: 'iOS_487' }, { key: 'ios486', label: 'iOS_486' },
+  { key: 'ios485', label: 'iOS_485' }, { key: 'ios484', label: 'iOS_484' }, { key: 'ios483', label: 'iOS_483' }, { key: 'ios482', label: 'iOS_482' }, { key: 'ios481', label: 'iOS_481' },
+  { key: 'ios480', label: 'iOS_480' }, { key: 'ios479', label: 'iOS_479' }, { key: 'ios478', label: 'iOS_478' }, { key: 'ios477', label: 'iOS_477' }, { key: 'ios476', label: 'iOS_476' },
+  { key: 'ios475', label: 'iOS_475' }, { key: 'ios474', label: 'iOS_474' }, { key: 'ios473', label: 'iOS_473' }, { key: 'ios472', label: 'iOS_472' }, { key: 'ios471', label: 'iOS_471' },
+  { key: 'ios470', label: 'iOS_470' }, { key: 'ios469', label: 'iOS_469' }, { key: 'ios468', label: 'iOS_468' }, { key: 'ios467', label: 'iOS_467' }, { key: 'ios466', label: 'iOS_466' },
+  { key: 'ios465', label: 'iOS_465' }, { key: 'ios464', label: 'iOS_464' }, { key: 'ios463', label: 'iOS_463' }, { key: 'ios462', label: 'iOS_462' }, { key: 'ios461', label: 'iOS_461' },
+  { key: 'ios460', label: 'iOS_460' }, { key: 'ios459', label: 'iOS_459' }, { key: 'ios458', label: 'iOS_458' }, { key: 'ios457', label: 'iOS_457' }, { key: 'ios456', label: 'iOS_456' },
+  { key: 'ios455', label: 'iOS_455' }, { key: 'ios454', label: 'iOS_454' }, { key: 'ios453', label: 'iOS_453' }, { key: 'ios452', label: 'iOS_452' }, { key: 'ios451', label: 'iOS_451' },
+  { key: 'ios450', label: 'iOS_450' }, { key: 'ios449', label: 'iOS_449' }, { key: 'ios448', label: 'iOS_448' }, { key: 'ios447', label: 'iOS_447' }, { key: 'ios446', label: 'iOS_446' },
+  { key: 'ios445', label: 'iOS_445' }, { key: 'ios444', label: 'iOS_444' }, { key: 'ios443', label: 'iOS_443' }, { key: 'ios442', label: 'iOS_442' }, { key: 'ios441', label: 'iOS_441' },
+  { key: 'ios440', label: 'iOS_440' }, { key: 'ios439', label: 'iOS_439' }, { key: 'ios438', label: 'iOS_438' }, { key: 'ios437', label: 'iOS_437' }, { key: 'ios436', label: 'iOS_436' },
+  { key: 'ios435', label: 'iOS_435' }, { key: 'ios434', label: 'iOS_434' }, { key: 'ios433', label: 'iOS_433' }, { key: 'ios432', label: 'iOS_432' }, { key: 'ios431', label: 'iOS_431' },
+  { key: 'ios430', label: 'iOS_430' }, { key: 'ios429', label: 'iOS_429' }, { key: 'ios428', label: 'iOS_428' }, { key: 'ios427', label: 'iOS_427' }, { key: 'ios426', label: 'iOS_426' },
+  { key: 'ios425', label: 'iOS_425' }, { key: 'ios424', label: 'iOS_424' }, { key: 'ios423', label: 'iOS_423' }, { key: 'ios422', label: 'iOS_422' }, { key: 'ios421', label: 'iOS_421' },
+  { key: 'ios420', label: 'iOS_420' },
 ]
 
 type PlatformOption = { key: string; label: string }
 const DISABLED_PLATFORM_KEYS = new Set(['s399'])
 
-const REG_PLATFORMS_MESS_ANDR: PlatformOption[] = []
-const REG_PLATFORMS_MESS_IOS: PlatformOption[] = []
+// Messenger groups — tách riêng khỏi lưới version để không lẫn vào các bản version.
+// Android Mess (Reg Mess / AppMess V3) đứng cạnh cụm Version; iOS Mess (Reg/Ver Mess iOS) đứng trong cụm iOS.
+const REG_PLATFORMS_MESS_ANDR: PlatformOption[] = [
+  { key: 'appmv3reg', label: 'Reg Mess' },
+  { key: 'appmv3reg567', label: 'Reg Mess 567' },
+  { key: 'appmv3reg566v3', label: 'Reg Mess 566v3' },
+  { key: 'appmv3reg566v2', label: 'Reg Mess 566v2' },
+  { key: 'appmv3reg566', label: 'Reg Mess 566' },
+  { key: 'appmv3reg565v4', label: 'Reg Mess 565v4' },
+  { key: 'appmv3reg565v3', label: 'Reg Mess 565v3' },
+  { key: 'appmv3reg565v2', label: 'Reg Mess 565v2' },
+  { key: 'appmv3reg565', label: 'Reg Mess 565' },
+  { key: 'appmv3reg564v2', label: 'Reg Mess 564v2' },
+  { key: 'appmv3reg564', label: 'Reg Mess 564' },
+  { key: 'appmv3reg563', label: 'Reg Mess 563' },
+  { key: 'appmv3reg555', label: 'Reg Mess 555' },
+  { key: 'appmv3reg545', label: 'Reg Mess 545' },
+  { key: 'appmv3reg535', label: 'Reg Mess 535' },
+  { key: 'appmv3reg525', label: 'Reg Mess 525' },
+  { key: 'appmv3reg515', label: 'Reg Mess 515' },
+  { key: 'appmv3reg505', label: 'Reg Mess 505' },
+  { key: 'appmv3reg490', label: 'Reg Mess 490' },
+]
+const REG_PLATFORMS_MESS_IOS: PlatformOption[] = [{ key: 'iosmessreg', label: 'Reg Mess iOS' }]
+// Facebook Lite (FBAN/EMA v499) Android — reg 10-step Bloks + confirm OTP qua email (HTTPS).
+// Tài khoản Facebook (KHÔNG phải Messenger) → pool android mặc định; cần reg mode = TempMail.
+const REG_PLATFORMS_FBLITE: PlatformOption[] = [{ key: 'fblite', label: 'Reg FB Lite' }]
 const VER_PLATFORMS_MESS_ANDR: PlatformOption[] = [
   { key: 'appmessv3', label: 'AppMess V3' },
-  { key: 'appmessv3_535', label: 'AppMess 535' },
-  { key: 'appmessv3_545', label: 'AppMess 545' },
-  { key: 'appmessv3_555', label: 'AppMess 555' },
-  { key: 'appmessv3_563', label: 'AppMess 563' },
-  { key: 'appmessv3_564', label: 'AppMess 564' },
+  { key: 'appmessv3_567', label: 'AppMess 567' },
+  { key: 'appmessv3_566v3', label: 'AppMess 566v3' },
+  { key: 'appmessv3_566v2', label: 'AppMess 566v2' },
+  { key: 'appmessv3_566', label: 'AppMess 566' },
+  { key: 'appmessv3_565v4', label: 'AppMess 565v4' },
+  { key: 'appmessv3_565v3', label: 'AppMess 565v3' },
+  { key: 'appmessv3_565v2', label: 'AppMess 565v2' },
   { key: 'appmessv3_565', label: 'AppMess 565' },
+  { key: 'appmessv3_564v2', label: 'AppMess 564v2' },
+  { key: 'appmessv3_564', label: 'AppMess 564' },
+  { key: 'appmessv3_563', label: 'AppMess 563' },
+  { key: 'appmessv3_555', label: 'AppMess 555' },
+  { key: 'appmessv3_545', label: 'AppMess 545' },
+  { key: 'appmessv3_535', label: 'AppMess 535' },
   { key: 'appmessv3_525', label: 'AppMess 525' },
   { key: 'appmessv3_515', label: 'AppMess 515' },
   { key: 'appmessv3_505', label: 'AppMess 505' },
   { key: 'appmessv3_490', label: 'AppMess 490' },
 ]
-const VER_PLATFORMS_MESS_IOS: PlatformOption[] = [{ key: 'iosmess', label: 'Ver Mess iOS' }]
+const VER_PLATFORMS_MESS_IOS: PlatformOption[] = [
+  { key: 'iosmess567', label: 'Ver Mess iOS 567' },
+  { key: 'iosmess566', label: 'Ver Mess iOS 566' },
+  { key: 'iosmess565', label: 'Ver Mess iOS 565' },
+  { key: 'iosmess564', label: 'Ver Mess iOS 564' },
+  { key: 'iosmess', label: 'Ver Mess iOS 563' },
+  { key: 'iosmess562', label: 'Ver Mess iOS 562' },
+  { key: 'iosmess561', label: 'Ver Mess iOS 561' },
+  { key: 'iosmess560', label: 'Ver Mess iOS 560' },
+  { key: 'iosmess559', label: 'Ver Mess iOS 559' },
+  { key: 'iosmess558', label: 'Ver Mess iOS 558' },
+]
+// Ver FB Lite — verify acc tạo từ Reg FB Lite (đổi mail mới → OTP → confirm). Cùng key "fblite"
+// với reg nhưng registry tách biệt (NewVerifier). Pool android. Backend delegate flow verify FB chuẩn.
+const VER_PLATFORMS_FBLITE: PlatformOption[] = [{ key: 'fblite', label: 'Ver FB Lite' }]
 
 const IOS_PLATFORM_KEY_SET = new Set([
   ...REG_PLATFORMS_IOS.map(p => p.key),
@@ -1398,13 +1534,14 @@ function platformRangeLabel(items: PlatformOption[]): string {
   return first === last ? first : `${first} - ${last}`
 }
 
+const regVersionBatches = computed(() => chunkPlatformOptions(REG_PLATFORMS_VER))
 const verifyVersionBatches = computed(() => chunkPlatformOptions(VER_PLATFORMS_VER))
 const regIosBatches = computed(() => chunkPlatformOptions(REG_PLATFORMS_IOS, 20))
 const verifyIosBatches = computed(() => chunkPlatformOptions(VER_PLATFORMS_IOS, 20))
-const regPlatformKeys = computed(() => new Set([...REG_PLATFORMS_STD, ...REG_PLATFORMS_VER, ...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_IOS, ...REG_PLATFORMS_MESS_IOS].map(p => p.key)))
-const verifyPlatformKeys = computed(() => new Set([...VER_PLATFORMS_ANDR, ...VER_PLATFORMS_MFB, ...VER_PLATFORMS_VER, ...VER_PLATFORMS_MESS_ANDR, ...VER_PLATFORMS_IOS, ...VER_PLATFORMS_MESS_IOS].map(p => p.key)))
-const allRegPlatformOptions = computed(() => [...REG_PLATFORMS_STD, ...REG_PLATFORMS_VER, ...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_IOS, ...REG_PLATFORMS_MESS_IOS])
-const allVerifyPlatformOptions = computed(() => [...VER_PLATFORMS_ANDR, ...VER_PLATFORMS_MFB, ...VER_PLATFORMS_VER, ...VER_PLATFORMS_MESS_ANDR, ...VER_PLATFORMS_IOS, ...VER_PLATFORMS_MESS_IOS])
+const regPlatformKeys = computed(() => new Set([...REG_PLATFORMS_STD, ...REG_PLATFORMS_VER, ...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_IOS, ...REG_PLATFORMS_MESS_IOS, ...REG_PLATFORMS_FBLITE].map(p => p.key)))
+const verifyPlatformKeys = computed(() => new Set([...VER_PLATFORMS_ANDR, ...VER_PLATFORMS_MFB, ...VER_PLATFORMS_VER, ...VER_PLATFORMS_MESS_ANDR, ...VER_PLATFORMS_IOS, ...VER_PLATFORMS_MESS_IOS, ...VER_PLATFORMS_FBLITE].map(p => p.key)))
+const allRegPlatformOptions = computed(() => [...REG_PLATFORMS_STD, ...REG_PLATFORMS_VER, ...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_IOS, ...REG_PLATFORMS_MESS_IOS, ...REG_PLATFORMS_FBLITE])
+const allVerifyPlatformOptions = computed(() => [...VER_PLATFORMS_ANDR, ...VER_PLATFORMS_MFB, ...VER_PLATFORMS_VER, ...VER_PLATFORMS_MESS_ANDR, ...VER_PLATFORMS_IOS, ...VER_PLATFORMS_MESS_IOS, ...VER_PLATFORMS_FBLITE])
 
 const PLATFORM_DISPLAY_KEYS = {
   reg: 'hvr:setupVisibleRegPlatforms',
@@ -1461,13 +1598,18 @@ watch(visibleVerifyPlatformKeys, (v) => {
 // Platform trong DISABLED_PLATFORM_KEYS bị ẨN HOÀN TOÀN — không hiển thị button, không
 // trong popup config visibility. Để kích hoạt lại 1 platform: xoá khỏi DISABLED_PLATFORM_KEYS.
 const visibleRegPlatformsStd = computed(() => REG_PLATFORMS_STD.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleRegPlatformsVer = computed(() => REG_PLATFORMS_VER.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 const visibleRegPlatformsIos = computed(() => REG_PLATFORMS_IOS.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 const visibleVerifyPlatformsAndr = computed(() => VER_PLATFORMS_ANDR.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 const visibleVerifyPlatformsMfb = computed(() => VER_PLATFORMS_MFB.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
-const visibleVerifyPlatformsVer = computed(() => VER_PLATFORMS_VER.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
-const visibleVerifyPlatformsIos = computed(() => VER_PLATFORMS_IOS.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
-const visibleVerifyPlatformsMessAndr = computed(() => VER_PLATFORMS_MESS_ANDR.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
-const visibleVerifyPlatformsMessIos = computed(() => VER_PLATFORMS_MESS_IOS.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)).slice(0, 1))
+const visibleVerifyPlatformsVer = computed(() => VER_PLATFORMS_VER.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleVerifyPlatformsIos = computed(() => VER_PLATFORMS_IOS.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleRegPlatformsMessAndr = computed(() => REG_PLATFORMS_MESS_ANDR.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleRegPlatformsMessIos = computed(() => REG_PLATFORMS_MESS_IOS.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleRegPlatformsFblite = computed(() => REG_PLATFORMS_FBLITE.filter(p => visibleRegPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleVerifyPlatformsMessAndr = computed(() => VER_PLATFORMS_MESS_ANDR.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleVerifyPlatformsMessIos = computed(() => VER_PLATFORMS_MESS_IOS.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
+const visibleVerifyPlatformsFblite = computed(() => VER_PLATFORMS_FBLITE.filter(p => visibleVerifyPlatformKeys.value.includes(p.key) && !DISABLED_PLATFORM_KEYS.has(p.key)))
 
 function togglePlatformDisplayMenu(kind: 'reg' | 'verify') {
   platformDisplayMenu.value = platformDisplayMenu.value === kind ? null : kind
@@ -1546,9 +1688,12 @@ function readPlatformClipboardList(payload: unknown, target: 'reg' | 'verify'): 
   if (Array.isArray(payload)) return normalizePlatformList(payload, allowed, aliases)
   if (!payload || typeof payload !== 'object') return []
   const data = payload as PlatformSelectionClipboard
+  // Ưu tiên key của chính bên đích; nếu rỗng → fallback sang key bên kia (dán CHÉO veri↔reg).
+  // normalizePlatformList lọc theo `allowed` (version tồn tại bên đích) → version nào bên đích
+  // KHÔNG có sẽ tự bị bỏ qua; chỉ giữ version trùng cả 2 bên.
   const candidates = target === 'reg'
-    ? [data.reg, data.apiRegPlatforms, data.platforms]
-    : [data.verify, data.apiVerifyPlatforms, data.platforms]
+    ? [data.reg, data.apiRegPlatforms, data.verify, data.apiVerifyPlatforms, data.platforms]
+    : [data.verify, data.apiVerifyPlatforms, data.reg, data.apiRegPlatforms, data.platforms]
   for (const candidate of candidates) {
     const list = normalizePlatformList(candidate, allowed, aliases)
     if (list.length > 0) return list
@@ -1594,8 +1739,9 @@ const verPlatformCfg = computed<PlatformUAConfig>(() => {
 const MESS_ANDR_VER_FBAV: Record<string, string> = {
   '530': '530.1.0.67.107|814020040', '535': '535.0.0.101.107|840054075',
   '545': '545.0.0.27.62|870175947', '555': '555.0.0.56.66|930834402',
-  '563': '563.0.0.47.86|979328543', '564': '564.0.0.42.89|984961990',
-  '565': '565.0.0.0.2|981799924', '525': '525.0.0.44.108|792260954',
+  '563': '563.0.0.47.86|979328543', '564': '564.0.0.42.89|984961990', '564v2': '564.0.0.48.74|992344641',
+  '565': '565.0.0.0.2|981799924', '565v2': '565.0.0.43.88|991058519', '565v3': '565.0.0.43.88|991058519', '565v4': '565.0.0.43.88|991057586',
+  '566v3': '566.0.0.57.86|997326114', '525': '525.0.0.44.108|792260954',
   '515': '515.0.0.51.108|763707183', '505': '505.0.0.62.82|730961636',
   '490': '490.0.0.42.108|684080902',
 }
@@ -1603,7 +1749,7 @@ const MESS_IOS_UAGOC = 'LightSpeed [FBAN/MessengerLiteForiOS;FBAV/563.0.0.27.106
 function messOriginalUA(platform: string): string {
   if (MESS_IOS_KEY_SET.has(platform)) return MESS_IOS_UAGOC
   if (!MESS_ANDR_KEY_SET.has(platform)) return ''
-  const m = platform.match(/(\d{3})$/)
+  const m = platform.match(/(\d{3}(?:v\d+)?)/)
   const ver = m ? m[1] : '530' // appmv3reg / appmessv3 (không số) = 530
   const fb = MESS_ANDR_VER_FBAV[ver]
   if (!fb) return ''
@@ -1635,6 +1781,16 @@ const regTestUA = ref('')
 const verTestLoading = ref(false)
 const verTestNote = ref('')
 const verTestUA = ref('')
+const uaCopied = ref<'reg' | 'ver' | null>(null)
+
+function copyUA(text: string, kind: 'reg' | 'ver') {
+  if (!text) return
+  navigator.clipboard.writeText(text).then(() => {
+    uaCopied.value = kind
+    setTimeout(() => { uaCopied.value = null }, 1500)
+    appStore.notify('success', 'Đã copy UA vào clipboard')
+  })
+}
 
 watch(() => form.value.apiRegPlatform, (p) => {
   regTestNote.value = ''; regTestUA.value = ''
@@ -1730,10 +1886,7 @@ function addRegPlatforms(platforms: string[]) {
   selectRegPlatforms([...(form.value.apiRegPlatforms ?? []), ...platforms.filter(isPlatformSelectable)])
 }
 function selectAllRegPlatforms() {
-  selectRegPlatforms([
-    ...visibleRegPlatformsStd.value.map(p => p.key),
-    ...visibleRegPlatformsIos.value.map(p => p.key),
-  ])
+  selectRegPlatforms([...visibleRegPlatformsStd.value, ...visibleRegPlatformsVer.value, ...visibleRegPlatformsMessAndr.value, ...visibleRegPlatformsIos.value, ...visibleRegPlatformsMessIos.value, ...visibleRegPlatformsFblite.value].map(p => p.key))
 }
 function selectRegVersionBatch(batch: PlatformOption[]) {
   addRegPlatforms(batch.map(p => p.key))
@@ -1835,7 +1988,7 @@ function addVerifyPlatforms(platforms: string[]) {
   selectVerifyPlatforms([...(form.value.apiVerifyPlatforms ?? []), ...platforms.filter(isPlatformSelectable)])
 }
 function selectAllVerifyPlatforms() {
-  selectVerifyPlatforms([...visibleVerifyPlatformsAndr.value, ...visibleVerifyPlatformsMfb.value, ...visibleVerifyPlatformsVer.value, ...visibleVerifyPlatformsMessAndr.value, ...visibleVerifyPlatformsIos.value, ...visibleVerifyPlatformsMessIos.value].map(p => p.key))
+  selectVerifyPlatforms([...visibleVerifyPlatformsAndr.value, ...visibleVerifyPlatformsMfb.value, ...visibleVerifyPlatformsVer.value, ...visibleVerifyPlatformsMessAndr.value, ...visibleVerifyPlatformsIos.value, ...visibleVerifyPlatformsMessIos.value, ...visibleVerifyPlatformsFblite.value].map(p => p.key))
 }
 function selectVerifyVersionBatch(batch: PlatformOption[]) {
   addVerifyPlatforms(batch.map(p => p.key))
@@ -1955,16 +2108,18 @@ async function openVersionsFile(kind: 'reg' | 'ver', platform: string) {
 }
 
 const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
+    { value: 'mailhv',       label: 'MailHV (cần API key)' },
+
   { value: 'moakt',          label: 'Moakt' },
   //{ value: '@i2b.vn',       label: 'Mail1sec' },          // ẩn
   { value: 'mohmal',        label: 'Mohmal' },
   { value: 'tempmail-lol',  label: 'TempMail LOL' },
-  { value: 'mailtm',         label: 'Mail.tm (IG)' },       // dùng cho IG reg (ig_ios_bloks / ig_android)
+  //{ value: 'mailtm',        label: 'Mail.tm' },            // ẩn — không đọc được code
   { value: 'tempmail-plus', label: 'TempMail.plus' },
-  //{ value: 'dropmail',      label: 'Dropmail' },           // BỎ — API disabled (legacy_token_disabled)
+  { value: 'dropmail',      label: 'Dropmail' },
   { value: 'guerrillamail', label: 'GuerrillaMail' },
   { value: 'spam4me',       label: 'Spam4.me' },
-  //{ value: 'temp-mail.org', label: 'Temp-Mail.org' },      // BỎ — Cloudflare chặn
+  { value: 'temp-mail.org', label: 'Temp-Mail.org' },
   //{ value: 'mail.cx',       label: 'Mail.cx' },   // ẩn
   { value: 'mailtd',        label: 'Mail.cx' },
   //{ value: 'inboxes',       label: 'Inboxes.com' },        // ẩn
@@ -1972,10 +2127,7 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'mailymg',       label: 'Mailymg.com' },
   { value: 'altmails',      label: 'AltMails.com' },
   //{ value: 'onesecmail',   label: '1secmail.com' },        // ẩn
-  { value: 'firetempmail',       label: 'FireTempMail.com' },
-  { value: 'firetempmail-ctm',   label: 'FireTempMail (@ctm.edu.pl)' },
-  { value: 'firetempmail-jd',    label: 'FireTempMail (@jobsdeforyou.sa.com)' },
-  { value: 'firetempmail-offre', label: 'FireTempMail (@offredaily.sa.com)' },
+  { value: 'firetempmail', label: 'FireTempMail.com' },
   //{ value: 'fviainboxes',  label: 'FviaInboxes.com' },     // ẩn
   { value: 'byomde',       label: 'Byom.de' },
   { value: 'dinlaan',      label: 'Dinlaan.com' },
@@ -1987,36 +2139,30 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'tempomintraccoon', label: 'Tempo.Mintraccoon.com' },
   { value: 'tempemail',    label: 'TempEmail.co' },
   { value: 'tmpinbox',     label: 'TmpInbox.com' },
-  //{ value: 'tenminutemail', label: '10MinuteMail.com' },   // BỎ — API trả HTML (hỏng)
+  { value: 'tenminutemail', label: '10MinuteMail.com' },
   { value: 'tempmailto',   label: 'TempMailTo.com' },
   { value: 'onesecemail',  label: '1secemail.com' },
   { value: 'tempmail100',  label: 'TempMail100.com' },
-  //{ value: 'tempmailso',   label: 'TempMail.so' },         // BỎ — Cloudflare chặn (cần residential proxy)
+  { value: 'tempmail100free', label: 'TempMail100.com (Free)' },
+  { value: 'tempmailso',   label: 'TempMail.so' },
   { value: 'priyoemail',   label: 'Priyo.email (cần API key)' },
-  //{ value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' }, // BỎ — payment token hết hạn (4030)
+  { value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' },
   { value: 'mailtempcom',  label: 'Mail-Temp.com' },
   //{ value: 'wemakemail',   label: 'WeMakeMail (cần API key)' }, // ẩn
-  { value: 'mailhv',       label: 'MailHV (cần API key)' },
-  // ── Port từ NullCoreSummer (đã test CreateEmail OK) ──
-  { value: 'tempmailio',      label: 'Temp-Mail.io' },
-  { value: 'anonymmail',      label: 'AnonymMail.net' },
-  { value: 'tempmailnow',     label: 'TempMail.now' },
-  { value: 'tempmailworld',   label: 'TempMail.world' },
-  { value: 'expressmail',     label: 'ExpressMail.app' },
-  { value: 'tempmail100free', label: 'TempMail100 Free' },
-  { value: 'fakelegal',       label: 'Fake.legal' },
-  { value: 'tempmailbee',     label: 'TempMailBee' },
-  { value: 'tempmailapp',     label: 'Temp-Mail.app' },
-  { value: 'tempamail',       label: 'TempaMail.com' },
-  { value: 'tempmailai',      label: 'Temp-Mail.ai' },
-  { value: 'tempemailcc',     label: 'TempEmail.cc' },
-  { value: 'tempmailerme',    label: 'Temp-Mailer.me' },
-  { value: 'mailwave',        label: 'MailWave.dev' },
-  { value: 'tempmail10',      label: 'TempMail10.com' },
-  { value: 'tempmailpro',     label: 'TempMailPro.io' },
+  // Providers mới thêm 2026-06-19
+  { value: 'tempmailapp',  label: 'Temp-Mail.app' },
+  { value: 'tempamail',    label: 'TempAmail.com' },
+  { value: 'tempmailai',   label: 'Temp-Mail.ai' },
+  { value: 'tempemailcc',  label: 'TempEmail.cc' },
+  { value: 'tempmailerme', label: 'Temp-Mailer.me' },
+  { value: 'mailwave',     label: 'MailWave.dev' },
+  { value: 'tempmail10',   label: 'TempMail10.com' },
+  { value: 'internxt',     label: 'Internxt.com (= Mail.tm)' },
+  { value: 'tempmailasia', label: 'Temp-Mail.asia (cần API key)' },
+  { value: 'tempmailpro',  label: 'TempMailPro.io' },
   { value: 'tempmaildigital', label: 'TempMail.digital' },
-  { value: 'tempmailx',       label: 'TempMailX.xyz' },
-  { value: 'tempmailid',      label: 'Temp-Mail.id' },
+  { value: 'tempmailx',    label: 'TempMailX.xyz' },
+  { value: 'tempmailid',   label: 'Temp-Mail.id (cần proxy residential, chọn domain)' },
 ]
 const RENT_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'zeus-x',        label: 'ZeusX' },
@@ -2149,6 +2295,10 @@ const currentProviderLabel = computed(() => {
 })
 const isManualMailMode = computed(() => false)
 
+// Add Sub Email: stage ③ chỉ còn toggle addSubEmail + link sang Email/Phone (S04-D2-T003).
+// Provider + key riêng cho mail #2 cấu hình ở AuthSourcePanel (form.subMail). Field flat
+// subMailProvider/subTempMailDomain/subTempMailToken giữ trong type (backward-compat, BE fallback).
+
 // ─── Auto-save (port C#: không có nút Lưu, mọi thay đổi tự persist) ──────────
 // Watch form deep → debounce 500ms → call save API. Worker đang chạy reload config
 // qua LoadInteractionConfig realtime ở backend — user đổi thông số giữa chừng có
@@ -2160,9 +2310,9 @@ const { status: saveStatus, saveNow } = useAutoSave(form, async (value) => {
   // Nếu user tắt Verify → force splitMode=false, tránh AccountsPage vẫn hiển thị
   // layout split + panel VERIFY rỗng khi chỉ chạy reg.
   if (!value.createEnabled || !value.verifyEnabled) value.splitMode = false
-  // splitVerifyThreads: 0 = bằng số luồng reg. Khác 0 = clamp [1, 600].
+  // splitVerifyThreads: 0 = bằng số luồng reg. Khác 0 = clamp [1, 100000].
   if (value.splitVerifyThreads < 0) value.splitVerifyThreads = 0
-  if (value.splitVerifyThreads > 600) value.splitVerifyThreads = 600
+  if (value.splitVerifyThreads > 100000) value.splitVerifyThreads = 100000
   const interactionSvc = await getInteractionService()
   const r = await interactionSvc.save(value)
   if (r !== 'OK') throw new Error(r)
@@ -2172,7 +2322,7 @@ const { status: saveStatus, saveNow } = useAutoSave(form, async (value) => {
 function clampSplitVerifyThreads() {
   const v = Number(form.value.splitVerifyThreads)
   if (isNaN(v) || v < 0) form.value.splitVerifyThreads = 0
-  else if (v > 600) form.value.splitVerifyThreads = 600
+  else if (v > 100000) form.value.splitVerifyThreads = 100000
   else form.value.splitVerifyThreads = Math.floor(v)
 }
 
@@ -2180,7 +2330,7 @@ function clampSplitVerifyThreads() {
 function clampRegThreads() {
   const v = Number(form.value.regThreads)
   if (isNaN(v) || v < 1) form.value.regThreads = 1
-  else if (v > 600) form.value.regThreads = 600
+  else if (v > 100000) form.value.regThreads = 100000
   else form.value.regThreads = Math.floor(v)
 }
 
@@ -2209,37 +2359,9 @@ function resetForms() {
     <!-- ── Toolbar ──────────────────────────────────────────────────────────── -->
     <div class="rp-toolbar">
       <h2 class="rp-toolbar__title">Thiết lập chạy</h2>
-      <div class="rp-mode-checks rp-mode-checks--toolbar">
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.createEnabled" />
-          <span>Register</span>
-        </label>
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.verifyEnabled" />
-          <span>Verify</span>
-        </label>
-        <label v-if="form.createEnabled && form.verifyEnabled" class="rp-mode-check rp-mode-check--split">
-          <input type="checkbox" v-model="form.splitMode" />
-          <span title="Reg và Verify chạy độc lập: reg ghi file → verify tự đọc file đó">Split</span>
-        </label>
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.keepIpSuccess" />
-          <span title="Sau khi 1 account reg/verify Live, giữ nguyên IP của slot cho account kế. Fail → IP mới.">Keep IP</span>
-        </label>
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.keepUaSuccess" />
-          <span title="Sau khi reg Live, giữ nguyên User-Agent cho slot đó để reg tiếp. Fail → UA mới.">Keep UA</span>
-        </label>
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.keepDatrSuccess" />
-          <span title="Sau khi reg ra cookie thành công, dùng datr mới của slot đó để reg tiếp. Fail thì lấy datr khác trong pool.">Keep datr</span>
-        </label>
-        <label v-if="form.regMode !== 'TempMail'" class="rp-mode-check">
-          <input type="checkbox" v-model="form.keepInitialSuccess" />
-          <span title="Sau khi reg Live, giữ lại email/phone contact của slot để tiếp tục reg acc kế tiếp. Áp dụng với mode Mail, Phone, Random. Không áp dụng TempMail.">Keep Contact </span>
-        </label>
-      </div>
       <div class="rp-toolbar__actions">
+        <!-- Profile bar gọn (S02-D2-T003): Profile: [tên ▾ + Quản lý] · Lưu thay đổi · trạng thái -->
+        <span class="rp-profilebar__label">Profile:</span>
         <ProfileManager
           :profiles="profiles"
           :active-profile-id="activeProfileId"
@@ -2254,39 +2376,57 @@ function resetForms() {
           @import="handleProfileImportFromManager"
           @reset="resetForms"
         />
-        <span class="rp-save-status" :data-status="saveStatus">
-          <template v-if="saveStatus === 'saving'">&#x25D0; Đang lưu...</template>
-          <template v-else-if="saveStatus === 'saved'">&#x2714; Đã lưu</template>
-          <template v-else-if="saveStatus === 'error'">&#x26A0; Lỗi lưu</template>
-          <template v-else>&#x2022; Tự động lưu</template>
+        <button class="rp-btn rp-profilebar__save" @click="handleSave" title="Lưu cấu hình hiện tại ngay (bình thường tự lưu)">&#x1F4BE; Lưu thay đổi</button>
+        <span class="rp-save-status" :data-status="saveStatus" :title="saveStatus === 'saving' ? 'Đang lưu thay đổi…' : 'Đã lưu'">
+          <span class="rp-dirty-dot" :class="`rp-dirty-dot--${saveStatus}`"></span>
+          <template v-if="saveStatus === 'saving'">Đang lưu…</template>
+          <template v-else-if="saveStatus === 'saved'">Đã lưu</template>
+          <template v-else-if="saveStatus === 'error'">Lỗi lưu</template>
+          <template v-else>Tự lưu</template>
         </span>
         <button class="rp-btn rp-btn--danger" @click="$router.back()"><X :size="14" /> Đóng</button>
       </div>
     </div>
 
-    <!-- ── Control bar ────────────────────────────────────────────────────── -->
-    <div class="rp-controlbar">
-      <!-- Mode checkboxes -->
-      <div class="rp-mode-checks">
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.createEnabled" />
-          <span>Register</span>
-        </label>
-        <label class="rp-mode-check">
-          <input type="checkbox" v-model="form.verifyEnabled" />
-          <span>Verify</span>
-        </label>
-        <!-- Split mode: chỉ hiện khi bật cả 2 -->
+    <!-- ── Pipeline strip (S02-D2-T001) — 3 thẻ Reg → Ver → ReUseEmail ──────── -->
+    <div class="rp-pipeline-strip">
+      <div class="rp-strip-inner">
+        <template v-for="(stage, idx) in PIPELINE_STAGES" :key="stage.key">
+          <div v-if="idx > 0" class="rp-strip-arrow">→</div>
+          <div
+            class="rp-strip-chip"
+            :class="{
+              'rp-strip-chip--active': activeStage === stage.key,
+              'rp-strip-chip--disabled': !stageEnabled(stage.key),
+            }"
+            @click="activeStage = stage.key"
+          >
+            <span class="rp-chip-num">{{ stage.num }}</span>
+            <span class="rp-chip-icon">{{ stage.icon }}</span>
+            <div class="rp-chip-info">
+              <span class="rp-chip-label">{{ stage.label }}</span>
+              <span class="rp-chip-sub">{{ stage.sub }}</span>
+            </div>
+            <span class="rp-chip-toggle" @click.stop>
+              <BaseToggle
+                :model-value="stageEnabled(stage.key)"
+                :disabled="stage.key === 'interact' || stage.key === 'reg'"
+                @update:model-value="(v: boolean) => setStageEnabled(stage.key, v)"
+              />
+            </span>
+          </div>
+        </template>
+      </div>
+      <!-- Cụm flag Split/Keep (S02-D2-T003) — chuyển từ toolbar sang cạnh dải pipeline -->
+      <div class="rp-flag-cluster">
         <label v-if="form.createEnabled && form.verifyEnabled" class="rp-mode-check rp-mode-check--split">
           <input type="checkbox" v-model="form.splitMode" />
           <span title="Reg và Verify chạy độc lập: reg ghi file → verify tự đọc file đó">Split</span>
         </label>
-        <!-- Keep IP: giữ proxy cho slot sau reg/verify thành công (port C# KeepIPSuccess) -->
         <label class="rp-mode-check">
           <input type="checkbox" v-model="form.keepIpSuccess" />
           <span title="Sau khi 1 account reg/verify Live, giữ nguyên IP của slot cho account kế. Fail → IP mới.">Keep IP</span>
         </label>
-        <!-- Keep UA: giữ User-Agent của slot sau reg thành công -->
         <label class="rp-mode-check">
           <input type="checkbox" v-model="form.keepUaSuccess" />
           <span title="Sau khi reg Live, giữ nguyên User-Agent cho slot đó để reg tiếp. Fail → UA mới.">Keep UA</span>
@@ -2300,10 +2440,10 @@ function resetForms() {
           <span title="Sau khi reg Live, giữ lại email/phone contact của slot để tiếp tục reg acc kế tiếp. Áp dụng với mode Mail, Phone, Random. Không áp dụng TempMail.">Keep Contact</span>
         </label>
       </div>
-
-      <div class="rp-controlbar__spacer" />
-      <!-- UA Pool selector đã được chuyển xuống section "Reg account" → subsection "User Agent" -->
     </div>
+
+    <!-- rp-controlbar (display:none, trùng lặp Register/Verify/Split/Keep) đã gỡ ở S02-D2-T005:
+         flag đã nằm trên chip pipeline + cụm flag cạnh strip. -->
 
     <Teleport to="body">
       <div v-if="platformDisplayMenu" class="rp-display-modal">
@@ -2385,6 +2525,21 @@ function resetForms() {
                 </label>
               </div>
             </section>
+            <section class="rp-display-group">
+              <div class="rp-display-group__head">
+                <strong>FB Lite</strong>
+                <span>
+                  <button type="button" @click="toggleVisiblePlatforms('verify', VER_PLATFORMS_FBLITE, true)">Chọn</button>
+                  <button type="button" @click="toggleVisiblePlatforms('verify', VER_PLATFORMS_FBLITE, false)">Bỏ</button>
+                </span>
+              </div>
+              <div class="rp-display-grid">
+                <label v-for="p in VER_PLATFORMS_FBLITE" :key="p.key" class="rp-display-card">
+                  <input type="checkbox" :checked="visibleVerifyPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('verify', p.key)" />
+                  <span>{{ p.label }}</span>
+                </label>
+              </div>
+            </section>
           </div>
 
           <div v-else class="rp-display-modal__body">
@@ -2403,6 +2558,68 @@ function resetForms() {
                 </label>
               </div>
             </section>
+            <section class="rp-display-group">
+              <div class="rp-display-group__head">
+                <strong>Version</strong>
+                <span>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_VER, true)">Chọn</button>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_VER, false)">Bỏ</button>
+                </span>
+              </div>
+              <div class="rp-display-grid">
+                <template v-for="p in REG_PLATFORMS_VER" :key="p.key">
+                  <label v-if="!DISABLED_PLATFORM_KEYS.has(p.key)" class="rp-display-card">
+                    <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
+                    <span>{{ p.label }}</span>
+                  </label>
+                </template>
+              </div>
+            </section>
+            <section class="rp-display-group rp-display-group--ios">
+              <div class="rp-display-group__head">
+                <strong>iOS Native</strong>
+                <span>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_IOS, true)">Chọn</button>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_IOS, false)">Bỏ</button>
+                </span>
+              </div>
+              <div class="rp-display-grid">
+                <label v-for="p in REG_PLATFORMS_IOS" :key="p.key" class="rp-display-card rp-display-card--ios">
+                  <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
+                  <span>{{ p.label }}</span>
+                </label>
+              </div>
+            </section>
+            <section class="rp-display-group">
+              <div class="rp-display-group__head">
+                <strong>Messenger</strong>
+                <span>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', [...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_MESS_IOS], true)">Chọn</button>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', [...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_MESS_IOS], false)">Bỏ</button>
+                </span>
+              </div>
+              <div class="rp-display-grid">
+                <label v-for="p in [...REG_PLATFORMS_MESS_ANDR, ...REG_PLATFORMS_MESS_IOS]" :key="p.key" class="rp-display-card">
+                  <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
+                  <span>{{ p.label }}</span>
+                </label>
+              </div>
+            </section>
+            <section class="rp-display-group">
+              <div class="rp-display-group__head">
+                <strong>FB Lite</strong>
+                <span>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_FBLITE, true)">Chọn</button>
+                  <button type="button" @click="toggleVisiblePlatforms('reg', REG_PLATFORMS_FBLITE, false)">Bỏ</button>
+                </span>
+              </div>
+              <div class="rp-display-grid">
+                <label v-for="p in REG_PLATFORMS_FBLITE" :key="p.key" class="rp-display-card">
+                  <input type="checkbox" :checked="visibleRegPlatformKeys.includes(p.key)" @change="toggleVisiblePlatform('reg', p.key)" />
+                  <span>{{ p.label }}</span>
+                </label>
+              </div>
+            </section>
           </div>
         </section>
       </div>
@@ -2411,41 +2628,39 @@ function resetForms() {
     <!-- ── Body ───────────────────────────────────────────────────────────── -->
     <div class="rp-page__body">
 
-      <div class="rp-main-col">
+      <div class="rp-main-col rp-main-col--single">
 
       <!-- ══════════════════════════════════════════════════════════
            SECTION 2 — VERIFY / XÁC THỰC
            ══════════════════════════════════════════════════════════ -->
-      <div class="rp-section rp-section--verify" style="order: 2">
-        <div
-          class="rp-section__header rp-section__header--toggle"
-          :class="{ 'rp-section__header--no-body': sectionCollapsed.s1 }"
-          @click="sectionCollapsed.s1 = !sectionCollapsed.s1"
-        >
-          <span class="rp-section__num">2</span>
-          <span class="rp-section__title">Verify / Xác thực</span>
-          <span v-if="form.verifyEnabled" class="rp-section__badge badge--on">BẬT</span>
-          <span v-else class="rp-section__badge badge--off">TẮT</span>
-          <ChevronDown v-if="sectionCollapsed.s1" :size="14" class="rp-section__caret" />
-          <ChevronUp v-else :size="14" class="rp-section__caret" />
-        </div>
-
-        <div v-if="!sectionCollapsed.s1" class="rp-section__body">
+      <div v-show="activeStage === 'ver'" class="rp-section rp-section--verify rp-section--stage">
+        <!-- Header bỏ (S02-D2-T002): chip ② đã có số + tên + toggle BẬT/TẮT -->
+        <div class="rp-section__body">
         <fieldset :disabled="!form.verifyEnabled" class="rp-section__disable-wrap">
 
           <!-- ── Sub: API & Logic ────────────────────────────────────── -->
-          <div class="rp-subsection">
-            <div class="rp-subsection__label rp-subsection__label--tools">
-              <span>API VERIFY <span class="rp-subsection__hint">— click chọn · kéo chuột để quét chọn (Alt+kéo = bỏ) · chuột phải = menu</span></span>
-              <span class="rp-display-filter">
+          <div class="rp-subsection" :class="{ 'rp-subsection--collapsed': subCollapsed.verApi }">
+            <div class="rp-subsection__label rp-subsection__label--tools rp-subsection__label--clickable" @click="toggleSub('verApi')">
+              <span>
+                <span class="rp-sub-caret">{{ subCollapsed.verApi ? '▸' : '▾' }}</span>
+                API VERIFY
+                <span v-if="!subCollapsed.verApi" class="rp-subsection__hint">— click chọn · kéo chuột để quét chọn (Alt+kéo = bỏ) · chuột phải = menu</span>
+                <span v-else class="rp-sub-count">{{ verPlatCount }} API đã chọn</span>
+              </span>
+              <span class="rp-display-filter" @click.stop>
                 <button type="button" class="rp-display-filter__btn" @click="togglePlatformDisplayMenu('verify')">Hiển thị</button>
               </span>
             </div>
-            <div class="api-dev-notice">⚠️ Bản Instagram đang phát triển — các bản API hiện đã tạm khóa. Chọn/Chạy sẽ trả về "unsupported platform".</div>
+            <!-- Family filter chips (S02-D2-T002) -->
+            <div class="rp-family-chips">
+              <button v-for="f in PLATFORM_FAMILIES" :key="'verfam-' + f.key" type="button"
+                :class="['rp-family-chip', { 'rp-family-chip--active': verFamily === f.key }]"
+                @click="verFamily = f.key">{{ f.label }}</button>
+            </div>
             <!-- Platform selector (click bật/tắt 1 version; kéo chuột = quét chọn; chuột phải = menu) -->
             <div class="rp-platform-btns" :class="{ 'rp-platform-btns--dragging': verMarquee.state.dragging, 'rp-platform-btns--removing': verMarquee.state.dragging && verMarquee.state.mode === 'remove' }"
               :ref="verMarquee.setContainerEl" @mousedown="verMarquee.onMouseDown" @contextmenu="openVerifyPlatformMenu">
-              <div class="rp-platform-btns__group">
+              <div v-show="famShow(verFamily, 'android')" class="rp-platform-btns__group">
                 <button v-for="p in visibleVerifyPlatformsAndr" :key="p.key" type="button" :data-pkey="p.key"
                   :class="['rp-pbtn', { 'rp-pbtn--active': isVerifyPlatformOn(p.key), 'rp-pbtn--focus rp-pbtn--focus-ver': isVerifyPlatformOn(p.key) && form.apiVerifyPlatform === p.key, 'rp-pbtn--marquee': verMarquee.isPreviewed(p.key) }]"
                   :disabled="!isPlatformSelectable(p.key)"
@@ -2456,14 +2671,14 @@ function resetForms() {
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleVerifyPlatform(p.key)">api {{ p.label }}</button>
               </div>
-              <div v-if="visibleVerifyPlatformsVer.length" class="rp-platform-btns__group">
+              <div v-if="famShow(verFamily, 'android') && visibleVerifyPlatformsVer.length" class="rp-platform-btns__group">
                 <button v-for="p in visibleVerifyPlatformsVer" :key="p.key" type="button" :data-pkey="p.key"
                   :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isVerifyPlatformOn(p.key), 'rp-pbtn--focus rp-pbtn--focus-ver': isVerifyPlatformOn(p.key) && form.apiVerifyPlatform === p.key, 'rp-pbtn--marquee': verMarquee.isPreviewed(p.key) }]"
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleVerifyPlatform(p.key)">{{ p.label }}</button>
               </div>
               <!-- Messenger (Android) — tách riêng khỏi lưới version -->
-              <div v-if="visibleVerifyPlatformsMessAndr.length" class="rp-platform-btns__group rp-platform-btns__group--mess">
+              <div v-if="famShow(verFamily, 'mess') && visibleVerifyPlatformsMessAndr.length" class="rp-platform-btns__group rp-platform-btns__group--mess">
                 <span class="rp-pbtn-grouplbl">Mess</span>
                 <button v-for="p in visibleVerifyPlatformsMessAndr" :key="p.key" type="button" :data-pkey="p.key"
                   :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isVerifyPlatformOn(p.key), 'rp-pbtn--focus rp-pbtn--focus-ver': isVerifyPlatformOn(p.key) && form.apiVerifyPlatform === p.key, 'rp-pbtn--marquee': verMarquee.isPreviewed(p.key) }]"
@@ -2471,7 +2686,7 @@ function resetForms() {
                   @click="toggleVerifyPlatform(p.key)">{{ p.label }}</button>
               </div>
               <!-- iOS Native App group — màu cyan để phân biệt với Android (verify backend chưa làm) -->
-              <div v-if="visibleVerifyPlatformsIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
+              <div v-if="famShow(verFamily, 'ios') && visibleVerifyPlatformsIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
                 <span class="rp-pbtn-grouplbl">iOS</span>
                 <button v-for="p in visibleVerifyPlatformsIos" :key="p.key" type="button" :data-pkey="p.key"
                   :class="['rp-pbtn rp-pbtn--ios rp-pbtn--versioned', { 'rp-pbtn--active': isVerifyPlatformOn(p.key), 'rp-pbtn--focus rp-pbtn--focus-ver': isVerifyPlatformOn(p.key) && form.apiVerifyPlatform === p.key, 'rp-pbtn--marquee': verMarquee.isPreviewed(p.key) }]"
@@ -2479,10 +2694,18 @@ function resetForms() {
                   @click="toggleVerifyPlatform(p.key)">{{ p.label }}</button>
               </div>
               <!-- Messenger (iOS) — trong cụm iOS nhưng tách khỏi các version iOS -->
-              <div v-if="visibleVerifyPlatformsMessIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
+              <div v-if="famShow(verFamily, 'mess') && visibleVerifyPlatformsMessIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
                 <span class="rp-pbtn-grouplbl">Mess iOS</span>
                 <button v-for="p in visibleVerifyPlatformsMessIos" :key="p.key" type="button" :data-pkey="p.key"
                   :class="['rp-pbtn rp-pbtn--ios rp-pbtn--versioned', { 'rp-pbtn--active': isVerifyPlatformOn(p.key), 'rp-pbtn--focus rp-pbtn--focus-ver': isVerifyPlatformOn(p.key) && form.apiVerifyPlatform === p.key, 'rp-pbtn--marquee': verMarquee.isPreviewed(p.key) }]"
+                  :disabled="!isPlatformSelectable(p.key)"
+                  @click="toggleVerifyPlatform(p.key)">{{ p.label }}</button>
+              </div>
+              <!-- Facebook Lite — verify acc tạo từ Reg FB Lite (đổi mail mới → OTP → confirm) -->
+              <div v-if="famShow(verFamily, 'lite') && visibleVerifyPlatformsFblite.length" class="rp-platform-btns__group rp-platform-btns__group--mess">
+                <span class="rp-pbtn-grouplbl">FB Lite</span>
+                <button v-for="p in visibleVerifyPlatformsFblite" :key="p.key" type="button" :data-pkey="p.key"
+                  :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isVerifyPlatformOn(p.key), 'rp-pbtn--focus rp-pbtn--focus-ver': isVerifyPlatformOn(p.key) && form.apiVerifyPlatform === p.key, 'rp-pbtn--marquee': verMarquee.isPreviewed(p.key) }]"
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleVerifyPlatform(p.key)">{{ p.label }}</button>
               </div>
@@ -2549,6 +2772,7 @@ function resetForms() {
                 <button type="button" class="rp-uai__test-btn" :disabled="verTestLoading" @click="runVerUATest">
                   {{ verTestLoading ? '...' : verPlatformCfg.useOriginalUA ? '👁 Xem' : '▶ Test' }}
                 </button>
+                <button v-if="verTestUA || (verPlatformCfg.useOriginalUA && verOriginalUA)" type="button" class="rp-ua-copy-btn" @click="copyUA(verTestUA || verOriginalUA, 'ver')">{{ uaCopied === 'ver' ? '✓ Đã copy' : 'Copy' }}</button>
               </div>
               <div class="rp-uai__row rp-uai__row--opts">
                 <label class="rp-uai__check" :class="{ 'rp-uai__check--dim': !verOriginalUA }" :title="verOriginalUA ? '' : 'Platform này không có UA gốc'">
@@ -2598,7 +2822,7 @@ function resetForms() {
                   type="number"
                   v-model.number="form.splitVerifyThreads"
                   min="0"
-                  max="600"
+                  max="100000"
                   class="vr-input vr-input--num"
                   @blur="clampSplitVerifyThreads"
                   @change="clampSplitVerifyThreads"
@@ -2616,8 +2840,12 @@ function resetForms() {
           </div>
 
           <!-- ── Sub: Timing & Delay ────────────────────────────────── -->
-          <div class="rp-subsection">
-            <div class="rp-subsection__label">Timing &amp; Delay</div>
+          <div class="rp-subsection" :class="{ 'rp-subsection--collapsed': subCollapsed.verTiming }">
+            <div class="rp-subsection__label rp-subsection__label--clickable" @click="toggleSub('verTiming')">
+              <span class="rp-sub-caret">{{ subCollapsed.verTiming ? '▸' : '▾' }}</span>
+              Timing &amp; Delay
+              <span v-if="subCollapsed.verTiming" class="rp-sub-count">{{ verOptCount }} tùy chọn bật</span>
+            </div>
             <div class="rp-timing-grid rp-timing-grid--dense">
               <div class="rp-field rp-field--compact" title="Tổng thời gian tối đa chờ OTP về mail. Hết giờ này mà không thấy → timeout.">
                 <label>Chờ OTP tối đa (s):</label>
@@ -2655,10 +2883,6 @@ function resetForms() {
                 <label>Giữ kết quả UI (s):</label>
                 <input type="number" v-model.number="form.delayDisplayResult" min="0" max="60" class="vr-input vr-input--num" />
               </div>
-              <div v-show="form.reUseEmail" class="rp-field rp-field--compact" title="Số lần dùng lại 1 mail trước khi lấy mail mới (tiết kiệm chi phí mail rent).">
-                <label>Dùng lại mail (lần):</label>
-                <input type="number" v-model.number="form.useMailTimes" min="1" class="vr-input vr-input--num" />
-              </div>
             </div>
             <div class="rp-checks-row rp-checks-row--merged">
               <label class="rp-checkbox" title="Khi bật, tool sẽ tự gửi lại OTP nếu hết timeout chưa thấy mã.">
@@ -2666,9 +2890,9 @@ function resetForms() {
                 <span>Tự gửi lại OTP khi timeout</span>
               </label>
               <span class="rp-checks-sep">·</span>
-              <label class="rp-checkbox" title="Sau khi confirm OTP, gọi check Live/Die (picture endpoint / pending redirect) để xác minh acc còn sống → chống ghi nhầm acc chết vào SuccessVerify_No2FA.txt. Vẫn chờ đủ Trước check live (s) trước khi báo Live cuối cùng.">
+              <label class="rp-checkbox" title="Sau khi verify xong, bắn graph /me QUA PROXY ACCOUNT (không dùng IP máy → tránh IP máy bị FB chặn làm mọi check ra Unknown hàng loạt) để xác nhận acc THẬT SỰ còn sống. CHỈ lưu Live khi xác nhận được Live; không xác nhận được (toàn Unknown) → giữ Unknown, KHÔNG ghi Live (chống bán nhầm acc chưa chắc verified). Android: /me bằng token bắt checkpoint ngay; iOS: picture trước. Khuyến nghị luôn bật.">
                 <input type="checkbox" v-model="form.checkLiveDieEnabled" />
-                <span>Kiểm tra sau reg</span>
+                <span>Kiểm tra acc sống thật trước khi lưu Live</span>
               </label>
               <span class="rp-checks-sep">·</span>
               <label class="rp-checkbox" title="Sau pass 1, tự verify lại acc Unknown/Error 1 lần nữa — Pass 2 dùng PROXY MỚI (offset worker slot trong sticky manager) để né proxy đã fail. Acc nào vẫn Unknown sau pass 2 thì giữ Unknown. Đỡ phí acc do lỗi mạng/proxy tạm thời.">
@@ -2676,10 +2900,12 @@ function resetForms() {
                 <span>Verify lại Unknown ngay</span>
               </label>
               <span class="rp-checks-sep">·</span>
-              <label class="rp-checkbox">
-                <input type="checkbox" v-model="form.reUseEmail" />
-                <span>Re-use email</span>
+              <label class="rp-checkbox" title="Verify lại các acc Unknown bằng cách LOGIN LẠI TỪ ĐẦU bằng fb_561v3 (xóa token+cookie, login REST /auth/login lấy EAAAAU mới) + BUILD UA mới + đổi NHÀ MẠNG, rồi verify với MAIL MỚI. Áp dụng cho cả luồng Verify standalone lẫn REG+VER+SPLIT. Dành cho acc có sẵn UID+password. Kết quả ghi RetryThongKe.txt.">
+                <input type="checkbox" v-model="form.retryUnknownRelogin" />
+                <span>Login lại fb_561v3 verify Unknown</span>
               </label>
+              <span class="rp-checks-sep">·</span>
+              <!-- Re-use email / Add Sub Email đã chuyển sang stage ③ ReUseEmail (S02-D2-T002) -->
               <label class="rp-checkbox">
                 <input type="checkbox" v-model="form.fmUserTmpMail" />
                 <span>Fm User TmpMail</span>
@@ -2703,45 +2929,74 @@ function resetForms() {
       <!-- ══════════════════════════════════════════════════════════
            SECTION 1 — REGISTER / TẠO TÀI KHOẢN
            ══════════════════════════════════════════════════════════ -->
-      <div class="rp-section rp-section--reg" style="order: 1">
-        <div
-          class="rp-section__header rp-section__header--toggle"
-          :class="{ 'rp-section__header--no-body': sectionCollapsed.s2 }"
-          @click="sectionCollapsed.s2 = !sectionCollapsed.s2"
-        >
-          <span class="rp-section__num">1</span>
-          <span class="rp-section__title">Reg account</span>
-          <span v-if="form.createEnabled" class="rp-section__badge badge--on">BẬT</span>
-          <span v-else class="rp-section__badge badge--off">TẮT</span>
-          <ChevronDown v-if="sectionCollapsed.s2" :size="14" class="rp-section__caret" />
-          <ChevronUp v-else :size="14" class="rp-section__caret" />
-        </div>
-
-        <div v-if="!sectionCollapsed.s2" class="rp-section__body">
-        <fieldset :disabled="!form.createEnabled" class="rp-section__disable-wrap">
+      <div v-show="activeStage === 'reg'" class="rp-section rp-section--reg rp-section--stage">
+        <!-- Header bỏ (S02-D2-T002): chip ① đã có số + tên + toggle BẬT/TẮT -->
+        <div class="rp-section__body">
+        <fieldset class="rp-section__disable-wrap">
 
           <!-- API & Setup ──────────────────────────────────────────────────────── -->
-          <div class="rp-subsection">
-            <div class="rp-subsection__label rp-subsection__label--tools">
-              <span>API REG <span class="rp-subsection__hint">— click chọn · kéo chuột để quét chọn (Alt+kéo = bỏ) · chuột phải = menu</span></span>
-              <span class="rp-display-filter">
+          <div class="rp-subsection" :class="{ 'rp-subsection--collapsed': subCollapsed.regApi }">
+            <div class="rp-subsection__label rp-subsection__label--tools rp-subsection__label--clickable" @click="toggleSub('regApi')">
+              <span>
+                <span class="rp-sub-caret">{{ subCollapsed.regApi ? '▸' : '▾' }}</span>
+                API REG
+                <span v-if="!subCollapsed.regApi" class="rp-subsection__hint">— click chọn · kéo chuột để quét chọn (Alt+kéo = bỏ) · chuột phải = menu</span>
+                <span v-else class="rp-sub-count">{{ regPlatCount }} API đã chọn</span>
+              </span>
+              <span class="rp-display-filter" @click.stop>
                 <button type="button" class="rp-display-filter__btn" @click="togglePlatformDisplayMenu('reg')">Hiển thị</button>
               </span>
             </div>
-            <div class="api-dev-notice">⚠️ Bản Instagram đang phát triển — các bản API hiện đã tạm khóa. Chọn/Chạy sẽ trả về "unsupported platform".</div>
+            <!-- Family filter chips (S02-D2-T002) -->
+            <div class="rp-family-chips">
+              <button v-for="f in PLATFORM_FAMILIES" :key="'regfam-' + f.key" type="button"
+                :class="['rp-family-chip', { 'rp-family-chip--active': regFamily === f.key }]"
+                @click="regFamily = f.key">{{ f.label }}</button>
+            </div>
             <!-- Platform selector (click bật/tắt 1 version; kéo chuột = quét chọn; chuột phải = menu) -->
             <div class="rp-platform-btns" :class="{ 'rp-platform-btns--dragging': regMarquee.state.dragging, 'rp-platform-btns--removing': regMarquee.state.dragging && regMarquee.state.mode === 'remove' }"
               :ref="regMarquee.setContainerEl" @mousedown="regMarquee.onMouseDown" @contextmenu="openRegPlatformMenu">
-              <div class="rp-platform-btns__group">
+              <div v-show="famShow(regFamily, 'android')" class="rp-platform-btns__group">
                 <button v-for="p in visibleRegPlatformsStd" :key="p.key" type="button" :data-pkey="p.key"
                   :class="['rp-pbtn', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
               </div>
-              <div v-if="visibleRegPlatformsIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
+              <div v-if="famShow(regFamily, 'android') && visibleRegPlatformsVer.length" class="rp-platform-btns__group">
+                <button v-for="p in visibleRegPlatformsVer" :key="p.key" type="button" :data-pkey="p.key"
+                  :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
+                  :disabled="!isPlatformSelectable(p.key)"
+                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
+              </div>
+              <!-- Messenger (Android) — tách riêng khỏi lưới version -->
+              <div v-if="famShow(regFamily, 'mess') && visibleRegPlatformsMessAndr.length" class="rp-platform-btns__group rp-platform-btns__group--mess">
+                <span class="rp-pbtn-grouplbl">Mess</span>
+                <button v-for="p in visibleRegPlatformsMessAndr" :key="p.key" type="button" :data-pkey="p.key"
+                  :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
+                  :disabled="!isPlatformSelectable(p.key)"
+                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
+              </div>
+              <!-- iOS Native App group — màu cyan để phân biệt với Android orange -->
+              <div v-if="famShow(regFamily, 'ios') && visibleRegPlatformsIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
                 <span class="rp-pbtn-grouplbl">iOS</span>
                 <button v-for="p in visibleRegPlatformsIos" :key="p.key" type="button" :data-pkey="p.key"
-                  :class="['rp-pbtn rp-pbtn--ios', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
+                  :class="['rp-pbtn rp-pbtn--ios rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
+                  :disabled="!isPlatformSelectable(p.key)"
+                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
+              </div>
+              <!-- Messenger (iOS) — trong cụm iOS nhưng tách khỏi các version iOS -->
+              <div v-if="famShow(regFamily, 'mess') && visibleRegPlatformsMessIos.length" class="rp-platform-btns__group rp-platform-btns__group--ios">
+                <span class="rp-pbtn-grouplbl">Mess iOS</span>
+                <button v-for="p in visibleRegPlatformsMessIos" :key="p.key" type="button" :data-pkey="p.key"
+                  :class="['rp-pbtn rp-pbtn--ios rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
+                  :disabled="!isPlatformSelectable(p.key)"
+                  @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
+              </div>
+              <!-- Facebook Lite (FBAN/EMA v499) — reg+ver qua email OTP, tài khoản FB Android -->
+              <div v-if="famShow(regFamily, 'lite') && visibleRegPlatformsFblite.length" class="rp-platform-btns__group rp-platform-btns__group--mess">
+                <span class="rp-pbtn-grouplbl">FB Lite</span>
+                <button v-for="p in visibleRegPlatformsFblite" :key="p.key" type="button" :data-pkey="p.key"
+                  :class="['rp-pbtn rp-pbtn--versioned', { 'rp-pbtn--active': isRegPlatformOn(p.key), 'rp-pbtn--focus': isRegPlatformOn(p.key) && form.apiRegPlatform === p.key, 'rp-pbtn--marquee': regMarquee.isPreviewed(p.key) }]"
                   :disabled="!isPlatformSelectable(p.key)"
                   @click="toggleRegPlatform(p.key)">{{ p.label }}</button>
               </div>
@@ -2767,6 +3022,16 @@ function resetForms() {
                   <button type="button" class="rp-ctxmenu__item rp-ctxmenu__item--submenu">Chọn <span>›</span></button>
                   <div class="rp-ctxmenu__flyout">
                     <button type="button" class="rp-ctxmenu__item" @click="selectAllRegPlatforms">Tất cả</button>
+                    <div class="rp-ctxmenu__sep">── Android ──</div>
+                    <button
+                      v-for="batch in regVersionBatches"
+                      :key="batch.map(p => p.key).join('-')"
+                      type="button"
+                      class="rp-ctxmenu__item"
+                      @click="selectRegVersionBatch(batch)"
+                    >
+                      {{ platformRangeLabel(batch) }}
+                    </button>
                     <div class="rp-ctxmenu__sep">── iOS ──</div>
                     <button
                       v-for="batch in regIosBatches"
@@ -2802,6 +3067,7 @@ function resetForms() {
                 <button type="button" class="rp-uai__test-btn" :disabled="regTestLoading" @click="runRegUATest">
                   {{ regTestLoading ? '...' : regPlatformCfg.useOriginalUA ? '👁 Xem' : '▶ Test' }}
                 </button>
+                <button v-if="regTestUA || (regPlatformCfg.useOriginalUA && regOriginalUA)" type="button" class="rp-ua-copy-btn" @click="copyUA(regTestUA || regOriginalUA, 'reg')">{{ uaCopied === 'reg' ? '✓ Đã copy' : 'Copy' }}</button>
               </div>
               <div class="rp-uai__row rp-uai__row--opts">
                 <label class="rp-uai__check" :class="{ 'rp-uai__check--dim': !regOriginalUA }" :title="regOriginalUA ? '' : 'Platform này không có UA gốc'">
@@ -2848,7 +3114,7 @@ function resetForms() {
                   type="number"
                   v-model.number="form.regThreads"
                   min="1"
-                  max="600"
+                  max="100000"
                   class="vr-input vr-input--num"
                   @blur="clampRegThreads"
                   @change="clampRegThreads"
@@ -2881,8 +3147,12 @@ function resetForms() {
           </div>
 
           <!-- Reg Settings -->
-          <div class="rp-subsection">
-            <div class="rp-subsection__label">Reg Settings</div>
+          <div class="rp-subsection" :class="{ 'rp-subsection--collapsed': subCollapsed.regSettings }">
+            <div class="rp-subsection__label rp-subsection__label--clickable" @click="toggleSub('regSettings')">
+              <span class="rp-sub-caret">{{ subCollapsed.regSettings ? '▸' : '▾' }}</span>
+              Reg Settings
+              <span v-if="subCollapsed.regSettings" class="rp-sub-count">{{ form.regMode }}</span>
+            </div>
             <div class="rp-grid-2 rp-grid-2--paired rp-reg-settings-grid">
               <div class="rp-field rp-field--lead-domain">
                 <label>Lead Domain Mail:</label>
@@ -2952,9 +3222,13 @@ function resetForms() {
           </div>
 
           <!-- Cookie Initial — đã được chuyển vào trong cụm Reg account -->
-          <div class="rp-subsection rp-subsection--ci">
-            <div class="rp-ci-head">
-              <div class="rp-subsection__label">Cookie Initial</div>
+          <div class="rp-subsection rp-subsection--ci" :class="{ 'rp-subsection--collapsed': subCollapsed.regCookie }">
+            <div class="rp-ci-head rp-subsection__label--clickable" @click="toggleSub('regCookie')">
+              <div class="rp-subsection__label">
+                <span class="rp-sub-caret">{{ subCollapsed.regCookie ? '▸' : '▾' }}</span>
+                Cookie Initial
+                <span v-if="subCollapsed.regCookie" class="rp-sub-count">{{ form.cookieInitialMethod === 'new' ? 'Tạo mới' : 'Từ file' }}</span>
+              </div>
               <span class="rp-ci-desc">Nguồn datr đầu vào cho pool register</span>
             </div>
             <div class="rp-sf-ci">
@@ -3023,53 +3297,92 @@ function resetForms() {
       </div>
 
 
-      </div><!-- /rp-main-col -->
-
       <!-- ══════════════════════════════════════════════════════════
-           SECTION 3 — USER AGENT
-           Đặt dưới Reg/Verify để dùng chung cho cả 2 luồng.
-           Nguồn UA + 2 modifier (addVirtualSpec + useBuildNumFile) + Dùng UA gốc.
-           Trước đây panel UA pool nằm ở Cài đặt chung — đã chuyển hẳn sang đây
-           để gom toàn bộ thiết lập chạy 1 chỗ.
+           STAGE ③ — REUSEEMAIL (Swap + Recycle) — S02-D2-T002
            ══════════════════════════════════════════════════════════ -->
-      <div class="rp-section rp-section--ua">
-        <div
-          class="rp-section__header rp-section__header--toggle"
-          :class="{ 'rp-section__header--no-body': sectionCollapsed.s3 }"
-          @click="sectionCollapsed.s3 = !sectionCollapsed.s3"
-        >
-          <span class="rp-section__num">3</span>
-          <span class="rp-section__title">User Agent</span>
-          <span class="rp-section__badge badge--ua">{{ activeUaPoolMeta?.label || form.uaPoolKey }}</span>
-          <ChevronDown v-if="sectionCollapsed.s3" :size="14" class="rp-section__caret" />
-          <ChevronUp v-else :size="14" class="rp-section__caret" />
-        </div>
+      <div v-show="activeStage === 'reuse'" class="rp-section rp-section--reuse rp-section--stage">
+        <!-- Header bỏ (S02-D2-T002): chip ③ đã có số + tên + toggle BẬT/TẮT -->
+        <div class="rp-section__body">
+        <fieldset :disabled="!form.addSubEmail" class="rp-section__disable-wrap">
+          <p class="rp-reuse-hint">
+            Sau khi verify Live: thêm <b>email #2</b> (temp free) vào account và để lại đó.
+            Tích <b>Tái sử dụng mail ver</b> để xoá mail chính (thuê) rồi recycle về pool dùng cho
+            account kế — chỉ chạy khi mail chính là <b>mail thuê (rent)</b>. Bật/tắt cả cụm bằng chip
+            <b>③ Add Mail</b> ở trên.
+          </p>
 
-        <div v-if="!sectionCollapsed.s3" class="rp-section__body">
-
-          <!-- Chọn loại UA — map sang file Config/UserAgent/{file} -->
-          <div class="rp-ua-tabs">
-            <button
-              v-for="pool in UA_POOLS"
-              :key="pool.key"
-              type="button"
-              :class="['rp-ua-tab', { 'rp-ua-tab--active': form.uaPoolKey === pool.key }]"
-              @click="form.uaPoolKey = pool.key"
-            >
-              {{ pool.label }}
-              <span class="rp-ua-tab__count">{{ uaCounts[pool.key] ?? 0 }}</span>
-            </button>
+          <div class="rp-subsection">
+            <div class="rp-subsection__label">Tái sử dụng mail verify</div>
+            <div class="rp-checks-row rp-checks-row--merged">
+              <label class="rp-checkbox"
+                title="Sau khi thêm email #2: xoá mail chính (thuê) khỏi account rồi recycle về pool cho account kế. CẦN bật cùng Add Mail thì swap+recycle mới chạy (mail chính phải là Rent).">
+                <input type="checkbox" v-model="form.reUseEmail" />
+                <span>Tái sử dụng mail ver <small>(recycle mail thuê về pool)</small></span>
+              </label>
+            </div>
+            <div v-show="form.reUseEmail" class="rp-timing-grid rp-timing-grid--dense" style="margin-top:8px">
+              <div class="rp-field rp-field--compact" title="Số lần dùng lại 1 mail trước khi lấy mail mới (tiết kiệm chi phí mail rent).">
+                <label>Dùng lại mail (lần):</label>
+                <input type="number" v-model.number="form.useMailTimes" min="1" class="vr-input vr-input--num" />
+              </div>
+            </div>
           </div>
 
-          <!-- Đường dẫn file nguồn UA + nút mở file -->
-          <div class="rp-ua-source-row">
-            <span class="rp-ua-source-label">Nguồn:</span>
-            <code class="rp-ua-source-path">Config/UserAgent/{{ activeUaPoolMeta?.file }}</code>
-            <button type="button" class="rp-btn-icon rp-ua-open-btn" @click="openUAFile" title="Mở file trong Notepad">Mở file</button>
+          <div class="rp-subsection">
+            <div class="rp-subsection__label">Email #2</div>
+            <!-- Cấu hình chi tiết mail #2 (provider + key riêng) ở tab Email/Phone (S04-D2-T003) -->
+            <div class="rp-subemail-row rp-submail-link">
+              <span>Cấu hình provider + key riêng cho email #2 ở</span>
+              <button type="button" class="rp-link-btn" @click="router.push(ROUTE_PATHS.AUTH_SOURCE)">tab Email/Phone → mục “Mail #2” →</button>
+            </div>
           </div>
-
+        </fieldset>
         </div>
       </div>
+
+      <!-- ══════════════════════════════════════════════════════════
+           STAGE ④ — TƯƠNG TÁC (tab xem-trước, disabled)
+           Toggle chip bị disable (không bật được); click chip để xem.
+           Nội dung view-only (fieldset disabled) bind form chung — chưa cho chỉnh.
+           ══════════════════════════════════════════════════════════ -->
+      <div v-show="activeStage === 'interact'" class="rp-section rp-section--stage">
+        <div class="rp-section__body">
+          <div class="rp-interact-banner">
+            🚧 <b>Xem trước</b> — Tương tác chạy tự động sau khi verify Live. Tính năng đang hoàn thiện,
+            chưa bật được ở đây (chip ④ disabled). Bản sau sẽ mở khoá chỉnh trực tiếp.
+          </div>
+          <fieldset disabled class="rp-section__disable-wrap rp-interact-preview">
+            <div class="rp-interact-row">
+              <div class="rp-interact-row__info">
+                <span class="rp-interact-row__title">Upload Avatar</span>
+                <span class="rp-interact-row__desc">Pick ngẫu nhiên ảnh JPG/PNG từ thư mục đã chọn</span>
+              </div>
+              <BaseToggle :model-value="form.uploadAvatar" disabled />
+            </div>
+            <div class="rp-interact-row">
+              <div class="rp-interact-row__info">
+                <span class="rp-interact-row__title">Bật 2FA (TOTP)</span>
+                <span class="rp-interact-row__desc">Kích hoạt xác thực 2 bước — lưu secret key vào output</span>
+              </div>
+              <BaseToggle :model-value="form.enable2fa" disabled />
+            </div>
+            <div class="rp-interact-row">
+              <div class="rp-interact-row__info">
+                <span class="rp-interact-row__title">Cập nhật thông tin hồ sơ</span>
+                <span class="rp-interact-row__desc">Điền city, trường học, nơi làm việc… từ Config/AddInfo/</span>
+              </div>
+              <BaseToggle :model-value="form.addInfo" disabled />
+            </div>
+            <div class="rp-interact-placeholder">Like, comment, add friend… sẽ được thêm vào đây</div>
+          </fieldset>
+        </div>
+      </div>
+
+      </div><!-- /rp-main-col -->
+
+      <!-- SECTION 3 — USER AGENT: đã chuyển sang Cài đặt chung (S02-D2-T006).
+           Global uaPoolKey (fallback) + viewer counts/source/open-file nay ở GeneralSettingsPage.
+           Per-platform UA trong REG/VERIFY ở trên giữ nguyên (uaCounts vẫn dùng cho count per pool). -->
 
     </div><!-- /rp-page__body -->
 
@@ -3118,23 +3431,111 @@ function resetForms() {
   flex-shrink: 0;
 }
 
-/* ══ Control bar ════════════════════════════════════════════════════════════ */
-.rp-controlbar {
-  display: none;
+/* ══ Pipeline strip (S02-D2-T001) — port .strip-chip MDR sang HVR dark theme ══ */
+.rp-pipeline-strip {
+  flex-shrink: 0;
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 6px var(--space-4);
+  gap: 6px 10px;
+  flex-wrap: wrap;
   background: var(--surface-elevated);
   border-bottom: 1px solid var(--border-default);
-  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  padding: 6px var(--space-4);
+  position: relative;
+  z-index: 6;
+}
+.rp-strip-inner { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+/* Cụm flag Split/Keep cạnh dải pipeline (S02-D2-T003) */
+.rp-flag-cluster {
+  display: flex;
+  align-items: center;
+  gap: 8px 10px;
   flex-wrap: wrap;
+  margin-left: auto;
+  padding-left: 12px;
+  border-left: 1px solid var(--border-default);
 }
-.rp-controlbar__sep {
-  width: 1px; height: 16px;
-  background: var(--border-default);
-  flex-shrink: 0;
+.rp-strip-arrow { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+.rp-strip-chip {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  padding: 5px 9px; background: var(--surface-sunken, #111);
+  border: 1.5px solid var(--border-default); border-radius: 9px;
+  cursor: pointer; user-select: none;
+  transition: background 0.12s, border-color 0.12s, opacity 0.12s, transform 0.12s, box-shadow 0.12s;
 }
-.rp-controlbar__spacer { flex: 1; min-width: var(--space-2); }
+.rp-strip-chip:not(.rp-strip-chip--active):hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+.rp-strip-chip--active {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  box-shadow: 0 2px 10px rgba(79, 195, 247, 0.3);
+}
+.rp-strip-chip--active .rp-chip-label { color: #fff; }
+.rp-strip-chip--active .rp-chip-sub { color: rgba(255, 255, 255, 0.7); }
+.rp-strip-chip--active .rp-chip-num { background: rgba(255, 255, 255, 0.22); color: #fff; }
+/* Dim chip không active khi đang có 1 chip active */
+.rp-strip-inner:has(.rp-strip-chip--active) .rp-strip-chip:not(.rp-strip-chip--active) { opacity: 0.6; }
+.rp-strip-inner:has(.rp-strip-chip--active) .rp-strip-chip:not(.rp-strip-chip--active):hover { opacity: 1; }
+.rp-strip-chip--disabled { opacity: 0.5; }
+.rp-strip-chip--disabled.rp-strip-chip--active { opacity: 0.85; }
+.rp-chip-num {
+  width: 17px; height: 17px; border-radius: 50%; flex-shrink: 0;
+  background: var(--brand-primary); color: #fff;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.rp-chip-icon { font-size: 13px; line-height: 1; flex-shrink: 0; }
+.rp-chip-info { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.rp-chip-label { font-size: 11.5px; font-weight: 600; color: var(--text-primary); line-height: 1.2; white-space: nowrap; }
+.rp-chip-sub { font-size: 9.5px; color: var(--text-muted); line-height: 1.2; white-space: nowrap; }
+.rp-chip-toggle { display: inline-flex; align-items: center; margin-left: 2px; }
+
+/* ══ Stage ④ Tương tác — tab xem-trước (disabled) ══════════════════════════ */
+.rp-interact-banner {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px dashed rgba(255, 193, 7, 0.4);
+  border-radius: 8px;
+  padding: 8px 12px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.rp-interact-preview {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0.85;
+}
+.rp-interact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--border-default);
+}
+.rp-interact-row:last-of-type { border-bottom: none; }
+.rp-interact-row__info { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.rp-interact-row__title { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.rp-interact-row__desc { font-size: 11px; color: var(--text-muted); }
+.rp-interact-placeholder {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 14px;
+  border: 1px dashed var(--border-default);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+.rp-checkbox small { color: var(--text-muted); font-weight: 400; }
 
 /* ══ Mode checkboxes ════════════════════════════════════════════════════════ */
 .rp-mode-checks {
@@ -3150,15 +3551,15 @@ function resetForms() {
 .rp-mode-check {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   color: var(--text-secondary);
 }
 .rp-mode-check input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   accent-color: var(--brand-primary);
   cursor: pointer;
 }
@@ -3185,12 +3586,12 @@ function resetForms() {
 }
 .rp-ua-pool-btn:last-child { border-right: none; }
 .rp-ua-pool-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
-.rp-ua-pool-btn--active { background: rgba(225,48,108,0.15); color: var(--accent); font-weight: 700; }
+.rp-ua-pool-btn--active { background: rgba(79,195,247,0.15); color: var(--accent, #4fc3f7); font-weight: 700; }
 
 /* ══ User Agent subsection (in Reg account section) ════════════════════════ */
 .rp-subsection--ua {
-  background: rgba(225,48,108,0.04);
-  border: 1px dashed rgba(225,48,108,0.25);
+  background: rgba(79,195,247,0.04);
+  border: 1px dashed rgba(79,195,247,0.25);
 }
 .rp-ua-row {
   display: flex;
@@ -3212,7 +3613,7 @@ function resetForms() {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.rp-ua-pool-select--lg { box-shadow: 0 0 0 1px rgba(225,48,108,0.15) inset; }
+.rp-ua-pool-select--lg { box-shadow: 0 0 0 1px rgba(79,195,247,0.15) inset; }
 .rp-ua-pool-btn--lg {
   padding: 8px 18px;
   font-size: var(--font-size-sm);
@@ -3221,19 +3622,19 @@ function resetForms() {
   text-align: center;
 }
 .rp-ua-pool-btn--lg.rp-ua-pool-btn--active {
-  background: var(--accent);
+  background: var(--accent, #4fc3f7);
   color: #000;
   font-weight: 800;
-  box-shadow: 0 0 0 2px rgba(225,48,108,0.45);
+  box-shadow: 0 0 0 2px rgba(79,195,247,0.45);
   text-shadow: 0 0 1px rgba(0,0,0,0.2);
 }
-.rp-ua-pool-btn--lg.rp-ua-pool-btn--active:hover { background: var(--accent); color: #000; }
+.rp-ua-pool-btn--lg.rp-ua-pool-btn--active:hover { background: var(--accent, #4fc3f7); color: #000; }
 .rp-ua-active-hint {
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
 }
 .rp-ua-active-hint strong {
-  color: var(--accent);
+  color: var(--accent, #4fc3f7);
   font-weight: 700;
 }
 
@@ -3242,10 +3643,10 @@ function resetForms() {
    Border + radius giống Reg/Verify để 3 section đồng bộ.
    ══════════════════════════════════════════════════════════════════════ */
 .rp-section--ua {
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid #4fc3f7;
 }
-.rp-section--ua .rp-section__num { background: var(--accent); color: #000; }
-.rp-section--ua .rp-section__title { color: var(--accent); }
+.rp-section--ua .rp-section__num { background: #4fc3f7; color: #000; }
+.rp-section--ua .rp-section__title { color: #4fc3f7; }
 .rp-section--ua .rp-section__body {
   padding: 10px 14px 12px;
   display: flex;
@@ -3254,8 +3655,8 @@ function resetForms() {
 }
 
 .rp-section__badge.badge--ua {
-  background: rgba(225,48,108,0.18);
-  color: var(--accent);
+  background: rgba(79,195,247,0.18);
+  color: var(--accent, #4fc3f7);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -3295,9 +3696,9 @@ function resetForms() {
 }
 .rp-ua-tab:hover { color: var(--text-primary); background: var(--surface-hover); }
 .rp-ua-tab--active {
-  background: var(--accent);
+  background: var(--accent, #4fc3f7);
   color: #000;
-  border-color: var(--accent);
+  border-color: var(--accent, #4fc3f7);
   font-weight: 800;
   text-shadow: 0 0 1px rgba(0,0,0,0.2);
 }
@@ -3330,7 +3731,7 @@ function resetForms() {
   min-height: 36px;
   max-height: 80px;
 }
-.vr-textarea--mono:focus { border-color: var(--accent); }
+.vr-textarea--mono:focus { border-color: var(--accent, #4fc3f7); }
 
 .rp-ua-file-row {
   display: flex;
@@ -3361,7 +3762,7 @@ function resetForms() {
   flex-shrink: 0;
   transition: all 0.15s;
 }
-.rp-btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+.rp-btn-icon:hover { border-color: var(--accent, #4fc3f7); color: var(--accent, #4fc3f7); }
 .rp-btn-icon--danger:hover { border-color: #f44336; color: #f44336; }
 .rp-ua-open-btn { font-size: 11px; padding: 2px 10px; margin-left: auto; flex-shrink: 0; }
 
@@ -3380,8 +3781,8 @@ function resetForms() {
   font-weight: 700;
   padding: 1px 7px;
   border-radius: 8px;
-  background: rgba(225,48,108,0.15);
-  color: var(--accent);
+  background: rgba(79,195,247,0.15);
+  color: var(--accent, #4fc3f7);
   margin-left: 4px;
 }
 .rp-btn--xs {
@@ -3411,7 +3812,7 @@ function resetForms() {
   cursor: pointer;
   min-width: 0;
 }
-.rp-ua-toggles-row .rp-checkbox input { accent-color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+.rp-ua-toggles-row .rp-checkbox input { accent-color: var(--accent, #4fc3f7); margin-top: 2px; flex-shrink: 0; }
 .rp-checkbox__content { display: flex; flex-direction: column; gap: 0; min-width: 0; }
 .rp-checkbox__label {
   font-size: 12px;
@@ -3424,7 +3825,7 @@ function resetForms() {
   color: var(--text-muted);
   line-height: 1.3;
 }
-.rp-checkbox--primary .rp-checkbox__label { color: var(--accent); }
+.rp-checkbox--primary .rp-checkbox__label { color: var(--accent, #4fc3f7); }
 .rp-checkbox--muted { opacity: 0.45; pointer-events: none; }
 
 /* UA Gốc row */
@@ -3475,7 +3876,7 @@ function resetForms() {
   flex-shrink: 0;
 }
 .rp-ua-ps-badge--reg { background: rgba(251,140,0,0.15); color: #fb8c00; border: 1px solid rgba(251,140,0,0.3); }
-.rp-ua-ps-badge--ver { background: rgba(225,48,108,0.12); color: var(--accent); border: 1px solid rgba(225,48,108,0.3); }
+.rp-ua-ps-badge--ver { background: rgba(79,195,247,0.12); color: #4fc3f7; border: 1px solid rgba(79,195,247,0.3); }
 .rp-ua-ps-name { color: var(--text-primary); font-weight: 500; flex-shrink: 0; }
 .rp-ua-ps-desc {
   color: var(--text-muted);
@@ -3524,9 +3925,9 @@ function resetForms() {
 }
 .rp-uai__pool:hover:not(:disabled) { background: var(--surface-hover); color: var(--text-primary); }
 .rp-uai__pool--on {
-  background: rgba(225,48,108,0.12);
-  color: var(--accent);
-  border-color: rgba(225,48,108,0.4);
+  background: rgba(79,195,247,0.12);
+  color: #4fc3f7;
+  border-color: rgba(79,195,247,0.4);
   font-weight: 700;
 }
 .rp-uai__pool:disabled { opacity: 0.38; cursor: not-allowed; }
@@ -3551,7 +3952,7 @@ function resetForms() {
   cursor: pointer;
   white-space: nowrap;
 }
-.rp-uai__check input[type="checkbox"] { accent-color: var(--accent); flex-shrink: 0; }
+.rp-uai__check input[type="checkbox"] { accent-color: var(--accent, #4fc3f7); flex-shrink: 0; }
 .rp-uai__check--dim { opacity: 0.38; pointer-events: none; }
 .rp-uai__check--carrier {
   color: #8ba3c7;
@@ -3571,7 +3972,7 @@ function resetForms() {
   flex-shrink: 0;
   transition: all 0.1s;
 }
-.rp-uai__test-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.rp-uai__test-btn:hover:not(:disabled) { border-color: var(--accent, #4fc3f7); color: var(--accent, #4fc3f7); }
 .rp-uai__test-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .rp-uai__open-file {
@@ -3585,7 +3986,7 @@ function resetForms() {
   flex-shrink: 0;
   transition: all 0.1s;
 }
-.rp-uai__open-file:hover { border-color: var(--accent); color: var(--accent); }
+.rp-uai__open-file:hover { border-color: var(--accent, #4fc3f7); color: var(--accent, #4fc3f7); }
 
 .rp-reg-runtime {
   display: flex;
@@ -3615,6 +4016,27 @@ function resetForms() {
   color: var(--text-muted);
   font-style: italic;
 }
+.rp-ua-copy-btn {
+  flex-shrink: 0;
+  padding: 2px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+  background: rgba(255,255,255,0.9);
+  color: #333;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.rp-ua-copy-btn:hover { background: #fff; }
+.rp-uai__codes--preview .rp-ua-copy-btn {
+  background: rgba(255,255,255,0.9);
+  color: #0891b2;
+}
+.rp-uai__codes--preview .rp-ua-copy-btn:hover { background: #fff; }
 /* Preview inline UA Gốc (chưa qua backend) — background xanh dương nhạt để
  * phân biệt với rp-uai__codes thường (đỏ nhạt khi có error/result thật). */
 .rp-uai__codes--preview {
@@ -3653,7 +4075,7 @@ function resetForms() {
   position: absolute;
   z-index: 6;
   pointer-events: none;
-  border: 1px solid var(--accent);
+  border: 1px solid #3b82f6;
   background: rgba(59, 130, 246, 0.12);
   border-radius: 2px;
 }
@@ -3701,7 +4123,7 @@ function resetForms() {
 }
 .rp-section--verify .rp-pbtn--active {
   background: rgba(59,130,246,0.15);
-  color: var(--accent);
+  color: #3b82f6;
   border-color: rgba(59,130,246,0.4);
   font-weight: 700;
 }
@@ -3771,8 +4193,8 @@ function resetForms() {
   border-color: #f97316;
 }
 .rp-section--verify .rp-pbtn--focus {
-  box-shadow: 0 0 0 1px var(--accent) inset;
-  border-color: var(--accent);
+  box-shadow: 0 0 0 1px #3b82f6 inset;
+  border-color: #3b82f6;
 }
 .rp-multireg-hint {
   margin-top: 5px;
@@ -3787,7 +4209,7 @@ function resetForms() {
 .rp-multireg-hint b { color: #f97316; }
 .rp-multireg-hint__warn { display: block; margin-top: 2px; color: #d97706; }
 .rp-multireg-hint--ver { background: rgba(59,130,246,0.07); border-color: rgba(59,130,246,0.25); }
-.rp-multireg-hint--ver b { color: var(--accent); }
+.rp-multireg-hint--ver b { color: #3b82f6; }
 .rp-multireg-hint--empty {
   background: var(--surface-sunken);
   border-color: var(--border-default);
@@ -3843,7 +4265,7 @@ function resetForms() {
   box-shadow: 0 18px 64px rgba(0,0,0,0.42);
   --display-accent: #f97316;
 }
-.rp-display-modal__panel--verify { --display-accent: var(--accent); }
+.rp-display-modal__panel--verify { --display-accent: #3b82f6; }
 .rp-display-modal__head {
   display: flex;
   justify-content: space-between;
@@ -3970,17 +4392,6 @@ function resetForms() {
   accent-color: #06b6d4;
 }
 
-/* Banner cảnh báo: bản Instagram đang phát triển, API tạm khóa */
-.api-dev-notice {
-  background: var(--accent-bg);
-  border-left: 3px solid var(--accent);
-  color: var(--text-secondary);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--space-2);
-}
-
 /* Context menu chuột phải vùng API REG */
 .rp-ctxmenu-overlay { position: fixed; inset: 0; z-index: 998; }
 .rp-ctxmenu {
@@ -4053,8 +4464,8 @@ function resetForms() {
   gap: 14px;
   margin: 12px 18px 0;
   padding: 10px 14px;
-  background: rgba(225,48,108,0.06);
-  border: 1px dashed rgba(225,48,108,0.35);
+  background: rgba(79,195,247,0.06);
+  border: 1px dashed rgba(79,195,247,0.35);
   border-radius: var(--radius-lg);
 }
 .rp-auth-moved-banner__icon { font-size: 22px; }
@@ -4118,7 +4529,7 @@ function resetForms() {
 .rp-summary-toggle--open {
   border-color: var(--brand-primary);
   color: var(--brand-primary);
-  background: rgba(225,48,108,0.08);
+  background: rgba(79,195,247,0.08);
 }
 .rp-summary-drawer {
   flex-shrink: 0;
@@ -4170,9 +4581,9 @@ function resetForms() {
   flex-shrink: 0;
 }
 /* Section color theming */
-.rp-section--verify { border-left: 3px solid var(--accent); }
-.rp-section--verify .rp-section__num { background: var(--accent); }
-.rp-section--verify .rp-section__title { color: var(--accent); }
+.rp-section--verify { border-left: 3px solid #3b82f6; }
+.rp-section--verify .rp-section__num { background: #3b82f6; }
+.rp-section--verify .rp-section__title { color: #3b82f6; }
 .rp-section--reg { border-left: 3px solid #f97316; }
 .rp-section--reg .rp-section__num { background: #f97316; }
 .rp-section--reg .rp-section__title { color: #f97316; }
@@ -4252,6 +4663,23 @@ function resetForms() {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-muted);
+}
+/* ── Mục con thu gọn (accordion) ── */
+.rp-subsection--collapsed > :not(.rp-subsection__label):not(.rp-ci-head) { display: none; }
+.rp-subsection--collapsed .rp-ci-head .rp-ci-desc { display: none; }
+.rp-subsection__label--clickable { cursor: pointer; user-select: none; }
+.rp-subsection__label--clickable:hover { color: var(--text-secondary); }
+.rp-sub-caret { display: inline-block; width: 12px; font-size: 10px; color: var(--text-muted); margin-right: 2px; }
+.rp-sub-count {
+  margin-left: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--accent-text, #2563eb);
+  background: var(--surface-hover, rgba(37,99,235,0.08));
+  border-radius: 9px;
+  padding: 1px 7px;
 }
 /* Inline variant: label + checkboxes cùng 1 hàng (dùng cho Tùy chọn nâng cao) */
 .rp-subsection--inline {
@@ -4472,6 +4900,61 @@ function resetForms() {
 .rp-radio input { accent-color: var(--brand-primary); }
 .rp-checkbox { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; }
 .rp-checkbox input { accent-color: var(--brand-primary); }
+.rp-checkbox--disabled { opacity: 0.45; cursor: not-allowed; }
+.rp-checkbox--disabled input { cursor: not-allowed; }
+/* Add Sub Email config row — tách nhẹ khỏi hàng checkbox phía trên */
+.rp-subemail-row { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-subtle, rgba(255,255,255,0.08)); }
+/* Link sang Email/Phone để cấu hình mail #2 (S04-D2-T003) */
+.rp-submail-link { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; }
+.rp-link-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--accent-text, var(--brand-primary)); font-weight: 600; font-size: 12px; text-decoration: underline;
+}
+.rp-link-btn:hover { color: var(--brand-primary); }
+
+/* Stage panel (S02-D2-T002): mỗi stage full-width khi active (rp-main-col--single). */
+.rp-section--stage { width: 100%; }
+.rp-reuse-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary, #bbb);
+  padding: 8px 10px;
+  background: var(--surface-sunken, rgba(255,255,255,0.03));
+  border-left: 2px solid var(--brand-primary);
+  border-radius: 4px;
+}
+
+/* Family filter chips (S02-D2-T002) — lọc nhóm version theo Android/iOS/Mess/Lite */
+.rp-family-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+  /* Sticky khi cuộn panel: chip lọc family luôn thấy, grid version cuộn dưới (S02-D2-T004) */
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface-elevated);
+  padding: 6px 0;
+}
+.rp-family-chip {
+  padding: 3px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-sunken, #111);
+  color: var(--text-secondary, #bbb);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+.rp-family-chip:hover { border-color: var(--brand-primary); color: var(--text-primary); }
+.rp-family-chip--active {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: #fff;
+}
 
 /* ══ Hints ══════════════════════════════════════════════════════════════════ */
 .rp-hint {
@@ -4710,7 +5193,8 @@ function resetForms() {
 .rp-save-status {
   display: inline-flex;
   align-items: center;
-  padding: var(--space-1) var(--space-3);
+  gap: 5px;
+  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--text-muted);
   transition: color 0.2s;
@@ -4718,6 +5202,19 @@ function resetForms() {
 .rp-save-status[data-status="saving"]  { color: var(--brand-primary); }
 .rp-save-status[data-status="saved"]   { color: var(--success-solid, #16a34a); }
 .rp-save-status[data-status="error"]   { color: var(--danger-solid); }
+
+/* Profile bar gọn + chấm dirty (S02-D2-T003) */
+.rp-profilebar__label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.rp-profilebar__save { white-space: nowrap; }
+.rp-dirty-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.rp-dirty-dot--saving { background: var(--warning-solid, #f59e0b); }
+.rp-dirty-dot--saved  { background: var(--success-solid, #16a34a); }
+.rp-dirty-dot--error  { background: var(--danger-solid); }
 
 .vr-unit { font-size: var(--font-size-sm); color: var(--text-muted); white-space: nowrap; }
 .vr-stock-badge { font-size: var(--font-size-xs); font-weight: 600; padding: 3px 10px; border-radius: var(--radius-sm); }
