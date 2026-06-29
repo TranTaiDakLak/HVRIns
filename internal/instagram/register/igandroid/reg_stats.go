@@ -11,7 +11,14 @@ import (
 var sysErrCaptureN int64
 var noSessCaptureN int64
 
+// debugCaptureSamples = false → KHÔNG sinh file system_error_sample_*.txt / no_session_sample_*.txt.
+// Đây là file DEBUG (dump 3 response đầu mỗi loại để điều tra). Bật true khi cần điều tra lại.
+const debugCaptureSamples = false
+
 func captureSystemErrSample(resp string) {
+	if !debugCaptureSamples {
+		return
+	}
 	if n := atomic.AddInt64(&sysErrCaptureN, 1); n <= 3 {
 		_ = os.WriteFile(fmt.Sprintf("system_error_sample_%d.txt", n), []byte(resp), 0644)
 	}
@@ -20,6 +27,9 @@ func captureSystemErrSample(resp string) {
 // captureNoSessionSample ghi 3 response "no_session" đầu (không phải system_error/integrity)
 // → xem có phải parser bỏ sót session không (có thể recover ~12% reg-success).
 func captureNoSessionSample(resp string) {
+	if !debugCaptureSamples {
+		return
+	}
 	if n := atomic.AddInt64(&noSessCaptureN, 1); n <= 3 {
 		_ = os.WriteFile(fmt.Sprintf("no_session_sample_%d.txt", n), []byte(resp), 0644)
 	}

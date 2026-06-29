@@ -1272,8 +1272,7 @@ func (a *App) RunRegister(maxThreads int) string {
 				runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
 					"index": 0, "phone": "system", "proxy": "", "msg": line,
 				})
-				// Ghi ra file để đọc dễ (không cần tìm trong UI log view).
-				_ = os.WriteFile(filepath.Join(AppDataDir(), "reg_stats.txt"), []byte(line+"\n"), 0644)
+				// reg_stats.txt (file debug) đã TẮT — chỉ emit [RegStats] lên UI log, không ghi file.
 			}
 		}
 	}()
