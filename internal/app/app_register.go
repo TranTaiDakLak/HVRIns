@@ -529,15 +529,11 @@ func (a *App) RunRegister(maxThreads int) string {
 
 	// Pre-harvest iOS: MỖI lần chạy nạp thêm 1 batch mid tươi (= RegThreads) để pool
 	// LỚN DẦN + luôn có mid mới (tránh tái dùng mãi 1 tập + tích mid cháy — ta chưa có
-	// expiry). Chạy nền, không chặn reg. mid tươi từ qe/sync (server-token). Dừng khi
-	// chạm trần maxIOSPool để file không phình vô hạn.
+	// expiry). Chạy nền, không chặn reg. mid tươi từ qe/sync (server-token).
+	// KHÔNG cap pool (user: file nhẹ, cứ để lớn dần) — mỗi lần chạy nạp thêm RegThreads mid.
 	if interactionCfg.RegThreads > 0 {
-		const maxIOSPool = 5000
 		cur := igDevicePool.Size()
 		iosTarget := cur + interactionCfg.RegThreads
-		if iosTarget > maxIOSPool {
-			iosTarget = maxIOSPool
-		}
 		if cur < iosTarget {
 			harvestN := iosTarget - cur
 			runtime.EventsEmit(a.ctx, "register:status", map[string]interface{}{
@@ -1959,7 +1955,9 @@ func (a *App) RunRegister(maxThreads int) string {
 					if tempMailHandle != nil && tempMailHandle.Service != nil {
 						mailSvc := tempMailHandle.Service
 						prof.GetOTP = func(c context.Context) (string, error) {
-							return mailSvc.WaitForCode(c, 90, 2000)
+							// 45×2s=90s (giảm từ 180s): OTP IG về trong vài giây; quá ~90s = no-show
+							// → fail nhanh, nhả slot, không giữ luồng "đứng chờ" 3 phút.
+							return mailSvc.WaitForCode(c, 45, 2000)
 						}
 						onStatus("[IG] GetOTP wired — reg sẽ tự đọc OTP + confirm")
 
@@ -1971,7 +1969,7 @@ func (a *App) RunRegister(maxThreads int) string {
 									return "", nil, err
 								}
 								return newAddr, func(inner context.Context) (string, error) {
-									return mailSvc.WaitForCode(inner, 90, 2000)
+									return mailSvc.WaitForCode(inner, 45, 2000) // 90s (xem GetOTP trên)
 								}, nil
 							}
 							onStatus("[ig_ios_gql] GetNewEmail wired — auto-retry khi SESSION_FLAGGED")
