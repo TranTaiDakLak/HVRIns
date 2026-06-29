@@ -564,7 +564,11 @@ func (a *App) RunRegister(maxThreads int) string {
 
 	// User yêu cầu: nếu CookieInitialMethod="file" mà không có datr nào → DỪNG HOÀN TOÀN.
 	// Tránh reg fake không có datr → kết quả tệ. "Tạo mới"/"Ck" thì không cần check.
-	if strings.EqualFold(strings.TrimSpace(interactionCfg.CookieInitialMethod), "file") &&
+	// IG (ig_ios_bloks/ig_android) dùng MID-POOL riêng (SharedDevicePool/ig_devices.txt),
+	// KHÔNG dùng datr file này → bỏ qua check cho IG. Tránh chặn nhầm khi copy app sang
+	// folder mới chưa có datr (datr file là cơ chế FB, không cần cho IG).
+	if !strings.HasPrefix(regPlatform, "ig_") &&
+		strings.EqualFold(strings.TrimSpace(interactionCfg.CookieInitialMethod), "file") &&
 		loadedCookieInitialCount == 0 && len(tutDatrPool) == 0 {
 		a.registerMu.Unlock()
 		errMsg := "Cookie Initial: phương thức 'Từ file' nhưng không có datr — vui lòng cung cấp file cookie hoặc đổi sang 'Tạo mới'"
