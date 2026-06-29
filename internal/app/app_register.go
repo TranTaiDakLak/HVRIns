@@ -1682,15 +1682,19 @@ func (a *App) RunRegister(maxThreads int) string {
 				displayProxy := ""
 				countryCode := ""
 				{
-					type ipRes struct{ ip string }
+					type ipRes struct {
+						ip  string
+						err error
+					}
 					ipCh := make(chan ipRes, 1)
+					checkStart := time.Now()
 					checkCtx, checkCancel := context.WithTimeout(ctx, 6*time.Second)
 					go func() {
 						ip, err := proxy.CheckIP(checkCtx, prof.Proxy, generalCfg.ApiCheckIp)
 						if err != nil {
 							ip = ""
 						}
-						ipCh <- ipRes{ip}
+						ipCh <- ipRes{ip, err}
 					}()
 					select {
 					case res := <-ipCh:
@@ -1699,8 +1703,22 @@ func (a *App) RunRegister(maxThreads int) string {
 							if idx := strings.LastIndex(res.ip, "/"); idx >= 0 {
 								countryCode = strings.ToLower(res.ip[idx+1:])
 							}
+						} else {
+							// CheckIP fail — KHÔNG nuốt lỗi: log lý do thật (502 tunnel/TLS/
+							// refused/rate-limit) để chẩn đoán khi máy khác kẹt ở "đang check IP proxy".
+							slog.Warn("[CheckIP] FAIL",
+								"thread", threadIdx,
+								"proxy", proxy.ShortDisplay(prof.Proxy),
+								"api", generalCfg.ApiCheckIp,
+								"elapsed_ms", time.Since(checkStart).Milliseconds(),
+								"err", res.err)
 						}
 					case <-time.After(6 * time.Second):
+						// Hard timeout — proxy quá chậm/không cấp được session (thường do quá tải).
+						slog.Warn("[CheckIP] HARD-TIMEOUT 6s",
+							"thread", threadIdx,
+							"proxy", proxy.ShortDisplay(prof.Proxy),
+							"api", generalCfg.ApiCheckIp)
 					case <-ctx.Done():
 					}
 					checkCancel()
@@ -1993,7 +2011,8 @@ func (a *App) RunRegister(maxThreads int) string {
 					//
 					// method="new":
 					//   - Pool cạn → generate thêm 1 batch datr mới (size = RegThreads * limit * 2).
-					if sharedCookiePool != nil && sharedCookiePool.Size() == 0 {
+					isIGPlatform := strings.HasPrefix(strings.ToLower(string(regPlatform)), "ig_")
+					if !isIGPlatform && sharedCookiePool != nil && sharedCookiePool.Size() == 0 {
 						method := strings.ToLower(strings.TrimSpace(interactionCfg.CookieInitialMethod))
 						switch method {
 						case "new":
