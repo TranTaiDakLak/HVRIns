@@ -1326,14 +1326,49 @@ func (a *App) GetDatrPoolSize() int {
 	return p.Size()
 }
 
-// GetDevicePoolSize trả về số device (mid+datr+ig_did) trong mid-pool IG
-// (igcore.SharedDevicePool) — aged-device pool THẬT mà flow ig_ios_bloks dùng.
+// GetDevicePoolSize trả về số device (mid+datr+ig_did) trong mid-pool IG.
+// Đang chạy reg → đếm in-memory (igcore.SharedDevicePool). Khi rảnh (pool nil) →
+// đếm file ig_devices.txt để vẫn hiện số device ĐÃ LƯU (không hiện 0 lúc chưa chạy).
 func (a *App) GetDevicePoolSize() int {
-	p := igcore.SharedDevicePool
-	if p == nil {
+	if p := igcore.SharedDevicePool; p != nil {
+		return p.Size()
+	}
+	return countNonEmptyLines(defaultCookieDir() + "/ig_devices.txt")
+}
+
+// countNonEmptyLines đếm số dòng không rỗng trong file (0 nếu không đọc được).
+func countNonEmptyLines(path string) int {
+	f, err := os.Open(path)
+	if err != nil {
 		return 0
 	}
-	return p.Size()
+	defer f.Close()
+	n := 0
+	sc := bufio.NewScanner(f)
+	sc.Buffer(make([]byte, 1<<20), 1<<20)
+	for sc.Scan() {
+		if strings.TrimSpace(sc.Text()) != "" {
+			n++
+		}
+	}
+	return n
+}
+
+// OpenDevicePoolFile mở file mid-pool IG (Config/Cookie/ig_devices.txt) bằng notepad.
+func (a *App) OpenDevicePoolFile() string {
+	resolved := defaultCookieDir() + "/ig_devices.txt"
+	if err := os.MkdirAll(filepath.Dir(resolved), 0755); err != nil {
+		return "Không tạo được thư mục: " + err.Error()
+	}
+	if _, err := os.Stat(resolved); os.IsNotExist(err) {
+		if err := os.WriteFile(resolved, []byte(""), 0600); err != nil {
+			return "Không tạo được file: " + err.Error()
+		}
+	}
+	if err := exec.Command("notepad", resolved).Start(); err != nil {
+		return "Không mở được file: " + err.Error()
+	}
+	return "OK"
 }
 
 // GetPoolFileSaveCount trả về số datr đã ghi vào Pool file trong run hiện tại.

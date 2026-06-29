@@ -396,6 +396,17 @@ async function handleBrowseRegisterFolder() {
 }
 
 
+// Mở file mid-pool IG (Config/Cookie/ig_devices.txt) — pool device aged THẬT mà IG dùng.
+async function openDevicePoolFile() {
+  const fn = (window as any)?.go?.app?.App?.OpenDevicePoolFile
+  if (typeof fn !== 'function') return
+  try {
+    const result = await fn()
+    if (result && result !== 'OK') appStore.notify('error', String(result))
+    void loadDatrPoolCount()
+  } catch { /* ignore */ }
+}
+
 async function openCookieInitialFile() {
   const fn = (window as any)?.go?.main?.App?.OpenCookieInitialFile
   if (typeof fn !== 'function') return
@@ -3046,7 +3057,7 @@ function resetForms() {
                 </label>
                 <div v-if="form.cookieInitialMethod === 'file'" class="rp-ci-filebar">
                   <button type="button" class="rp-mini-btn" :title="cookieInitialResolvedPath || form.cookieInitialFile"
-                    @click="openCookieInitialFile">Mở file datr</button>
+                    @click="openDevicePoolFile">Mở file mid-pool</button>
                   <span class="rp-ci-count" :class="{ 'rp-ci-count--error': !!cookieInitialFileStatus }">
                     {{ cookieInitialFileStatus ? 'Không đọc được file' : `${cookieInitialFileCount > 0 ? cookieInitialFileCount.toLocaleString() + ' datr · ' : ''}mid-pool: ${datrPoolCount.toLocaleString()} device${poolFileSaveCount > 0 ? ` · +${poolFileSaveCount.toLocaleString()} saved` : ''}` }}
                   </span>
