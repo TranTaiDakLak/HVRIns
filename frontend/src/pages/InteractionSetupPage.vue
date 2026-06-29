@@ -42,9 +42,8 @@ type PipelineStageKey = 'reg' | 'ver' | 'reuse' | 'interact'
 const activeStage = ref<PipelineStageKey>('reg')
 const PIPELINE_STAGES = [
   { key: 'reg',      num: 1, icon: '📝', label: 'Register',  sub: 'Tạo tài khoản' },
-  { key: 'ver',      num: 2, icon: '✓',  label: 'Verify',    sub: 'Xác thực OTP' },
-  { key: 'reuse',    num: 3, icon: '➕', label: 'Add Mail',  sub: 'Thêm email #2' },
-  { key: 'interact', num: 4, icon: '⚡', label: 'Tương tác', sub: 'Xem trước' },
+  { key: 'reuse',    num: 2, icon: '➕', label: 'Add Mail',  sub: 'Thêm email #2' },
+  { key: 'interact', num: 3, icon: '⚡', label: 'Tương tác', sub: 'Xem trước' },
 ] as const
 
 function stageEnabled(key: PipelineStageKey): boolean {
@@ -1265,12 +1264,8 @@ const REG_PLATFORMS_VER: PlatformOption[] = []
 // Sắp xếp giảm dần (mới nhất lên đầu), không duplicate.
 const REG_PLATFORMS_IOS: PlatformOption[] = []
 
-const VER_PLATFORMS_ANDR = [
-  { key: 'api android', label: 'android' }, { key: 'api token', label: 'token' },
-]
-const VER_PLATFORMS_MFB = [
-  { key: 'api mfb', label: 'mfb' }, { key: 'api web andr', label: 'web andr' },
-]
+const VER_PLATFORMS_ANDR: PlatformOption[] = []
+const VER_PLATFORMS_MFB: PlatformOption[] = []
 const VER_PLATFORMS_VER: PlatformOption[] = []
 
 // iOS Native App (FBIOS) verify group — giảm dần (mới nhất lên đầu), không duplicate.
