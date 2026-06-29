@@ -38,12 +38,7 @@ func TestNewAndroidProfile_Fields(t *testing.T) {
 	if !strings.HasPrefix(p.PigeonSID, "UFS-") || !strings.HasSuffix(p.PigeonSID, "-0") {
 		t.Errorf("PigeonSID format wrong: %q", p.PigeonSID)
 	}
-	if p.keystoreKey == nil {
-		t.Error("keystoreKey is nil")
-	}
-	if len(p.keystoreHash) != 64 { // hex SHA-256
-		t.Errorf("keystoreHash len want 64, got %d", len(p.keystoreHash))
-	}
+	// keystoreKey/keystoreHash đã bỏ khỏi profile (không sinh ECDSA — attestation gửi key_hash rỗng)
 	if !strings.Contains(p.UserAgent, "SM-G996B") {
 		t.Errorf("UserAgent missing SM-G996B: %q", p.UserAgent)
 	}
@@ -249,7 +244,7 @@ func TestBuildAttestParams(t *testing.T) {
 	at := &attestResult{
 		keystoreNonce:      "IVhe56cAMxK1YGidwNvWfoTy4a8UnRBE",
 		keystoreSigned:     "MEYCIQDXStEP",
-		keystoreHash:       p.keystoreHash,
+		keystoreHash:       "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2", // hex SHA-256 placeholder (profile không còn sinh)
 		playIntegrityNonce: "yM96tbUon0RIaATQlqLYm2VS1NEGZ8Pe",
 	}
 	raw := buildAttestParams(p, at)
