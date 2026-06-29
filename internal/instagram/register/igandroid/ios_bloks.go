@@ -694,7 +694,7 @@ func iosPrecheckCloudID(ctx context.Context, eng *iosEngine) {
 
 func iosSetUsername(ctx context.Context, eng *iosEngine, username string) error {
 	eng.state.UsernamePrefill = username
-	eng.state.ScreenVisited = append(eng.state.ScreenVisited, "CAA_REG_IG_USERNAME")
+	eng.state.ScreenVisited = appendScreenOnce(eng.state.ScreenVisited, "CAA_REG_IG_USERNAME")
 	cip := map[string]any{
 		"validation_text":    username,
 		"aac":                buildAACJSON(eng.p),
@@ -1018,10 +1018,19 @@ func (r *igIOSBloksRegisterer) Register(ctx context.Context, input *instagram.Re
 	status("precheckCloudID")
 	iosPrecheckCloudID(ctx, eng)
 
-	username := buildUsername()
-	status("setUsername")
-	if err := iosSetUsername(ctx, eng, username); err != nil {
-		return fail("setUsername", err.Error())
+	username := ""
+	var unameErr error
+	for ut := 1; ut <= 4; ut++ {
+		username = buildUsername()
+		status("setUsername")
+		unameErr = iosSetUsername(ctx, eng, username)
+		if unameErr == nil {
+			break
+		}
+		status(fmt.Sprintf("setUsername trùng/lỗi (try %d/4) → đổi username", ut))
+	}
+	if unameErr != nil {
+		return fail("setUsername", unameErr.Error())
 	}
 
 	status("createAccount")

@@ -1082,7 +1082,7 @@ func (e *igAndroidEngine) setName(ctx context.Context, name string) error {
 // only username_prefill is set. After success, we promote it to Username for createAccount.
 func (e *igAndroidEngine) setUsername(ctx context.Context, username string) error {
 	e.state.UsernamePrefill = username
-	e.state.ScreenVisited = append(e.state.ScreenVisited, "CAA_REG_IG_USERNAME")
+	e.state.ScreenVisited = appendScreenOnce(e.state.ScreenVisited, "CAA_REG_IG_USERNAME")
 
 	regInfo := buildRegInfoJSON(e.p, e.state)
 	cip := map[string]any{
@@ -1328,15 +1328,16 @@ func buildUsername() string {
 	// separator nghiêng về không-dấu (giống đa số username thật)
 	sep := []string{"", ".", "_", ""}[int(b[0])%4]
 
-	// số đuôi giống người thật
+	// Số đuôi entropy CAO để giảm trùng (cả nội bộ lẫn với username IG đã tồn tại).
+	// Bỏ kiểu 2 chữ số (00–99) quá dễ trùng. Ưu tiên 5–7 chữ số.
 	var num string
-	switch int(b[1]) % 3 {
-	case 0:
-		num = strconv.Itoa(1985 + int(b[2])%26) // năm sinh 1985–2010
-	case 1:
-		num = fmt.Sprintf("%02d", int(b[2])%100) // 00–99
-	default:
-		num = strconv.Itoa(10 + int(b[2])%9990) // 10–9999
+	switch int(b[1]) % 10 {
+	case 0, 1: // 20%: năm sinh 1985–2010 (trông tự nhiên)
+		num = strconv.Itoa(1985 + randN(26))
+	case 2, 3: // 20%: 4 chữ số 1000–9999
+		num = strconv.Itoa(1000 + randN(9000))
+	default: // 60%: 5–7 chữ số 100000–9999999 (entropy cao nhất → ít trùng)
+		num = strconv.Itoa(100000 + randN(9900000))
 	}
 
 	// thân username (nghiêng về first+last)
@@ -1383,6 +1384,30 @@ func clampUsername(s string) string {
 		s = fmt.Sprintf("user%d", 1000+int(b[0])<<8+int(b[1]))
 	}
 	return s
+}
+
+// randN trả số nguyên crypto-random trong [0, max). max<=0 → 0.
+// Dùng cho số đuôi username entropy cao (giảm trùng).
+func randN(max int) int {
+	if max <= 0 {
+		return 0
+	}
+	bi, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	if err != nil {
+		return 0
+	}
+	return int(bi.Int64())
+}
+
+// appendScreenOnce thêm screen vào ScreenVisited nếu CHƯA có (tránh trùng khi
+// retry username gọi setUsername nhiều lần).
+func appendScreenOnce(screens []string, s string) []string {
+	for _, x := range screens {
+		if x == s {
+			return screens
+		}
+	}
+	return append(screens, s)
 }
 
 func buildPassword() string {
@@ -1552,11 +1577,20 @@ func (r *igAndroidRegisterer) Register(ctx context.Context, input *instagram.Reg
 
 	// (attestation đã chạy ở đầu flow — capture không có bước attestation giữa name↔username)
 
-	// ── Set username ───
-	username := buildUsername()
-	status("setUsername")
-	if err := eng.setUsername(ctx, username); err != nil {
-		return fail("setUsername", err.Error())
+	// ── Set username (retry đổi username khi trùng/không hợp lệ) ───
+	var username string
+	var unameErr error
+	for ut := 1; ut <= 4; ut++ {
+		username = buildUsername()
+		status("setUsername")
+		unameErr = eng.setUsername(ctx, username)
+		if unameErr == nil {
+			break
+		}
+		status(fmt.Sprintf("setUsername trùng/lỗi (try %d/4) → đổi username", ut))
+	}
+	if unameErr != nil {
+		return fail("setUsername", unameErr.Error())
 	}
 
 	// ── Step 9: create account ───

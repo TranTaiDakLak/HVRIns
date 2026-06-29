@@ -1231,12 +1231,22 @@ func (r *iosGQLRegisterer) Register(ctx context.Context, input *instagram.RegInp
 		return fail("setName", err.Error())
 	}
 
-	// ── setUsername ────────────────────────────────────────────────────────
+	// ── setUsername (retry đổi username khi trùng/không hợp lệ) ──────────────
 	gqlHumanDelay(ctx, 3, 8)
-	username := buildUsername()
-	status("setUsername:" + username)
-	if err := st.eng.setUsername(ctx, addr, username); err != nil {
-		return fail("setUsername", err.Error())
+	var username string
+	var unameErr error
+	for ut := 1; ut <= 4; ut++ {
+		username = buildUsername()
+		status("setUsername:" + username)
+		unameErr = st.eng.setUsername(ctx, addr, username)
+		if unameErr == nil {
+			break
+		}
+		status(fmt.Sprintf("setUsername trùng/lỗi (try %d/4) → đổi username", ut))
+		gqlHumanDelay(ctx, 1, 3)
+	}
+	if unameErr != nil {
+		return fail("setUsername", unameErr.Error())
 	}
 
 	// ── acceptTOS + createAccount ──────────────────────────────────────────
