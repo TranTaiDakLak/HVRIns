@@ -74,8 +74,6 @@ const PLATFORM_FAMILIES: { key: PlatformFamily; label: string }[] = [
   { key: 'all',     label: 'Tất cả' },
   { key: 'android', label: 'Android' },
   { key: 'ios',     label: 'iOS' },
-  { key: 'mess',    label: 'Mess' },
-  { key: 'lite',    label: 'FB Lite' },
 ]
 function famShow(current: PlatformFamily, fam: PlatformFamily): boolean {
   return current === 'all' || current === fam
