@@ -2059,7 +2059,11 @@ func (a *App) RunRegister(maxThreads int) string {
 					if threadReg == nil {
 						result = &instagram.RegResult{Success: false, Message: fmt.Sprintf("platform %q không có registerer: %v", regPlatform, threadRegErr)}
 					} else {
-						result = threadReg.Register(regWorkerCtx, &prof, onStatus)
+						// Cap cứng/account: không để 1 account treo slot quá lâu khi proxy hang.
+						// capDur = chờ OTP (WaitCode) + buffer; account thật ~30-50s nên không bị giết.
+						regCtx, regCancel := context.WithTimeout(regWorkerCtx, regAccountTimeout(interactionCfg.WaitCode))
+						result = threadReg.Register(regCtx, &prof, onStatus)
+						regCancel()
 					}
 
 					// igcore tự build iOS UA nội bộ → luôn ghi đè prof.UserAgent bằng

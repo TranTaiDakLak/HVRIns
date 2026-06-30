@@ -191,7 +191,9 @@ func (eng *iosEngine) iosCommonServerParams(step int) map[string]any {
 // Dùng Android TLS (Okhttp4Android13) kết hợp caa_launch_ig sẽ bị IG block ngay tại submitEmail.
 func newIOSSession(proxyStr string) (*androidSession, error) {
 	opts := []tls_client.HttpClientOption{
-		tls_client.WithTimeoutSeconds(60),
+		// 25s/request (giảm từ 60s): step Bloks thật chỉ 1-5s; proxy treo bỏ sau 25s
+		// thay vì 60s → createAccount 3 lần tối đa ~75s thay vì 180s khi proxy hang.
+		tls_client.WithTimeoutSeconds(25),
 		tls_client.WithClientProfile(profiles.Safari_IOS_17_0),
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
 		tls_client.WithInsecureSkipVerify(),

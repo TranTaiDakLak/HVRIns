@@ -431,12 +431,27 @@ type SubMailConfig struct {
 	TempMailToken  string `json:"tempMailToken,omitempty"`
 }
 
+// regAccountTimeout — cap cứng thời gian 1 lần reg account (chống slot kẹt khi proxy
+// treo). = thời gian chờ OTP (WaitCode) + buffer cho CheckIP/mail/Bloks/createAccount.
+// Clamp [120s, 240s]: đủ rộng để KHÔNG giết account thật (~30-50s + OTP), chỉ chặn
+// account treo bệnh lý (mọi step hang). Trả time.Duration.
+func regAccountTimeout(waitCode int) time.Duration {
+	capSec := otpRetriesFromWaitSeconds(waitCode)*2 + 90
+	if capSec < 120 {
+		capSec = 120
+	}
+	if capSec > 240 {
+		capSec = 240
+	}
+	return time.Duration(capSec) * time.Second
+}
+
 // otpRetriesFromWaitSeconds quy đổi WaitCode (số GIÂY chờ OTP) → số lần đọc OTP
 // (mỗi attempt 2s). 0/1 = chưa cấu hình → mặc định 60s. Clamp [3,150] lần (~6s..300s).
 // Giúp user giảm thời gian phí khi mail no-show (vd firetempmail không trả OTP).
 func otpRetriesFromWaitSeconds(waitSec int) int {
-	if waitSec <= 1 {
-		waitSec = 60
+	if waitSec <= 0 {
+		waitSec = 60 // chỉ khi CHƯA set (0) → mặc định 60s; giá trị user đặt được TÔN TRỌNG
 	}
 	n := waitSec / 2
 	if n < 3 {
@@ -919,7 +934,7 @@ func applyInteractionStringDefaults(c *InteractionConfig) {
 	}
 	// Timing defaults — user muốn tất cả = 1 (nhanh, đơn giản, user tự chỉnh nếu cần)
 	if c.WaitCode <= 0 {
-		c.WaitCode = 1
+		c.WaitCode = 30 // WaitCode = số giây chờ OTP → mặc định 30s (đủ bắt OTP thật, không quá phí)
 	}
 	if c.WaitMail <= 0 {
 		c.WaitMail = 1

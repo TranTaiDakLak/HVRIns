@@ -298,10 +298,13 @@ func acquireTempMailForReg(ctx context.Context, cfg instagram.VerifyConfig, prox
 		}
 	}
 
-	// 2. Provider chọn fail hết → fallback firetempmail (client-side, không gọi server tạo
-	//    mail nên không bao giờ rate-limit) để luồng vẫn có mail thay vì bỏ.
+	// 2. Fallback firetempmail: TẮT cho reg IG. firetempmail tạo được inbox nhưng
+	//    KHÔNG trả OTP cho IG → account chắc chắn die + phí thời gian chờ OTP (no-show).
+	//    Thà fail NGAY ở bước tạo mail (nhả slot nhanh) còn hơn tạo inbox vô dụng.
+	//    Bật lại = true nếu cần cho flow KHÔNG cần OTP.
+	const allowFireTempMailFallback = false
 	const fallback = "firetempmail"
-	if !strings.EqualFold(strings.TrimSpace(cfg.MailProvider), fallback) {
+	if allowFireTempMailFallback && !strings.EqualFold(strings.TrimSpace(cfg.MailProvider), fallback) {
 		if notify != nil {
 			notify(fmt.Sprintf("[TempMail] %s fail → fallback %s (client-side)", cfg.MailProvider, fallback))
 		}
@@ -309,7 +312,7 @@ func acquireTempMailForReg(ctx context.Context, cfg instagram.VerifyConfig, prox
 			return h, nil
 		}
 	}
-	return nil, fmt.Errorf("acquireTempMail: %s fail sau %d lần + fallback fail: %w", cfg.MailProvider, maxAttempts, lastErr)
+	return nil, fmt.Errorf("acquireTempMail: %s fail sau %d lần: %w", cfg.MailProvider, maxAttempts, lastErr)
 }
 
 // acquireMailTempComForReg — tạo email từ mail-temp.com (client-side, không cần API key).

@@ -1,9 +1,7 @@
 # ── Build output ─────────────────────────────────────────
-build/bin/*
-# Track TOÀN BỘ build/bin/Config (data pool tĩnh + runtime: Cookie, Proxy,
-# RentMail, Settings...) — user tự quản lý data này.
-# ⚠ Repo phải PRIVATE: Config chứa cookie session sống + proxy/mail creds + API keys.
-!build/bin/Config/
+# KHÔNG track build/bin (gồm cả Config) — runtime data + EXE + proxy/mail creds.
+# Config mẫu tracked nằm ở config/sample/. User tự quản lý build/bin/Config tại máy.
+build/bin/
 /bin/
 *.exe
 *.exe~
@@ -135,6 +133,13 @@ cmd/
 /checklive_test.go
 /docs/IGRegisterVIP-raw-capture.txt
 /docs/IGRegisterVIP-android-flow-CAPTURED.md
+
+# ── Test files scratch — user không up lên main (gỡ entry nếu muốn track lại) ──
+/internal/igcore/devicepool_minsize_test.go
+/internal/igcore/regcontext_test.go
+/internal/instagram/register/igandroid/leak_test.go
+/internal/instagram/register/igandroid/reginfo_bench_test.go
+/internal/instagram/register/igandroid/zz_username_sample_test.go
 
 # ── Python build cache ──
 __pycache__/
