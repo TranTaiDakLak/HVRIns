@@ -359,7 +359,9 @@ func (e *engine) createAccount(ctx context.Context, addr, username, name string)
 
 		if err == errThrottled {
 			e.log("  createAccount attempt %d: throttle → retry", i)
-			backoffCreate(i)
+			if i < maxCreate { // KHÔNG sleep ở lần cuối (sleep xong bỏ luôn = phí trắng)
+				backoffCreate(i)
+			}
 			continue
 		}
 		if err == errEmailDomainRejected {
@@ -369,8 +371,8 @@ func (e *engine) createAccount(ctx context.Context, addr, username, name string)
 			// integrity_block mà KHÔNG có create_failure → real block screen, retry same session.
 			msg := err.Error()
 			if strings.Contains(msg, "blocked") {
-				e.log("  createAccount attempt %d: %v → backoff retry (same session)", i, err)
-				backoffCreate(i)
+				// integrity_block là IP-level → retry CÙNG IP, sleep vô ích → BỎ sleep (retry ngay).
+				e.log("  createAccount attempt %d: %v → retry ngay (no sleep)", i, err)
 				continue
 			}
 			return err
@@ -387,8 +389,8 @@ func (e *engine) createAccount(ctx context.Context, addr, username, name string)
 			return nil
 		}
 		if hasMarker(resp, "integrity_block") {
-			e.log("  createAccount attempt %d: integrity_block (no create_failure) → retry", i)
-			backoffCreate(i)
+			// IP-level block → retry cùng IP không giúp gì → BỎ sleep (retry ngay).
+			e.log("  createAccount attempt %d: integrity_block (no create_failure) → retry ngay (no sleep)", i)
 			continue
 		}
 		return fmt.Errorf("createAccount không rõ kết quả attempt %d (resp %d bytes): %s", i, len(resp), e.shortErr(resp))

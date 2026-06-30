@@ -431,12 +431,34 @@ type SubMailConfig struct {
 	TempMailToken  string `json:"tempMailToken,omitempty"`
 }
 
+// otpRetriesFromWaitSeconds quy đổi WaitCode (số GIÂY chờ OTP) → số lần đọc OTP
+// (mỗi attempt 2s). 0/1 = chưa cấu hình → mặc định 60s. Clamp [3,150] lần (~6s..300s).
+// Giúp user giảm thời gian phí khi mail no-show (vd firetempmail không trả OTP).
+func otpRetriesFromWaitSeconds(waitSec int) int {
+	if waitSec <= 1 {
+		waitSec = 60
+	}
+	n := waitSec / 2
+	if n < 3 {
+		n = 3
+	}
+	if n > 150 {
+		n = 150
+	}
+	return n
+}
+
 type InteractionConfig struct {
 	VerifyEnabled       bool   `json:"verifyEnabled"`
 	MailProvider        string `json:"mailProvider"`
 	MailList            string `json:"mailList"`
 	CheckLiveDieEnabled bool   `json:"checkLiveDieEnabled"`
-	TimeDelayCheck      int    `json:"timeDelayCheck"`
+	// SPC (Secondary Profile Creation) — reg live → dùng account live làm parent đẻ con.
+	// Phase 1: tạo con (account_created) + lưu SPC_Children.txt. Live-check con = bearer
+	// (con partially_created thường unknown tới khi verify — Phase 2).
+	SPCEnabled           bool `json:"spcEnabled"`
+	SPCChildrenPerParent int  `json:"spcChildrenPerParent"`
+	TimeDelayCheck       int  `json:"timeDelayCheck"`
 	TimeDelaySendCode   int    `json:"timeDelaySendCode"`
 	SendAgainCode       bool   `json:"sendAgainCode"`
 	OutputPath          string `json:"outputPath"`
@@ -877,6 +899,10 @@ func applyInteractionStringDefaults(c *InteractionConfig) {
 	}
 	if strings.TrimSpace(c.ApiVerifyTokenType) == "" {
 		c.ApiVerifyTokenType = "adspw"
+	}
+	// SPC: số con/parent mặc định 2 khi chưa set (tránh 0 con khi bật SPC).
+	if c.SPCChildrenPerParent <= 0 {
+		c.SPCChildrenPerParent = 2
 	}
 	if strings.TrimSpace(c.MailProvider) == "" {
 		c.MailProvider = "mail1sec"

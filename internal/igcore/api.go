@@ -285,6 +285,48 @@ func CheckLiveByCookie(ctx context.Context, cookie, userAgent, proxyStr string) 
 	return classifyLiveResponse(resp.StatusCode, body)
 }
 
+// CheckLiveByBearer kiểm tra account còn sống bằng Bearer token (IGT:2:...) qua
+// GET current_user. Dùng cho account SPC (con) — con chỉ có sessionid/bearer,
+// KHÔNG có username thật để dùng CheckLiveByUsername, và cookie-only check không đủ
+// auth cho IG bearer account. Header android khớp ngữ cảnh gốc của bearer (SPC).
+// Trả: "live" | "die" | "suspended" | "checkpoint" | "unknown".
+func CheckLiveByBearer(ctx context.Context, bearer, proxyStr string) string {
+	bearer = strings.TrimSpace(bearer)
+	if bearer == "" {
+		return "unknown"
+	}
+	if !strings.HasPrefix(bearer, "Bearer ") {
+		bearer = "Bearer " + bearer
+	}
+	sess, err := newIGSession(proxyStr)
+	if err != nil {
+		return "unknown"
+	}
+	defer sess.client.CloseIdleConnections()
+	req, err := fhttp.NewRequestWithContext(ctx, "GET",
+		igHost+"/api/v1/accounts/current_user/?edit=true", nil)
+	if err != nil {
+		return "unknown"
+	}
+	req.Header[fhttp.HeaderOrderKey] = []string{
+		"authorization", "user-agent", "x-ig-app-id", "accept", "accept-encoding",
+	}
+	req.Header.Set("authorization", bearer)
+	req.Header.Set("user-agent", "Instagram 421.0.0.51.66 Android (35/15; 450dpi; 1080x2400; samsung; SM-G996B; t2s; exynos2100; en_GB; 909555893)")
+	req.Header.Set("x-ig-app-id", "567067343352427")
+	req.Header.Set("accept", "*/*")
+	req.Header.Set("accept-encoding", "zstd")
+
+	resp, err := sess.client.Do(req)
+	if err != nil {
+		return "unknown"
+	}
+	defer resp.Body.Close()
+	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	body := sess.decode(resp.Header.Get("Content-Encoding"), raw)
+	return classifyLiveResponse(resp.StatusCode, body)
+}
+
 // CheckLiveByCheckerCookie kiểm tra username có tồn tại không bằng cách dùng
 // cookie của 1 account checker (không phải cookie của nick cần check).
 // Gọi GET /api/v1/users/web_profile_info/?username=X với Chrome TLS fingerprint.

@@ -1979,12 +1979,14 @@ func (a *App) RunRegister(maxThreads int) string {
 					// platform khi đang TempMail mode (mail thật, đọc được OTP). Mail handle còn live.
 					if tempMailHandle != nil && tempMailHandle.Service != nil {
 						mailSvc := tempMailHandle.Service
+						// Số lần đọc OTP = WaitCode (số GIÂY chờ) / 2 (mỗi attempt 2s).
+						// User chỉnh "Chờ OTP (giây)" trên UI → đỡ phí thời gian khi mail no-show
+						// (vd firetempmail không trả OTP). Capture giá trị ở đây (per-account).
+						otpN := otpRetriesFromWaitSeconds(interactionCfg.WaitCode)
 						prof.GetOTP = func(c context.Context) (string, error) {
-							// 45×2s=90s (giảm từ 180s): OTP IG về trong vài giây; quá ~90s = no-show
-							// → fail nhanh, nhả slot, không giữ luồng "đứng chờ" 3 phút.
-							return mailSvc.WaitForCode(c, 45, 2000)
+							return mailSvc.WaitForCode(c, otpN, 2000)
 						}
-						onStatus("[IG] GetOTP wired — reg sẽ tự đọc OTP + confirm")
+						onStatus(fmt.Sprintf("[IG] GetOTP wired — chờ OTP tối đa %ds (%d lần × 2s)", otpN*2, otpN))
 
 						// ig_ios_gql: cấp GetNewEmail để Register() tự retry với email mới khi SESSION_FLAGGED.
 						if regPlatform == "ig_ios_gql" {
@@ -1994,7 +1996,7 @@ func (a *App) RunRegister(maxThreads int) string {
 									return "", nil, err
 								}
 								return newAddr, func(inner context.Context) (string, error) {
-									return mailSvc.WaitForCode(inner, 45, 2000) // 90s (xem GetOTP trên)
+									return mailSvc.WaitForCode(inner, otpN, 2000)
 								}, nil
 							}
 							onStatus("[ig_ios_gql] GetNewEmail wired — auto-retry khi SESSION_FLAGGED")
@@ -2232,6 +2234,15 @@ func (a *App) RunRegister(maxThreads int) string {
 								"username": acc.Username,
 								"result":   result,
 							})
+
+							// SPC Phase 1: reg live + check-live=live → dùng account này làm
+							// parent đẻ con (nếu bật). Chạy ngay trong goroutine này (đã detached
+							// khỏi reg slot) — cooldown giữa các con không block reg.
+							if result == "live" {
+								if spcCfg := a.LoadInteractionConfig(); spcCfg.SPCEnabled {
+									a.runSPCForParent(regWorkerCtx, acc, checkProxy, spcCfg, regWriter)
+								}
+							}
 						}(status, accForSave, result.Message, prof.Proxy)
 					}
 					if result != nil && result.Cookie != "" {

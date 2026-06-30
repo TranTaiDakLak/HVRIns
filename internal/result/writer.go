@@ -18,6 +18,7 @@ const (
 	FileUnknownBlockType         = "UnknownReg.txt"       // reg unknown (block không xác định) — tách riêng khỏi verify unknown
 	FileSuccessButErrorCheckLive = "Success_but_error_checklive.txt"
 	FileLive                     = "Live.txt" // reg success + check-live xác nhận CÒN SỐNG (sau delay)
+	FileSPCChildren              = "SPC_Children.txt" // con tạo từ SPC (account_created); format giống reg line
 
 	// Verify — gộp Die/Unknown về tên ngắn để folder output clean hơn
 	FileSuccessVerify               = "SuccessVerify.txt"                // uid|pass|2fa|cookie|token|email|fullname|time|country

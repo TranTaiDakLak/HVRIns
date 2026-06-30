@@ -129,6 +129,13 @@ Config/Permanent/
 Config/DeviceInfo/
 test_accounts*.txt
 
+# ── Scratch tools + raw captures (chứa secret: proxy/bearer/sessionid) — KHÔNG commit ──
+cmd/
+/checklive_main.go
+/checklive_test.go
+/docs/IGRegisterVIP-raw-capture.txt
+/docs/IGRegisterVIP-android-flow-CAPTURED.md
+
 # ── Python build cache ──
 __pycache__/
 *.pyc

@@ -3026,6 +3026,26 @@ function resetForms() {
               </label>
               <!-- 2 toggle UA (buildUA + addVirtualSpecAndroid) đã chuyển vào subsection User Agent ở trên -->
             </div>
+            <!-- Chờ OTP — số giây tối đa đọc OTP từ mail trước khi bỏ (mail no-show đỡ phí thời gian) -->
+            <div class="rp-checks-row">
+              <span class="rp-label">Chờ OTP (giây):</span>
+              <input type="number" v-model.number="form.waitCode" min="6" max="300" class="vr-input vr-input--num" style="width:64px"
+                title="Số giây tối đa chờ OTP từ mail (mỗi 2s đọc 1 lần). OTP thật về trong vài giây; mail no-show (vd firetempmail) sẽ bỏ qua sau ngần này. Đặt thấp (20-40s) để đỡ phí thời gian khi mail không trả OTP. Áp dụng cho reg IG (iOS Bloks + Android)." />
+              <span class="rp-hint">= {{ Math.max(3, Math.floor((form.waitCode > 1 ? form.waitCode : 60) / 2)) }} lần đọc × 2s · đặt 20-40s để đỡ phí</span>
+            </div>
+            <!-- SPC — đẻ con từ account vừa reg ra Live (Secondary Profile Creation) -->
+            <div class="rp-checks-row">
+              <span class="rp-label">SPC (đẻ con):</span>
+              <label class="rp-checkbox" title="Sau khi 1 account REG ra LIVE, dùng chính account đó làm 'parent' tạo thêm account CON qua Profile Switcher (Add account → Create new) — KHÔNG cần attestation. Con lưu vào SPC_Children.txt. Cooldown 35s/con (chạy ngầm, không chậm reg). LƯU Ý: con ở trạng thái partially_created → check-live ra 'unknown' tới khi verify email (Phase 2 sau).">
+                <input type="checkbox" v-model="form.spcEnabled" />
+                <span>Tự đẻ con khi reg ra Live</span>
+              </label>
+              <template v-if="form.spcEnabled">
+                <span class="rp-checks-sep">·</span>
+                <span class="rp-label">Số con/parent:</span>
+                <input type="number" v-model.number="form.spcChildrenPerParent" min="1" max="10" class="vr-input vr-input--num" style="width:56px" title="Số con tạo từ mỗi parent live (khuyến nghị 2-3; tối đa 10). Nhiều quá → parent dễ checkpoint, mất tài sản gốc." />
+              </template>
+            </div>
           </div>
 
           <!-- Cookie Initial — đã được chuyển vào trong cụm Reg account -->

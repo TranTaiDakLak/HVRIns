@@ -16,6 +16,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -270,12 +271,24 @@ func acquireTempMailForReg(ctx context.Context, cfg instagram.VerifyConfig, prox
 			return h, nil
 		}
 		lastErr = err
+		// KHÔNG nuốt lỗi: log lý do thật (anti-bot HTML challenge / 429 rate-limit /
+		// timeout) để chẩn đoán khi máy khác báo "tạo lỗi" mà không rõ vì sao.
+		slog.Warn("[TempMail] create FAIL",
+			"provider", cfg.MailProvider,
+			"attempt", attempt,
+			"max", maxAttempts,
+			"err", err)
 		if ctx.Err() != nil {
 			return nil, ctx.Err()
 		}
 		if attempt < maxAttempts {
 			if notify != nil {
-				notify(fmt.Sprintf("[TempMail] %s tạo lỗi (%d/%d), thử lại...", cfg.MailProvider, attempt, maxAttempts))
+				// Hiện luôn lý do thật lên UI (cắt ngắn) thay vì chỉ "tạo lỗi".
+				reason := err.Error()
+				if len(reason) > 120 {
+					reason = reason[:120] + "…"
+				}
+				notify(fmt.Sprintf("[TempMail] %s tạo lỗi (%d/%d): %s — thử lại...", cfg.MailProvider, attempt, maxAttempts, reason))
 			}
 			select {
 			case <-ctx.Done():

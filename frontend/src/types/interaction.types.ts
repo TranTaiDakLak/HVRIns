@@ -142,6 +142,9 @@ export interface VerifyConfig {
 
   // Kiểm tra live/die sau khi verify (groupBox1)
   checkLiveDieEnabled: boolean     // chkCheckLiveDie
+  // SPC — reg live → dùng account live làm parent đẻ con (Secondary Profile Creation)
+  spcEnabled: boolean              // tự SPC sau khi reg ra live
+  spcChildrenPerParent: number     // số con tạo từ mỗi parent live
   timeDelayCheck: number           // txtTimeDelay (giây)
   timeDelaySendCode: number        // txtTimeDelaySendCode (giây)
   sendAgainCode: boolean           // chkSendAgainCode
@@ -563,6 +566,8 @@ export const DEFAULT_VERIFY_CONFIG: VerifyConfig = {
   mailProvider: 'moakt',
   mailList: '',
   checkLiveDieEnabled: true,
+  spcEnabled: true,
+  spcChildrenPerParent: 2,
   timeDelayCheck: 5,
   timeDelaySendCode: 5,
   sendAgainCode: true,

@@ -155,6 +155,7 @@ export const verifyRunnerMock: IVerifyRunnerService = {
   async loadInteractionConfig(): Promise<VerifyConfig> {
     return {
       verifyEnabled: false, checkLiveDieEnabled: false,
+      spcEnabled: false, spcChildrenPerParent: 2,
       timeDelayCheck: 5, timeDelaySendCode: 5, sendAgainCode: false,
       mailProvider: '@i2b.vn', mailList: '', outputPath: '',
       uaPoolKey: 'android',
