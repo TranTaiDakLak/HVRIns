@@ -8,15 +8,29 @@
 //
 // LƯU Ý: server CHẶN User-Agent rỗng/curl mặc định (trả connection-reset). Bắt buộc set UA
 // trình duyệt. TTL mailbox chỉ ~3 phút nên reuse register→verify gần như không khả thi.
+//
+// PoW "Security Check" (phát hiện 2026-06, giống mail.td nhưng browser-side JS):
+// server đôi khi trả trang HTML thay vì JSON, nhúng:
+//
+//	const SEED = "<hex>", TARGET = "<hex prefix>";
+//	tìm nonce sao cho sha256(SEED+nonce) (hex) có prefix == TARGET
+//	→ POST /api/verify-challenge {seed, nonce, fingerprint} rồi retry request gốc
+//
+// doGET() tự động phát hiện + giải challenge này (dùng cookie jar để giữ session).
 package temp
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -52,18 +66,10 @@ func (m *FakeLegal) CreateEmail(ctx context.Context) (string, error) {
 	if len(m.configDomains) > 0 {
 		endpoint += "?domain=" + m.configDomains[rand.Intn(len(m.configDomains))]
 	}
-	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
-	if err != nil {
-		return "", err
-	}
-	m.setHeaders(req)
-
-	resp, err := m.client.Do(req)
+	body, err := m.doGET(ctx, endpoint)
 	if err != nil {
 		return "", fmt.Errorf("fakelegal create: %w", err)
 	}
-	defer resp.Body.Close()
-	body, _ := httpx.ReadBody(resp.Body, 16*1024)
 
 	var result struct {
 		Success bool   `json:"success"`
@@ -75,6 +81,110 @@ func (m *FakeLegal) CreateEmail(ctx context.Context) (string, error) {
 
 	m.email = result.Address
 	return m.email, nil
+}
+
+// fakeLegalChallengeRe extract SEED/TARGET từ trang "Security Check" (PoW browser-side).
+var fakeLegalChallengeRe = regexp.MustCompile(`SEED\s*=\s*"([a-f0-9]+)"\s*,\s*TARGET\s*=\s*"([a-f0-9]+)"`)
+
+// isFakeLegalChallenge detect trang "Security Check" thay vì JSON response.
+func isFakeLegalChallenge(body []byte) bool {
+	return bytes.Contains(body, []byte("checks your browser")) || bytes.Contains(body, []byte("verify-challenge"))
+}
+
+// solveFakeLegalPoW tìm nonce sao cho sha256(seed+nonce) (hex) có prefix == target.
+// Cùng kiểu PoW đã dùng cho mail.td (mailTdComputePoW) — bruteforce SHA-256 tăng dần.
+func solveFakeLegalPoW(ctx context.Context, seed, target string) (int, error) {
+	for nonce := 0; ; nonce++ {
+		if nonce&0xFFFFF == 0 {
+			if err := ctx.Err(); err != nil {
+				return 0, err
+			}
+		}
+		sum := sha256.Sum256([]byte(seed + strconv.Itoa(nonce)))
+		hexHash := hex.EncodeToString(sum[:])
+		if strings.HasPrefix(hexHash, target) {
+			return nonce, nil
+		}
+	}
+}
+
+// solveChallenge giải PoW rồi POST /api/verify-challenge để server unlock session
+// (cookie jar giữ trạng thái "đã pass" cho các request tiếp theo cùng client).
+func (m *FakeLegal) solveChallenge(ctx context.Context, body []byte) error {
+	match := fakeLegalChallengeRe.FindSubmatch(body)
+	if len(match) < 3 {
+		return fmt.Errorf("fakelegal: challenge page không parse được SEED/TARGET")
+	}
+	seed, target := string(match[1]), string(match[2])
+
+	nonce, err := solveFakeLegalPoW(ctx, seed, target)
+	if err != nil {
+		return fmt.Errorf("fakelegal pow: %w", err)
+	}
+
+	payload, _ := json.Marshal(map[string]any{
+		"seed":  seed,
+		"nonce": nonce,
+		"fingerprint": map[string]any{
+			"ua":        fakeLegalUA,
+			"webdriver": false,
+			"res":       "1920x1080",
+		},
+	})
+	req, err := http.NewRequestWithContext(ctx, "POST", fakeLegalBaseURL+"/api/verify-challenge", bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+	m.setHeaders(req)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("fakelegal verify-challenge: %w", err)
+	}
+	defer resp.Body.Close()
+	_, _ = httpx.ReadBody(resp.Body, 4*1024)
+	return nil
+}
+
+// doGET thực hiện GET, tự phát hiện + giải "Security Check" PoW rồi retry 1 lần.
+// Cookie jar của m.client giữ session "đã pass" xuyên suốt các request sau.
+func (m *FakeLegal) doGET(ctx context.Context, endpoint string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	m.setHeaders(req)
+	resp, err := m.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	body, _ := httpx.ReadBody(resp.Body, 64*1024)
+	resp.Body.Close()
+
+	if !isFakeLegalChallenge(body) {
+		return body, nil
+	}
+
+	// Gặp challenge → giải PoW, verify, rồi retry request gốc 1 lần.
+	if err := m.solveChallenge(ctx, body); err != nil {
+		return nil, err
+	}
+	req2, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	m.setHeaders(req2)
+	resp2, err := m.client.Do(req2)
+	if err != nil {
+		return nil, err
+	}
+	defer resp2.Body.Close()
+	body2, _ := httpx.ReadBody(resp2.Body, 64*1024)
+	if isFakeLegalChallenge(body2) {
+		return nil, fmt.Errorf("fakelegal: vẫn bị chặn sau khi giải challenge")
+	}
+	return body2, nil
 }
 
 // GetEmail trả về địa chỉ email đã tạo.
@@ -121,18 +231,10 @@ func (m *FakeLegal) WaitForCode(ctx context.Context, maxRetry int, intervalMs in
 // pollOnce lấy danh sách mail rồi extract code (subject trước, body sau).
 func (m *FakeLegal) pollOnce(ctx context.Context) (string, error) {
 	listURL := fakeLegalBaseURL + "/api/inbox/" + m.email
-	req, err := http.NewRequestWithContext(ctx, "GET", listURL, nil)
+	body, err := m.doGET(ctx, listURL)
 	if err != nil {
 		return "", err
 	}
-	m.setHeaders(req)
-
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	body, _ := httpx.ReadBody(resp.Body, 64*1024)
 
 	var list struct {
 		Success bool `json:"success"`
@@ -166,18 +268,10 @@ func (m *FakeLegal) pollOnce(ctx context.Context) (string, error) {
 
 // getMessage lấy nội dung email theo id (ưu tiên html, fallback text).
 func (m *FakeLegal) getMessage(ctx context.Context, id string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", fakeLegalBaseURL+"/api/email/"+id, nil)
+	body, err := m.doGET(ctx, fakeLegalBaseURL+"/api/email/"+id)
 	if err != nil {
 		return "", err
 	}
-	m.setHeaders(req)
-
-	resp, err := m.client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	body, _ := httpx.ReadBody(resp.Body, 256*1024)
 
 	var msg struct {
 		Success bool `json:"success"`

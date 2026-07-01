@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	mathrand "math/rand"
 	"os"
 	"path/filepath"
 	goruntime "runtime"
@@ -753,6 +754,32 @@ func (a *App) RunRegister(maxThreads int) string {
 	if interactionCfg.SplitMode && interactionCfg.SplitVerifyThreads > 0 {
 		verifySem = make(chan struct{}, interactionCfg.SplitVerifyThreads)
 	}
+
+	// checkLiveSem — giới hạn SỐ CHECK-LIVE (post-reg, CheckLiveByUsername) chạy
+	// đồng thời. TRƯỚC ĐÂY mỗi account reg live spawn 1 goroutine check-live KHÔNG
+	// giới hạn (rồi sau đó fix tạm bằng hằng số cứng 15 → 30) — nhưng hằng số cứng
+	// không tự scale theo tốc độ reg thực tế (maxThreads đổi mỗi lần chạy).
+	//
+	// TUNING HISTORY (đo thực tế, ưu tiên user: tốc độ check bắt kịp reg, KHÔNG
+	// quan tâm độ chính xác live/die):
+	//   15 → tồn đọng ~24% (272/1112 acc chưa check kịp)
+	//   30 (cố định) → tồn đọng giảm về ~11-12%, ổn định dù volume tăng 33x
+	//     (42 acc: 12% | 1403 acc: 11.5%) — nhưng đây vẫn là số CỐ ĐỊNH, không
+	//     scale nếu user tăng maxThreads (chạy 100-200 luồng reg thì 30 lại thiếu).
+	//
+	// Đổi sang SCALE THEO maxThreads: mỗi luồng reg có thể sinh ra tối đa 1 account
+	// live cần check → cấp checkLiveMaxConcurrent = maxThreads (tối thiểu 30 để vẫn
+	// tốt hơn baseline đã đo, tối đa 150 để tránh mở quá nhiều connection cùng lúc
+	// khi maxThreads rất lớn — 150 vẫn là ước lượng, có thể cần đo lại nếu volume
+	// tăng thêm nhiều).
+	checkLiveMaxConcurrent := maxThreads
+	if checkLiveMaxConcurrent < 30 {
+		checkLiveMaxConcurrent = 30
+	}
+	if checkLiveMaxConcurrent > 150 {
+		checkLiveMaxConcurrent = 150
+	}
+	checkLiveSem := make(chan struct{}, checkLiveMaxConcurrent)
 
 	// ───────────────────────────────────────────────────────────────────────────
 	// TRUE SPLIT MODE — REG pool và VERIFY pool độc lập, giao tiếp qua channel.
@@ -2215,22 +2242,47 @@ func (a *App) RunRegister(maxThreads int) string {
 							//    → file tương ứng. User thấy data thành công liền sau khi reg.
 							regLine := saveRegOutcome(regWriter, regCounters, regStatus, msg, acc, string(regPlatform), login, onRegSuccess)
 
-							// 2. Reg live → check-live NGAY bằng CheckLiveByUsername (timeout 20s/acc),
-							//    KHÔNG chờ delay. live → Live.txt, còn lại (die/unknown) → Die.txt.
-							//    Dùng proxy của chính luồng để phân tán request → tránh IG throttle
-							//    (direct IP bị 429 khi 20+ luồng check cùng lúc → unknown hàng loạt).
+							// 2. Reg live → check-live bằng CheckLiveByUsername.
+							//    - checkLiveSem giới hạn concurrency (xem giải thích ở khai báo sem):
+							//      tránh dồn hàng trăm request ẩn danh cùng lúc khiến IG throttle.
+							//    - Jitter 0-3s trước khi check: rải request theo thời gian thay vì
+							//      bắn đồng loạt ngay lúc reg xong (giống hành vi người dùng thật hơn).
 							if regStatus != "live" || acc.Username == "" {
 								return
 							}
+
+							select {
+							case checkLiveSem <- struct{}{}:
+								defer func() { <-checkLiveSem }()
+							case <-regWorkerCtx.Done():
+								return
+							}
+
+							jitter := time.Duration(mathrand.Intn(3000)) * time.Millisecond
+							select {
+							case <-time.After(jitter):
+							case <-regWorkerCtx.Done():
+								return
+							}
+
 							checkCtx, checkCancel := context.WithTimeout(regWorkerCtx, 20*time.Second)
 							result := igcore.CheckLiveByUsername(checkCtx, acc.Username, checkProxy)
 							checkCancel()
-							// Phân loại file: live → Live.txt | die/unknown → Die.txt (upsert theo field đầu).
+							// Phân loại file:
+							//   live    → Live.txt
+							//   die     → Die.txt (upsert theo UID — verdict RÕ RÀNG là chết)
+							//   unknown → Success_but_error_checklive.txt (KHÔNG phải die — lỗi
+							//             kỹ thuật lúc check: timeout/throttle/không đọc được title.
+							//             TRƯỚC ĐÂY unknown bị gộp chung vào Die.txt → thổi phồng
+							//             sai số liệu die khi check-live bị IG throttle dồn dập).
 							if regWriter != nil && regLine != "" {
-								if result == "live" {
+								switch result {
+								case "live":
 									_ = regWriter.Append(resultpkg.FileLive, regLine)
-								} else {
+								case "die":
 									_ = regWriter.UpsertUID(resultpkg.FileDieAfterVerify, regLine)
+								default: // "unknown"
+									_ = regWriter.Append(resultpkg.FileSuccessButErrorCheckLive, regLine)
 								}
 							}
 							// Emit để UI cập nhật Live counter + activity.

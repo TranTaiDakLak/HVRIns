@@ -1915,61 +1915,66 @@ async function openVersionsFile(kind: 'reg' | 'ver', platform: string) {
 }
 
 const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
-    { value: 'mailhv',       label: 'MailHV (cần API key)' },
-
-  { value: 'moakt',          label: 'Moakt' },
-  //{ value: '@i2b.vn',       label: 'Mail1sec' },          // ẩn
-  { value: 'mohmal',        label: 'Mohmal' },
-  { value: 'tempmail-lol',  label: 'TempMail LOL' },
-  //{ value: 'mailtm',        label: 'Mail.tm' },            // ẩn — không đọc được code
-  { value: 'tempmail-plus', label: 'TempMail.plus' },
-  { value: 'dropmail',      label: 'Dropmail' },
-  { value: 'guerrillamail', label: 'GuerrillaMail' },
-  { value: 'spam4me',       label: 'Spam4.me' },
-  { value: 'temp-mail.org', label: 'Temp-Mail.org' },
-  //{ value: 'mail.cx',       label: 'Mail.cx' },   // ẩn
-  { value: 'mailtd',        label: 'Mail.cx' },
-  //{ value: 'inboxes',       label: 'Inboxes.com' },        // ẩn
-  { value: 'dismail',       label: 'Dismail.top' },
-  { value: 'mailymg',       label: 'Mailymg.com' },
-  { value: 'altmails',      label: 'AltMails.com' },
-  //{ value: 'onesecmail',   label: '1secmail.com' },        // ẩn
-  { value: 'firetempmail', label: 'FireTempMail.com' },
-  //{ value: 'fviainboxes',  label: 'FviaInboxes.com' },     // ẩn
-  { value: 'byomde',       label: 'Byom.de' },
-  { value: 'dinlaan',      label: 'Dinlaan.com' },
-  { value: 'cryptogmail',  label: 'CryptoGmail.com' },
-  { value: 'buslink24',    label: 'Buslink24.com' },
-  { value: 'boxmailstore', label: 'BoxMail.store' },
-  { value: 'mailermnx',   label: 'Mailer.mnx-family.com' },
-  { value: 'tempforward',  label: 'TempForward.com' },
-  { value: 'tempomintraccoon', label: 'Tempo.Mintraccoon.com' },
-  { value: 'tempemail',    label: 'TempEmail.co' },
-  { value: 'tmpinbox',     label: 'TmpInbox.com' },
-  { value: 'tenminutemail', label: '10MinuteMail.com' },
-  { value: 'tempmailto',   label: 'TempMailTo.com' },
-  { value: 'onesecemail',  label: '1secemail.com' },
-  { value: 'tempmail100',  label: 'TempMail100.com' },
-  { value: 'tempmail100free', label: 'TempMail100.com (Free)' },
-  { value: 'tempmailso',   label: 'TempMail.so' },
-  { value: 'priyoemail',   label: 'Priyo.email (cần API key)' },
-  { value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' },
-  { value: 'mailtempcom',  label: 'Mail-Temp.com' },
-  //{ value: 'wemakemail',   label: 'WeMakeMail (cần API key)' }, // ẩn
-  // Providers mới thêm 2026-06-19
-  { value: 'tempmailapp',  label: 'Temp-Mail.app' },
-  { value: 'tempamail',    label: 'TempAmail.com' },
-  { value: 'tempmailai',   label: 'Temp-Mail.ai' },
-  { value: 'tempemailcc',  label: 'TempEmail.cc' },
-  { value: 'tempmailerme', label: 'Temp-Mailer.me' },
-  { value: 'mailwave',     label: 'MailWave.dev' },
-  { value: 'tempmail10',   label: 'TempMail10.com' },
-  { value: 'internxt',     label: 'Internxt.com (= Mail.tm)' },
-  { value: 'tempmailasia', label: 'Temp-Mail.asia (cần API key)' },
-  { value: 'tempmailpro',  label: 'TempMailPro.io' },
-  { value: 'tempmaildigital', label: 'TempMail.digital' },
-  { value: 'tempmailx',    label: 'TempMailX.xyz' },
-  { value: 'tempmailid',   label: 'Temp-Mail.id (cần proxy residential, chọn domain)' },
+  { value: 'mailhv',            label: 'MailHV (cần API key)' },         // ưu tiên đầu
+  { value: 'onesecemail',       label: '1secemail.com' },
+  { value: 'boxmailstore',      label: 'BoxMail.store' },
+  { value: 'buslink24',         label: 'Buslink24.com' },
+  { value: 'byomde',            label: 'Byom.de' },
+  { value: 'cryptogmail',       label: 'CryptoGmail.com' },
+  { value: 'dinlaan',           label: 'Dinlaan.com' },
+  { value: 'dismail',           label: 'Dismail.top' },
+  { value: 'firetempmail',      label: 'FireTempMail.com' },
+  { value: 'guerrillamail',     label: 'GuerrillaMail' },
+  { value: 'mailtempcom',       label: 'Mail-Temp.com' },
+  { value: 'mailtd',            label: 'Mail.cx' },
+  { value: 'mailermnx',         label: 'Mailer.mnx-family.com' },
+  { value: 'mailwave',          label: 'MailWave.dev' },
+  { value: 'mailymg',           label: 'Mailymg.com' },
+  { value: 'moakt',             label: 'Moakt' },
+  { value: 'mohmal',            label: 'Mohmal' },
+  { value: 'spam4me',           label: 'Spam4.me' },
+  { value: 'tempmailai',        label: 'Temp-Mail.ai' },
+  { value: 'tempmailapp',       label: 'Temp-Mail.app' },
+  { value: 'tempmailid',        label: 'Temp-Mail.id (cần proxy residential, chọn domain)' },
+  { value: 'tempmailerme',      label: 'Temp-Mailer.me' },
+  { value: 'tempamail',         label: 'TempAmail.com' },
+  { value: 'tempemailcc',       label: 'TempEmail.cc' },
+  { value: 'tempemail',         label: 'TempEmail.co' },
+  { value: 'tempforward',       label: 'TempForward.com' },
+  { value: 'tempmail-lol',      label: 'TempMail LOL' },
+  { value: 'tempmaildigital',   label: 'TempMail.digital' },
+  { value: 'tempmail-plus',     label: 'TempMail.plus' },
+  { value: 'tempmail100',       label: 'TempMail100.com' },
+  { value: 'tempmail100free',   label: 'TempMail100.com (Free)' },
+  { value: 'tempmailpro',       label: 'TempMailPro.io' },
+  { value: 'tempmailto',        label: 'TempMailTo.com' },
+  { value: 'tempmailx',         label: 'TempMailX.xyz' },
+  { value: 'tempomintraccoon',  label: 'Tempo.Mintraccoon.com' },
+  { value: 'tmpinbox',          label: 'TmpInbox.com' },
+  { value: 'tempmailio',        label: 'Temp-Mail.io' },
+  { value: 'anonymmail',        label: 'AnonymMail.net' },
+  { value: 'tempmailnow',       label: 'TempMail.now' },
+  { value: 'expressmail',       label: 'ExpressMail.app' },
+  //{ value: '@i2b.vn',          label: 'Mail1sec' },           // ẩn
+  //{ value: 'mailtm',           label: 'Mail.tm' },            // ẩn — tạo mail chậm 11s/lần, tránh khi chạy nhiều luồng
+  //{ value: 'mail.cx',          label: 'Mail.cx' },            // ẩn
+  //{ value: 'inboxes',          label: 'Inboxes.com' },        // ẩn
+  //{ value: 'onesecmail',       label: '1secmail.com' },       // ẩn
+  //{ value: 'fviainboxes',      label: 'FviaInboxes.com' },    // ẩn
+  //{ value: 'wemakemail',       label: 'WeMakeMail (cần API key)' }, // ẩn
+  // ── BỎ — không phù hợp chạy nhiều luồng / provider chết ──
+  //{ value: 'altmails',         label: 'AltMails.com' },              // cần proxy mới tạo được mail (timeout khi không proxy)
+  //{ value: 'tenminutemail',    label: '10MinuteMail.com' },          // Cloudflare chặn cứng
+  //{ value: 'dropmail',         label: 'Dropmail' },                  // API bị khóa vĩnh viễn (legacy_token_disabled)
+  //{ value: 'priyoemail',       label: 'Priyo.email (cần API key)' }, // cần API key, chưa test
+  //{ value: 'tempmailasia',     label: 'Temp-Mail.asia (cần API key)' }, // provider không tồn tại trong backend (factory.go không có case này)
+  //{ value: 'internxt',         label: 'Internxt.com (= Mail.tm)' },  // alias Mail.tm — cùng lý do chậm
+  //{ value: 'temp-mail.org',    label: 'Temp-Mail.org' },             // Cloudflare chặn cứng
+  //{ value: 'tempmailorgpremium', label: 'Temp-Mail.org Premium' },   // tài khoản trả phí hết hạn (4030)
+  //{ value: 'tempmailso',       label: 'TempMail.so' },               // Cloudflare chặn cứng (đã test qua proxy vẫn chặn)
+  //{ value: 'tempmail10',       label: 'TempMail10.com' },            // chậm 7.8s/lần, tránh khi chạy nhiều luồng
+  //{ value: 'fakelegal',        label: 'Fake.legal' },                // PoW SHA-256 nặng, nhiều luồng tranh CPU → timeout
+  //{ value: 'tempmailbee',      label: 'TempMailBee' },               // chưa thêm vào danh sách này trước đó — giữ nguyên như cũ
 ]
 const RENT_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'zeus-x',        label: 'ZeusX' },

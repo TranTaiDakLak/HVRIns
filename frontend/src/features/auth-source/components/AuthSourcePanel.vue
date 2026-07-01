@@ -100,7 +100,7 @@ const TEMP_MAIL_PROVIDERS: { value: MailProviderType; label: string }[] = [
   { value: 'tempmailworld',   label: 'TempMail.world' },
   { value: 'expressmail',     label: 'ExpressMail.app' },
   { value: 'tempmail100free', label: 'TempMail100 Free' },
-  { value: 'fakelegal',       label: 'Fake.legal' },
+  //{ value: 'fakelegal',      label: 'Fake.legal' },        // BỎ khi chạy nhiều luồng — PoW SHA-256 nặng (~16.7M hash/lần), nhiều luồng cùng giải tranh CPU dữ dội → account bị timeout/kẹt
   { value: 'tempmailbee',     label: 'TempMailBee' },
   { value: 'tempmailapp',     label: 'Temp-Mail.app' },
   { value: 'tempamail',       label: 'TempaMail.com' },

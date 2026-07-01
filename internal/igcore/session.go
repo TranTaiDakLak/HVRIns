@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"strings"
 
 	fhttp "github.com/bogdanfinn/fhttp"
@@ -34,6 +35,12 @@ var sharedZstdDecoder, _ = zstd.NewReader(nil)
 type igSession struct {
 	client tls_client.HttpClient
 	zr     *zstd.Decoder
+	// checkUA — User-Agent KHỚP với TLS ClientProfile đã chọn (chỉ set bởi
+	// newChromeCheckSession). Rỗng cho session iOS/Safari thường (newIGSession).
+	// Header UA phải khớp version Chrome thật của TLS fingerprint — mismatch
+	// (TLS nói Chrome 120 nhưng header nói Chrome 133) dễ bị phát hiện HƠN
+	// so với dùng UA cố định.
+	checkUA string
 }
 
 func newIGSession(proxyStr string) (*igSession, error) {
@@ -143,12 +150,28 @@ func (s *igSession) qeSync(ctx context.Context, p *igProfile) (string, string, s
 	return keyID, pubKey, xmid, nil
 }
 
-// newChromeCheckSession tạo TLS session với Chrome 133 fingerprint.
-// Dùng cho CheckLiveByCheckerCookie vì web_profile_info yêu cầu Chrome TLS.
+// chromeCheckProfiles — random giữa nhiều Chrome version để tránh fingerprint
+// giống hệt nhau lặp lại hàng nghìn lần khi check-live volume lớn (dễ bị IG
+// gắn cờ theo pattern TLS lặp lại). Cùng nguyên tắc đã dùng ở tempmailso.go.
+// checkUA PHẢI khớp version Chrome của profile — xem field igSession.checkUA.
+var chromeCheckProfiles = []struct {
+	profile profiles.ClientProfile
+	checkUA string
+}{
+	{profiles.Chrome_120, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
+	{profiles.Chrome_124, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
+	{profiles.Chrome_133, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"},
+}
+
+// newChromeCheckSession tạo TLS session với Chrome fingerprint NGẪU NHIÊN
+// (Chrome 120/124/133) — dùng cho CheckLiveByCheckerCookie/CheckLiveByUsername vì
+// web_profile_info / trang profile công khai yêu cầu Chrome TLS. session.checkUA
+// trả về UA khớp version — caller PHẢI dùng sess.checkUA thay UA hardcode.
 func newChromeCheckSession(proxyStr string) (*igSession, error) {
+	pick := chromeCheckProfiles[rand.Intn(len(chromeCheckProfiles))]
 	opts := []tls_client.HttpClientOption{
 		tls_client.WithTimeoutSeconds(30),
-		tls_client.WithClientProfile(profiles.Chrome_133),
+		tls_client.WithClientProfile(pick.profile),
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
 		tls_client.WithInsecureSkipVerify(),
 		tls_client.WithNotFollowRedirects(),
@@ -162,7 +185,7 @@ func newChromeCheckSession(proxyStr string) (*igSession, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create chrome tls client: %w", err)
 	}
-	return &igSession{client: c, zr: sharedZstdDecoder}, nil
+	return &igSession{client: c, zr: sharedZstdDecoder, checkUA: pick.checkUA}, nil
 }
 
 var _ = bytes.MinRead

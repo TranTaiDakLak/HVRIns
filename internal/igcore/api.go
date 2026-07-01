@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/url"
 	"regexp"
@@ -16,6 +17,23 @@ import (
 
 // ErrThrottled is the exported throttle sentinel.
 var ErrThrottled = errThrottled
+
+// chromeMajorVersionFromUA extract "120"/"124"/"133" từ chuỗi UA "...Chrome/120.0.0.0...".
+// Dùng để đồng bộ sec-ch-ua với UA/TLS profile đã chọn ngẫu nhiên — fallback "133"
+// nếu không parse được (không nên xảy ra vì UA luôn do chromeCheckProfiles sinh ra).
+func chromeMajorVersionFromUA(ua string) string {
+	const marker = "Chrome/"
+	i := strings.Index(ua, marker)
+	if i == -1 {
+		return "133"
+	}
+	rest := ua[i+len(marker):]
+	end := strings.IndexByte(rest, '.')
+	if end == -1 {
+		return "133"
+	}
+	return rest[:end]
+}
 
 // EncryptPassword wraps encryptPasswordInstagram for external callers.
 func EncryptPassword(password, pubKeyB64, keyIDStr string) (string, error) {
@@ -356,19 +374,22 @@ func CheckLiveByCheckerCookie(ctx context.Context, checkerCookie, username, prox
 		"sec-fetch-site", "user-agent", "viewport-width",
 		"x-asbd-id", "x-csrftoken", "x-ig-app-id", "x-requested-with",
 	}
+	// sec-ch-ua PHẢI khớp version Chrome thật của sess.checkUA (đồng bộ với TLS
+	// ClientProfile đã chọn ở newChromeCheckSession) — tránh mismatch UA/TLS/sec-ch-ua.
+	chromeVer := chromeMajorVersionFromUA(sess.checkUA)
 	req.Header.Set("accept", "*/*")
 	req.Header.Set("accept-language", "vi-VN,vi;q=0.9,en-US;q=0.6,en;q=0.5")
 	req.Header.Set("cookie", decoded)
 	req.Header.Set("dpr", "1")
 	req.Header.Set("referer", "https://www.instagram.com/"+username+"/")
 	req.Header.Set("sec-ch-prefers-color-scheme", "light")
-	req.Header.Set("sec-ch-ua", `"Google Chrome";v="133", "Chromium";v="133", "Not(A:Brand";v="99"`)
+	req.Header.Set("sec-ch-ua", fmt.Sprintf(`"Google Chrome";v="%s", "Chromium";v="%s", "Not(A:Brand";v="99"`, chromeVer, chromeVer))
 	req.Header.Set("sec-ch-ua-mobile", "?0")
 	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
 	req.Header.Set("sec-fetch-dest", "empty")
 	req.Header.Set("sec-fetch-mode", "cors")
 	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+	req.Header.Set("user-agent", sess.checkUA)
 	req.Header.Set("viewport-width", "887")
 	req.Header.Set("x-asbd-id", "359341")
 	req.Header.Set("x-csrftoken", csrf)
@@ -429,7 +450,9 @@ func CheckLiveByUsername(ctx context.Context, username, proxyStr string) string 
 		"user-agent", "accept", "accept-language", "accept-encoding",
 		"sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-user",
 	}
-	req.Header.Set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+	// UA khớp với TLS ClientProfile ngẫu nhiên đã chọn (xem newChromeCheckSession)
+	// — tránh lặp UA/TLS giống hệt nhau hàng nghìn lần khi check-live volume lớn.
+	req.Header.Set("user-agent", sess.checkUA)
 	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
 	req.Header.Set("accept-language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7")
 	req.Header.Set("accept-encoding", "gzip, deflate, br")

@@ -499,11 +499,13 @@ function regRowStatus(t: RegThread): string {
   if (t.status === 'running') return 'new'
   if (t.status === 'success') {
     if (t.rawVerifyStatus && t.rawVerifyStatus !== 'live' && t.rawVerifyStatus !== 'die') {
-      // Verify đã chạy nhưng unknown — phân biệt nguyên nhân
       if (isAddMailRetryMessage(t.verifyMessage)) {
         return 'addmail' // cam đậm — addmail fail sau khi retry hết
       }
-      return 'unknown' // unknown không rõ nguyên nhân
+      // 'unknown' từ inline verify = chưa xác định được, không khác "chưa verify"
+      // → hiện vàng (nvr) thay vì trắng (unknown) cho acc reg thành công
+      if (t.rawVerifyStatus === 'unknown') return 'nvr'
+      return 'unknown'
     }
     return 'nvr' // vàng — reg xong nhưng chưa verify
   }
@@ -1758,21 +1760,25 @@ async function setupRegisterListeners() {
   // Tìm row theo username và cập nhật activity kể cả khi status đã 'success'.
   _registerUnsubs.push(bus.on('register:check-live-result', (data: { username: string; result: string }) => {
     // 'live' → live-confirmed; 'die' → die-confirmed (reg OK nhưng check ra die).
-    // 'unknown' không tính vào Die (chưa xác định) — vẫn vào Die.txt phía backend.
+    // 'unknown' KHÔNG tính vào Die — ghi riêng Success_but_error_checklive.txt
+    // (lỗi kỹ thuật lúc check: timeout/throttle, KHÔNG phải account chết).
     if (data.result === 'live') {
       regTotalLiveConfirmed.value++
     } else if (data.result === 'die') {
       regTotalDieConfirmed.value++
+    } else {
+      regTotalUnknown.value++
     }
     for (const t of registerThreads.value.values()) {
       if (t.username === data.username) {
         if (data.result === 'live') {
           t.activity = '✅ Check live: OK → Live.txt'
+          t.verifyStatus = 'live' // xanh lá — phân biệt với nvr chưa check
         } else if (data.result === 'die') {
           t.activity = '⛔ IG kill account → Die.txt'
           t.status = 'failed'
         } else {
-          t.activity = '❓ Check live: unknown (20s) → Die.txt'
+          t.activity = '❓ Check live: unknown (lỗi tạm) → Success_but_error_checklive.txt'
           t.status = 'failed'
         }
         break
@@ -2235,7 +2241,7 @@ async function handleRunRegister() {
           <span class="stats-item stats-item--sep">|</span>
           <span class="stats-item stats-item--checkpoint">Checkpoint: {{ regTotalCheckpoint }}</span>
         </template>
-        <template v-if="verifiedLiveTotal + verifiedDieTotal + verifiedUnknownTotal > 0">
+        <template v-if="verifiedLiveTotal + verifiedDieTotal > 0">
           <span class="stats-item stats-item--sep stats-item--sep-thick">‖</span>
           <span class="stats-item stats-item--label stats-item--label-ver">VERIFIED {{ regVerifyLiveRate }}%</span>
           <span class="stats-item stats-item--sep">|</span>
